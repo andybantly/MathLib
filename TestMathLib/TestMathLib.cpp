@@ -7,7 +7,7 @@
 #include <ctime>
 #include <thread>
 #include <mutex>
-#include "..\MathLib.h"
+//#include "..\Lib.h"
 
 using namespace std;
 

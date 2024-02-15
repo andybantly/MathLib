@@ -140,6 +140,27 @@ static int contract(string strInput, string& strResult)
 }
 
 extern "C"
+static int contract_fraction(string strInput, string & strResult)
+{
+	int iResult = 0;
+
+	strResult.clear();
+
+	vector<string> vstrTokens;
+	split(strInput, vstrTokens);
+
+	string strDigit;
+	for (vector<string>::iterator vit = vstrTokens.begin(); iResult == 0 && vit != vstrTokens.end(); ++vit)
+	{
+		iResult = contract(*vit, strDigit);
+		if (iResult == 0)
+			strResult += strDigit;
+	}
+
+	return iResult;
+}
+
+extern "C"
 static int expand(string sInput, string& strResult)
 {
 	int iResult = 0;
@@ -246,6 +267,28 @@ start:
 	return iResult;
 }
 
+extern "C"
+static int expand_fraction(string sInput, string & strResult)
+{
+	int iResult = 0;
+	string strDigit, strDigitResult;
+
+	strResult.clear();
+
+	for (string::iterator it = sInput.begin(); iResult == 0 && it != sInput.end(); ++it)
+	{
+		strDigit = *it;
+		iResult = expand(strDigit, strDigitResult);
+		if (iResult == 0)
+		{
+			strResult += strDigitResult;
+			if (it + 1 != sInput.end())
+				strResult += " ";
+		}
+	}
+	return iResult;
+}
+
 static void ttest(unsigned long long ullb, unsigned long long ulle)
 {
 	string s, sr, sv;
@@ -332,14 +375,6 @@ extern "C" static void test()
 		(*it)->join();
 }
 
-/*
-.123456 is one hundred twenty-three thousand four hundred fifty-six millionths.
- .100456 is one hundred thousand four hundred fifty-six millionths.
- 001456 is one thousand four hundred fifty-six millionths.
-  .123456789 one hundred twenty-three million, four hundred fifty-six thousand, seven hundred eighty-nine billionth
- 12.3456. It is pronounced “twelve and three thousand, four hundred fifty-six ten-thousandths.”
- */
-
 int main()
 {
 	// Build 21 to 99
@@ -361,7 +396,6 @@ int main()
 	bool bAgain = true;
 	do
 	{
-	input:
 		cout << "Enter a number or 'test' for verification or 'quit' to exit: ";
 		cin >> strInput;
 		if (strInput != "quit" && strInput != "test")
@@ -374,24 +408,11 @@ int main()
 				cout << "Invalid Number!" << endl;
 			else
 			{
-				vector<string> vstrInput, vstrOutput;
-				if (stP1 != string::npos)
-				{
-					string strLhs = strInput.substr(0, stP1);
-					string strRhs = strInput.substr(stP1 + 1);
-					vstrInput.push_back(strLhs);
-					vstrInput.push_back(strRhs);
-					vstrInput.push_back("1" + string(strRhs.length(), '0'));
-				}
-				else
-					vstrInput.push_back(strInput);
-
 				int iResult;
-				vector<string>::iterator vit;
-				for (vit = vstrInput.begin(), iResult = 0; iResult == 0 && vit != vstrInput.end(); ++vit)
+				string strResult;
+				if (stP1 == string::npos)
 				{
-					string strResult;
-					iResult = expand(*vit, strResult);
+					iResult = expand(strInput, strResult);
 					if (iResult < 0)
 					{
 						if (iResult == -1)
@@ -400,55 +421,63 @@ int main()
 							cout << "The number is out of range. The number must not surpass the +/-" << g_huns[g_nHuns - 1] << " range" << endl;
 					}
 					else
-						vstrOutput.push_back(strResult);
-				}
-
-				for (vit = vstrOutput.begin(); iResult == 0 && vit != vstrOutput.end(); ++vit)
-				{
-					if (vstrOutput.size() == 1)
-						cout << *vit;
-					else
 					{
-						if (vit + 1 == vstrOutput.end())
-						{
-							vector<string> vstrTokens;
-							split(*vit, vstrTokens);
-							if (*(vstrTokens.begin()) != "One")
-								cout << *(vstrTokens.begin()) << "-" << *(vstrTokens.begin() + 1);
-							else
-								cout << *(vstrTokens.begin() + 1);
-						}
+						// Show the expansion
+						cout << strResult << endl;
+
+						string strVerify;
+						iResult = contract(strResult, strVerify);
+						if (iResult < 0)
+							cout << "Invalid Number!" << endl;
 						else
-							cout << *vit;
-						if (vstrOutput.size() > 1 && vit == vstrOutput.begin())
-							cout << " and ";
-						else
-						{
-							if (vit + 1 == vstrOutput.end())
-								cout << "th";
-							else
-								cout << " ";
-						}
+							// Show the contraction
+							cout << strVerify << endl;
 					}
 				}
-				cout << endl;
-
-				for (vit = vstrOutput.begin(); iResult == 0 && vit != vstrOutput.end(); ++vit)
+				else
 				{
-					string strVerify;
-					iResult = contract(*vit, strVerify);
+					string strLhs = strInput.substr(0, stP1);
+					string strRhs = strInput.substr(stP1 + 1);
+					iResult = expand(strLhs, strResult);
 					if (iResult < 0)
-						cout << "Invalid Number!" << endl;
+					{
+						if (iResult == -1)
+							cout << "Invalid Number!" << endl;
+						else if (iResult == -2)
+							cout << "The number is out of range. The number must not surpass the +/-" << g_huns[g_nHuns - 1] << " range" << endl;
+					}
 					else
 					{
-						if (vstrOutput.size() > 1 && vit + 1 != vstrOutput.end())
-							cout << strVerify;
-					}
-					if (vstrOutput.size() > 1 && vit == vstrOutput.begin())
-						cout << ".";
+						string strFraction;
+						iResult = expand_fraction(strRhs, strFraction);
 
+						if (iResult == -1)
+							cout << "Invalid Number!" << endl;
+						else if (iResult == -2)
+							cout << "The number is out of range. The number must not surpass the +/-" << g_huns[g_nHuns - 1] << " range" << endl;
+						else
+						{
+							// Show the expansion
+							cout << strResult << " point " << strFraction << endl;
+
+							string strVerify, strFractionVerify;
+							iResult = contract(strResult, strVerify);
+							if (iResult < 0)
+								cout << "Invalid Number!" << endl;
+							else
+							{
+								iResult = contract_fraction(strFraction, strFractionVerify);
+								if (iResult < 0)
+									cout << "Invalid Number!" << endl;
+								else
+								{
+									// Show the contraction
+									cout << strVerify << "." << strFractionVerify << endl;
+								}
+							}
+						}
+					}
 				}
-				cout << endl;
 			}
 		}
 		else
