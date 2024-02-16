@@ -15,6 +15,9 @@ using namespace std;
 
 static void split(string strInput, vector<string>& vstrTokens)
 {
+	if (strInput.empty())
+		return;
+
 	string strToken;
 	size_t ipos;
 
@@ -37,6 +40,9 @@ static void split(string strInput, vector<string>& vstrTokens)
 extern "C"
 static int contract(string strInput, string& strResult)
 {
+	if (strInput.empty())
+		return -1;
+
 	strResult = "";
 	int iResult = 0;
 	bool bNegative = false;
@@ -113,17 +119,15 @@ static int contract(string strInput, string& strResult)
 	}
 
 	// Process the number groups
-	vector<vector<string> >::iterator vit;
-	vector<string>::iterator it;
-	for (vit = vvstrNumbers.begin(); vit != vvstrNumbers.end(); ++vit)
+	for (vector<vector<string> >::iterator vvit = vvstrNumbers.begin(); vvit != vvstrNumbers.end(); ++vvit)
 	{
-		string strGroupNumber = *((*vit).begin());
-		for (it = (*vit).begin() + 1; it != (*vit).end(); ++it)
+		string strGroupNumber = *((*vvit).begin());
+		for (vector<string>::iterator vit = (*vvit).begin() + 1; vit != (*vvit).end(); ++vit)
 		{
-			strNumber = *it;
+			strNumber = *vit;
 			if (strNumber.length() > 2 &&
 				*(strNumber.end() - 1) == '0')
-				strGroupNumber += strNumber.substr(1);
+				strGroupNumber.append(strNumber.begin() + 1, strNumber.end());
 			else
 				strGroupNumber.replace(strGroupNumber.end() - strNumber.length(), strGroupNumber.end(), strNumber);
 		}
@@ -142,6 +146,9 @@ static int contract(string strInput, string& strResult)
 extern "C"
 static int contract_fraction(string strInput, string & strResult)
 {
+	if (strInput.empty())
+		return -1;
+
 	int iResult = 0;
 
 	strResult.clear();
@@ -161,22 +168,24 @@ static int contract_fraction(string strInput, string & strResult)
 }
 
 extern "C"
-static int expand(string sInput, string& strResult)
+static int expand(string strInput, string& strResult)
 {
+	if (strInput.empty())
+		return -1;
+
 	int iResult = 0;
 	bool bNegative = false;
 	int digs, ld, nd, idx;
 
 	strResult.clear();
-
-	if (sInput.substr(0, 1) == "-")
+	if (*(strInput.begin()) == '-')
 	{
 		bNegative = true;
-		sInput = sInput.substr(1);
+		strInput = strInput.substr(1);
 	}
 
 start:
-	digs = (int)sInput.length() - 1;
+	digs = (int)strInput.length() - 1;
 	idx = (digs / 3) - 1;
 	if (idx < g_nHuns)
 	{
@@ -193,11 +202,11 @@ start:
 			nd = 1;
 		}
 
-		string sInput2 = sInput.substr(0, nd);
+		string strInput2 = strInput.substr(0, nd);
 		int input2, digs2, div, l;
 		try
 		{
-			input2 = stoi(sInput2);
+			input2 = stoi(strInput2);
 		}
 		catch (invalid_argument)
 		{
@@ -246,16 +255,16 @@ start:
 				}
 			}
 
-			if (sInput.length() > 3)
+			if (strInput.length() > 3)
 			{
 				if (!strResult.empty())
 					strResult += " ";
 				strResult += g_huns[idx];
 			}
 
-			sInput = sInput.substr(nd);
-			sInput.erase(0, sInput.find_first_not_of('0'));
-			if (sInput.length())
+			strInput = strInput.substr(nd);
+			strInput.erase(0, strInput.find_first_not_of('0'));
+			if (strInput.length())
 				goto start;
 		}
 		else
@@ -268,21 +277,24 @@ start:
 }
 
 extern "C"
-static int expand_fraction(string sInput, string & strResult)
+static int expand_fraction(string strInput, string & strResult)
 {
+	if (strInput.empty())
+		return -1;
+
 	int iResult = 0;
 	string strDigit, strDigitResult;
 
 	strResult.clear();
 
-	for (string::iterator it = sInput.begin(); iResult == 0 && it != sInput.end(); ++it)
+	for (string::iterator it = strInput.begin(); iResult == 0 && it != strInput.end(); ++it)
 	{
 		strDigit = *it;
 		iResult = expand(strDigit, strDigitResult);
 		if (iResult == 0)
 		{
 			strResult += strDigitResult;
-			if (it + 1 != sInput.end())
+			if (it + 1 != strInput.end())
 				strResult += " ";
 		}
 	}
