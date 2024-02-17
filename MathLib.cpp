@@ -37,13 +37,12 @@ static void split(string strInput, vector<string>& vstrTokens)
 	} while (ipos != string::npos);
 }
 
-extern "C"
-static int contract(string strInput, string& strResult)
+static int contract_lhs(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
+	strResult.clear();
 
-	strResult = "";
 	int iResult = 0;
 	bool bNegative = false;
 	string strNumber;
@@ -143,8 +142,7 @@ static int contract(string strInput, string& strResult)
 	return iResult;
 }
 
-extern "C"
-static int contract_fraction(string strInput, string & strResult)
+static int contract_rhs(string strInput, string & strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -159,7 +157,7 @@ static int contract_fraction(string strInput, string & strResult)
 	string strDigit;
 	for (vector<string>::iterator vit = vstrTokens.begin(); iResult == 0 && vit != vstrTokens.end(); ++vit)
 	{
-		iResult = contract(*vit, strDigit);
+		iResult = contract_lhs(*vit, strDigit);
 		if (iResult == 0)
 			strResult += strDigit;
 	}
@@ -167,8 +165,7 @@ static int contract_fraction(string strInput, string & strResult)
 	return iResult;
 }
 
-extern "C"
-static int expand(string strInput, string& strResult)
+static int expand_lhs(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -267,17 +264,16 @@ start:
 			if (strInput.length())
 				goto start;
 		}
-		else
-			iResult = -2;
 	}
+	else
+		iResult = -2;
 
 	if (bNegative && iResult == 0)
 		strResult = "Negative " + strResult;
 	return iResult;
 }
 
-extern "C"
-static int expand_fraction(string strInput, string & strResult)
+static int expand_rhs(string strInput, string & strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -290,7 +286,7 @@ static int expand_fraction(string strInput, string & strResult)
 	for (string::iterator it = strInput.begin(); iResult == 0 && it != strInput.end(); ++it)
 	{
 		strDigit = *it;
-		iResult = expand(strDigit, strDigitResult);
+		iResult = expand_lhs(strDigit, strDigitResult);
 		if (iResult == 0)
 		{
 			strResult += strDigitResult;
@@ -318,7 +314,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 	do
 	{
 		s = to_string(ull++);
-		if (expand(s, sr) != 0)
+		if (expand_lhs(s, sr) != 0)
 		{
 			lock_guard<mutex> guard(g_io_mutex);
 			cout << s << " did not expand" << endl;
@@ -326,7 +322,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 		}
 		else
 		{
-			if (contract(sr, sv) != 0)
+			if (contract_lhs(sr, sv) != 0)
 			{
 				lock_guard<mutex> guard(g_io_mutex);
 				cout << sr << " did not contract" << endl;
@@ -387,6 +383,72 @@ extern "C" static void test()
 		(*it)->join();
 }
 
+extern "C" static int contract(string strInput, string & strResult)
+{
+	if (strInput.empty())
+		return -1;
+	strResult.clear();
+
+	int iResult = 0;
+	string strPoint = " Point ";
+	size_t stP1 = strInput.find(strPoint);
+	if (stP1 == string::npos)
+		iResult = contract_lhs(strInput, strResult);
+	else
+	{
+		string strLhs = strInput.substr(0, stP1);
+		iResult = contract_lhs(strLhs, strResult);
+		if (iResult == 0)
+		{
+			string strResult2;
+			string strRhs = strInput.substr(stP1 + strPoint.length());
+			iResult = contract_rhs(strRhs, strResult2);
+			if (iResult == 0)
+				strResult += "." + strResult2;
+		}
+	}
+
+	return iResult;
+}
+
+extern "C" static int expand(string strInput, string & strResult)
+{
+	int iResult = 0;
+	if (strInput.empty())
+		iResult = -1;
+	else
+	{
+		size_t stP1 = strInput.find_first_of('.');
+		size_t stP2 = string::npos;
+		if (stP1 != string::npos)
+		{
+			stP2 = strInput.find_first_of('.', stP1 + 1);
+			if (stP2 != string::npos)
+				iResult = -1;
+		}
+
+		if (iResult == 0)
+		{
+			if (stP1 == string::npos)
+				iResult = expand_lhs(strInput, strResult);
+			else
+			{
+				string strLhs = strInput.substr(0, stP1);
+				iResult = expand_lhs(strLhs, strResult);
+				if (iResult == 0)
+				{
+					string strResult2;
+					string strRhs = strInput.substr(stP1 + 1);
+					iResult = expand_rhs(strRhs, strResult2);
+					if (iResult == 0)
+						strResult += " Point " + strResult2;
+				}
+			}
+		}
+	}
+	return iResult;
+}
+
 int main()
 {
 	// Build 21 to 99
@@ -398,7 +460,7 @@ int main()
 	for (int iHun = 0, nZero = 3; iHun < g_nHuns; iHun++, nZero += 3)
 	{
 		string strZero(nZero, '0');
-		strZero = "1" + strZero; // Is a leading 1 necessary? I don't think so
+		strZero = "1" + strZero;
 		g_vstrHuns.push_back(strZero);
 	}
 
@@ -420,38 +482,22 @@ int main()
 				cout << "Invalid Number!" << endl;
 			else
 			{
-				int iResult;
 				string strResult;
-				if (stP1 == string::npos)
+				int iResult = expand(strInput, strResult);
+				if (iResult != 0)
 				{
-					iResult = expand(strInput, strResult);
-					if (iResult < 0)
-					{
-						if (iResult == -1)
-							cout << "Invalid Number!" << endl;
-						else if (iResult == -2)
-							cout << "The number is out of range. The number must not surpass the +/-" << g_huns[g_nHuns - 1] << " range" << endl;
-					}
-					else
-					{
-						// Show the expansion
-						cout << strResult << endl;
-
-						string strVerify;
-						iResult = contract(strResult, strVerify);
-						if (iResult < 0)
-							cout << "Invalid Number!" << endl;
-						else
-							// Show the contraction
-							cout << strVerify << endl;
-					}
+					if (iResult == -1)
+						cout << "Invalid Number!" << endl;
+					else if (iResult == -2)
+						cout << "The number is out of range. The number must not surpass the +/-" << g_huns[g_nHuns - 1] << " range" << endl;
 				}
 				else
 				{
-					string strLhs = strInput.substr(0, stP1);
-					string strRhs = strInput.substr(stP1 + 1);
-					iResult = expand(strLhs, strResult);
-					if (iResult < 0)
+					cout << strResult << endl;
+
+					string strVerify;
+					iResult = contract(strResult, strVerify);
+					if (iResult != 0)
 					{
 						if (iResult == -1)
 							cout << "Invalid Number!" << endl;
@@ -459,36 +505,7 @@ int main()
 							cout << "The number is out of range. The number must not surpass the +/-" << g_huns[g_nHuns - 1] << " range" << endl;
 					}
 					else
-					{
-						string strFraction;
-						iResult = expand_fraction(strRhs, strFraction);
-
-						if (iResult == -1)
-							cout << "Invalid Number!" << endl;
-						else if (iResult == -2)
-							cout << "The number is out of range. The number must not surpass the +/-" << g_huns[g_nHuns - 1] << " range" << endl;
-						else
-						{
-							// Show the expansion
-							cout << strResult << " point " << strFraction << endl;
-
-							string strVerify, strFractionVerify;
-							iResult = contract(strResult, strVerify);
-							if (iResult < 0)
-								cout << "Invalid Number!" << endl;
-							else
-							{
-								iResult = contract_fraction(strFraction, strFractionVerify);
-								if (iResult < 0)
-									cout << "Invalid Number!" << endl;
-								else
-								{
-									// Show the contraction
-									cout << strVerify << "." << strFractionVerify << endl;
-								}
-							}
-						}
-					}
+						cout << strVerify << endl;
 				}
 			}
 		}
