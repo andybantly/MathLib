@@ -1,13 +1,6 @@
 // MathLib.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <stack>
-#include <ctime>
-#include <thread>
-#include <mutex>
 #include "MathLib.h"
 #include "Lib.h"
 #pragma warning(disable:6385)
@@ -142,7 +135,7 @@ int main()
 			if (strInput == "quit")
 				bAgain = false;
 			else
-				test();
+				test(); // Manual testing, automatic testing in TestMathLib project
 		}
 	} while (bAgain);
 	return 0;

@@ -132,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lib.h" />
+    <ClInclude Include="LibConst.h" />
     <ClInclude Include="MathLib.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
