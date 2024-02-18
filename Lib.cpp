@@ -6,23 +6,28 @@ using namespace std;
 
 CLib::CLib()
 {
-	for (int iHun = 0, nZero = 3; iHun < nHuns; iHun++, nZero += 3)
-	{
-		string strZero(nZero, '0');
-		strZero = "1" + strZero;
-		m_vstrHuns.push_back(strZero);
-	}
+	Init();
+}
 
-	for (int iTen = 2; iTen < nTens - 1; ++iTen)
-		for (int iOne = 1; iOne < 10; ++iOne)
-			m_vstr21to99.push_back(pair<string, string>(tens[iTen] + "-" + ones[iOne], to_string(iTen * 10 + iOne)));
+CLib::CLib(const CLib& rhs)
+{
+	*this = rhs;
 }
 
 CLib::~CLib()
 {
 }
 
-int CLib::ContractLHS(string strInput, string & strResult)
+CLib& CLib::operator = (const CLib& rhs)
+{
+	if (this != &rhs)
+	{
+		Init();
+	}
+	return *this;
+}
+
+int CLib::ContractLHS(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -171,6 +176,9 @@ start:
 		ld = digs % 3;
 		switch (ld)
 		{
+		case 0:
+			nd = 1;
+			break;
 		case 1:
 			nd = 2;
 			break;
@@ -178,7 +186,7 @@ start:
 			nd = 3;
 			break;
 		default:
-			nd = 1;
+			break;
 		}
 
 		string strInput2 = strInput.substr(0, nd);
@@ -268,12 +276,17 @@ int CLib::ExpandRHS(string strInput, string& strResult)
 	for (string::iterator it = strInput.begin(); iResult == 0 && it != strInput.end(); ++it)
 	{
 		strDigit = *it;
-		iResult = ExpandLHS(strDigit, strDigitResult);
-		if (iResult == 0)
+		try
 		{
-			strResult += strDigitResult;
+			int iDigit = stoi(strDigit);
+			strResult += ones[iDigit];
 			if (it + 1 != strInput.end())
 				strResult += " ";
+		}
+		catch (invalid_argument)
+		{
+			iResult = -1;
+			break;
 		}
 	}
 	return iResult;
@@ -344,6 +357,22 @@ int CLib::Expand(string strInput, string & strResult)
 		}
 	}
 	return iResult;
+}
+
+void CLib::Init()
+{
+	m_vstrHuns.reserve(nHuns);
+	for (int iHun = 0, nZero = 3; iHun < nHuns; iHun++, nZero += 3)
+	{
+		string strZero(nZero, '0');
+		strZero = "1" + strZero;
+		m_vstrHuns.push_back(strZero);
+	}
+
+	m_vstr21to99.reserve((nTens - 3) * 9);
+	for (int iTen = 2; iTen < nTens - 1; ++iTen)
+		for (int iOne = 1; iOne < 10; ++iOne)
+			m_vstr21to99.push_back(pair<string, string>(tens[iTen] + "-" + ones[iOne], to_string(iTen * 10 + iOne)));
 }
 
 void CLib::Split(string strInput, vector<string>& vstrTokens)

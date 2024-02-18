@@ -11,7 +11,11 @@ class CLib
 {
 public:
 	CLib();
-	~CLib();
+    CLib(const CLib& rhs);
+    ~CLib();
+
+public:
+    CLib& operator = (const CLib& rhs);
 
 public:
 	int Contract(std::string strInput, std::string& strResult);
@@ -25,6 +29,7 @@ protected:
 	int ExpandRHS(std::string strInput, std::string& strResult);
 
 private:
+    void Init();
 	void Split(std::string strInput, std::vector<std::string>& vstrTokens);
 
 protected:
