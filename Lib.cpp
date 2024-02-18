@@ -27,6 +27,11 @@ CLib& CLib::operator = (const CLib& rhs)
 	return *this;
 }
 
+string CLib::WB()
+{
+	return huns[nHuns - 1];
+}
+
 int CLib::ContractLHS(string strInput, string& strResult)
 {
 	if (strInput.empty())
@@ -399,7 +404,21 @@ void CLib::Split(string strInput, vector<string>& vstrTokens)
 	} while (ipos != string::npos);
 }
 
-string CLib::WB()
+int CLib::Search(string& strSearch, string* pStr[], int nSize)
 {
-	return huns[nHuns - 1];
+	int nLeft = 0;
+	int nRight = nSize - 1;
+	int nMiddle;
+
+	while (nLeft <= nRight)
+	{
+		nMiddle = nLeft + ((nRight - nLeft) / 2);
+		if ((*pStr)[nMiddle].compare(strSearch) < 0)
+			nLeft = nMiddle + 1;
+		else if ((*pStr)[nMiddle].compare(strSearch) > 0)
+			nRight = nMiddle - 1;
+		else
+			return nMiddle;
+	}
+	return -1;
 }

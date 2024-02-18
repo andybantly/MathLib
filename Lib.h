@@ -31,6 +31,7 @@ protected:
 private:
     void Init();
 	void Split(std::string strInput, std::vector<std::string>& vstrTokens);
+    int Search(std::string& strSearch, std::string* pstr[], int nSize);
 
 protected:
 	std::vector<std::string> m_vstrHuns;
