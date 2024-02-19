@@ -9,6 +9,11 @@ CLib::CLib()
 	Init();
 }
 
+CLib::CLib(string strToken) : m_strToken(strToken)
+{
+	Init();
+}
+
 CLib::CLib(const CLib& rhs)
 {
 	*this = rhs;
@@ -22,6 +27,7 @@ CLib& CLib::operator = (const CLib& rhs)
 {
 	if (this != &rhs)
 	{
+		m_strToken = rhs.m_strToken;
 		Init();
 	}
 	return *this;
@@ -420,6 +426,9 @@ void CLib::Init()
 		strHun = "1" + strHun;
 		m_mapWordTo100[huns[iHun]] = strHun;
 	}
+
+	// Set the numbers type
+	SetType();
 }
 
 void CLib::Split(string strInput, vector<string>& vstrTokens)
@@ -444,6 +453,20 @@ void CLib::Split(string strInput, vector<string>& vstrTokens)
 				strInput.erase(0, ipos + 1);
 		}
 	} while (ipos != string::npos);
+}
+
+void CLib::SetType()
+{
+	if (!m_strToken.empty())
+	{
+		string strResult;
+		if (Expand(m_strToken, strResult) == 0)
+			m_Type = Type::Number;
+		else if (Contract(m_strToken, strResult) == 0)
+			m_Type = Type::Word;
+	}
+	else
+		m_Type = Type::NotSet;
 }
 
 int CLib::BinarySearch(string& strSearch, const vector<string> & vec, int nSize)

@@ -11,7 +11,10 @@
 class CLib
 {
 public:
-	CLib();
+    enum Type : int { NotSet = 0, Number = 1, Word = 2 };
+    
+    CLib();
+    CLib(std::string strToken);
     CLib(const CLib& rhs);
     ~CLib();
 
@@ -32,6 +35,7 @@ protected:
 private:
     void Init();
 	void Split(std::string strInput, std::vector<std::string>& vstrTokens);
+    void SetType();
     int  BinarySearch(std::string& strSearch, const std::vector<std::string> & vec, int nSize);
 
 protected:
@@ -40,6 +44,9 @@ protected:
 	//std::vector <std::pair<std::string, std::string> > m_vstr21to99;
     std::map<std::string, std::string> m_mapWordTo99;
     std::map<std::string, std::string> m_mapWordTo100;
+
+    Type m_Type;
+    std::string m_strToken;
 };
 
 class CDuration
