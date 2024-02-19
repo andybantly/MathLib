@@ -164,7 +164,7 @@ int CLib::ExpandLHS(string strInput, string& strResult)
 
 	int iResult = 0;
 	bool bNegative = false;
-	int digs, ld, nd, idx;
+	int digs, ld, nd, nh;
 
 	strResult.clear();
 	if (*(strInput.begin()) == '-')
@@ -175,8 +175,8 @@ int CLib::ExpandLHS(string strInput, string& strResult)
 
 start:
 	digs = (int)strInput.length() - 1;
-	idx = (digs / 3) - 1;
-	if (idx < nHuns)
+	nh = digs / 3;
+	if (nh <= nHuns)
 	{
 		ld = digs % 3;
 		switch (ld)
@@ -251,7 +251,7 @@ start:
 			{
 				if (!strResult.empty())
 					strResult += " ";
-				strResult += huns[idx];
+				strResult += huns[nh - 1];
 			}
 
 			strInput = strInput.substr(nd);
@@ -273,7 +273,7 @@ int CLib::ExpandRHS(string strInput, string& strResult)
 	if (strInput.empty())
 		return -1;
 
-	int iResult = 0;
+	int iResult = 0, iDigit;
 	string strDigit, strDigitResult;
 
 	strResult.clear();
@@ -283,7 +283,7 @@ int CLib::ExpandRHS(string strInput, string& strResult)
 		strDigit = *it;
 		try
 		{
-			int iDigit = stoi(strDigit);
+			iDigit = stoi(strDigit);
 			strResult += ones[iDigit];
 			if (it + 1 != strInput.end())
 				strResult += " ";
@@ -404,7 +404,7 @@ void CLib::Split(string strInput, vector<string>& vstrTokens)
 	} while (ipos != string::npos);
 }
 
-int CLib::Search(string& strSearch, string* pStr[], int nSize)
+int CLib::BinarySearch(string& strSearch, const vector<string> & vec, int nSize)
 {
 	int nLeft = 0;
 	int nRight = nSize - 1;
@@ -413,9 +413,9 @@ int CLib::Search(string& strSearch, string* pStr[], int nSize)
 	while (nLeft <= nRight)
 	{
 		nMiddle = nLeft + ((nRight - nLeft) / 2);
-		if ((*pStr)[nMiddle].compare(strSearch) < 0)
+		if (vec[nMiddle].compare(strSearch) < 0)
 			nLeft = nMiddle + 1;
-		else if ((*pStr)[nMiddle].compare(strSearch) > 0)
+		else if (vec[nMiddle].compare(strSearch) > 0)
 			nRight = nMiddle - 1;
 		else
 			return nMiddle;
