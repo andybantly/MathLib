@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -34,8 +35,11 @@ private:
     int  BinarySearch(std::string& strSearch, const std::vector<std::string> & vec, int nSize);
 
 protected:
-	std::vector<std::string> m_vstrHuns;
-	std::vector <std::pair<std::string, std::string> > m_vstr21to99;
+    // These work and am leaving them in as a slower way to lookup, in case needed later
+	//std::vector<std::string> m_vstrHuns;
+	//std::vector <std::pair<std::string, std::string> > m_vstr21to99;
+    std::map<std::string, std::string> m_mapWordTo99;
+    std::map<std::string, std::string> m_mapWordTo100;
 };
 
 class CDuration

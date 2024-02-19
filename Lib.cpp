@@ -48,11 +48,32 @@ int CLib::ContractLHS(string strInput, string& strResult)
 	bool bFound = false;
 	vector<string> vstrNumbers;
 	vector<vector<string> > vvstrNumbers;
+	map<string, string>::iterator mit;
 	for (vector<string>::iterator it = vstrTokens.begin(); it != vstrTokens.end(); ++it)
 	{
 		bFound = false;
 		string strToken = *it;
 
+		mit = m_mapWordTo99.find(strToken);
+		if (mit != m_mapWordTo99.end())
+		{
+			vstrNumbers.push_back(mit->second);
+			bFound = true;
+		}
+		else
+		{
+			mit = m_mapWordTo100.find(strToken);
+			if (mit != m_mapWordTo100.end())
+			{
+				vstrNumbers.push_back(mit->second);
+				vvstrNumbers.push_back(vstrNumbers);
+				vstrNumbers.clear();
+				bFound = true;
+			}
+		}
+
+		/*
+		// Lookup works but is probably slower than the map, need to time to find out, so keep the code
 		// Look from 0-19
 		for (int iPos = 0; !bFound && iPos < nOnes; ++iPos)
 		{
@@ -77,9 +98,7 @@ int CLib::ContractLHS(string strInput, string& strResult)
 				vstrNumbers.push_back((*it).second);
 		}
 
-		// Look at the big numbers that increase in magnitude. 
-		// i.e. Thousand, Million, Billion, etc.
-		// Number groups terminate on these
+		// Look at the big numbers that increase in magnitude and if found ends the grouping
 		for (int iPos = 0; !bFound && iPos < nHuns; ++iPos)
 		{
 			bFound = strToken == huns[iPos];
@@ -90,7 +109,7 @@ int CLib::ContractLHS(string strInput, string& strResult)
 				vstrNumbers.clear();
 			}
 		}
-
+		*/
 		if (!bFound)
 		{
 			if (strToken == "Negative")
@@ -364,8 +383,28 @@ int CLib::Expand(string strInput, string & strResult)
 	return iResult;
 }
 
+// Commented code works and sets up a slower lookup mechanism than the map
 void CLib::Init()
 {
+	for (int iOne = 0; iOne < nOnes; ++iOne)
+		m_mapWordTo99[ones[iOne]] = nones[iOne];
+
+	for (int iTen = 2; iTen < nTens; ++iTen)
+		m_mapWordTo99[tens[iTen]] = ntens[iTen];
+
+//	m_vstr21to99.reserve((nTens - 3) * 9);
+	for (int iTen = 2; iTen < nTens - 1; ++iTen)
+	{
+		for (int iOne = 1; iOne < 10; ++iOne)
+		{
+			string strWord = tens[iTen] + "-" + ones[iOne];
+			string strNum = to_string(iTen * 10 + iOne);
+//			m_vstr21to99.push_back(pair<string, string>(strWord, strNum));
+			m_mapWordTo99[strWord] = strNum;
+		}
+	}
+
+	/*
 	m_vstrHuns.reserve(nHuns);
 	for (int iHun = 0, nZero = 3; iHun < nHuns; iHun++, nZero += 3)
 	{
@@ -373,11 +412,14 @@ void CLib::Init()
 		strZero = "1" + strZero;
 		m_vstrHuns.push_back(strZero);
 	}
+	*/
 
-	m_vstr21to99.reserve((nTens - 3) * 9);
-	for (int iTen = 2; iTen < nTens - 1; ++iTen)
-		for (int iOne = 1; iOne < 10; ++iOne)
-			m_vstr21to99.push_back(pair<string, string>(tens[iTen] + "-" + ones[iOne], to_string(iTen * 10 + iOne)));
+	for (int iHun = 0, nZero = 3; iHun < nHuns; iHun++, nZero += 3)
+	{
+		string strHun(nZero, '0');
+		strHun = "1" + strHun;
+		m_mapWordTo100[huns[iHun]] = strHun;
+	}
 }
 
 void CLib::Split(string strInput, vector<string>& vstrTokens)
