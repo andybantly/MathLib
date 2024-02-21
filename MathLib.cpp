@@ -11,7 +11,7 @@ mutex g_io_mutex;
 
 static void ttest(unsigned long long ullb, unsigned long long ulle)
 {
-	CLib MathLib;
+	CMathLib MathLib;
 
 	string s, sr, sv;
 	unsigned long long ull = ullb;
@@ -99,9 +99,6 @@ static void test()
 
 int main()
 {
-	CLib MathLib;
-	cout << "This program will need user to input a number." << endl << "Then it will read it out and convert it back to the number." << endl;
-
 	string strInput;
 	bool bAgain = true;
 	do
@@ -111,16 +108,22 @@ int main()
 		if (strInput != "quit" && strInput != "test")
 		{
 			string strResult;
-			int iResult = MathLib.Expand(strInput, strResult);
+			CMathLib MathLib(strInput);
+			int iResult = MathLib.Expand(strResult);
 			if (iResult == 0)
 			{
 				cout << strResult << endl;
+				CMathLib MathLib2(strResult);
 				string strVerify;
-				iResult = MathLib.Contract(strResult, strVerify);
+				iResult = MathLib2.Contract(strVerify);
 				if (iResult == 0)
 					cout << strVerify << endl;
-				else
+				else if (iResult == -1)
 					cout << "Invalid Number!" << endl;
+				else if (iResult == -2)
+					cout << "The number is out of range. The number must not surpass the +/-" << MathLib.WB() << " range" << endl;
+				else if (iResult == -3)
+					cout << "Wrong number type" << endl;
 			}
 			else
 			{
@@ -128,6 +131,8 @@ int main()
 					cout << "Invalid Number!" << endl;
 				else if (iResult == -2)
 					cout << "The number is out of range. The number must not surpass the +/-" << MathLib.WB() << " range" << endl;
+				else if (iResult == -3)
+					cout << "Wrong number type" << endl;
 			}
 		}
 		else

@@ -4,26 +4,26 @@
 
 using namespace std;
 
-CLib::CLib()
+CMathLib::CMathLib()
 {
 	Init();
 }
 
-CLib::CLib(string strToken) : m_strToken(strToken)
+CMathLib::CMathLib(string strToken) : m_strToken(strToken)
 {
 	Init();
 }
 
-CLib::CLib(const CLib& rhs)
+CMathLib::CMathLib(const CMathLib& rhs)
 {
 	*this = rhs;
 }
 
-CLib::~CLib()
+CMathLib::~CMathLib()
 {
 }
 
-CLib& CLib::operator = (const CLib& rhs)
+CMathLib& CMathLib::operator = (const CMathLib& rhs)
 {
 	if (this != &rhs)
 	{
@@ -33,12 +33,12 @@ CLib& CLib::operator = (const CLib& rhs)
 	return *this;
 }
 
-string CLib::WB()
+string CMathLib::WB()
 {
 	return huns[nHuns - 1];
 }
 
-int CLib::ContractLHS(string strInput, string& strResult)
+int CMathLib::ContractLHS(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -159,7 +159,7 @@ int CLib::ContractLHS(string strInput, string& strResult)
 	return iResult;
 }
 
-int CLib::ContractRHS(string strInput, string & strResult)
+int CMathLib::ContractRHS(string strInput, string & strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -182,7 +182,7 @@ int CLib::ContractRHS(string strInput, string & strResult)
 	return iResult;
 }
 
-int CLib::ExpandLHS(string strInput, string& strResult)
+int CMathLib::ExpandLHS(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -293,7 +293,7 @@ start:
 	return iResult;
 }
 
-int CLib::ExpandRHS(string strInput, string& strResult)
+int CMathLib::ExpandRHS(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -322,8 +322,7 @@ int CLib::ExpandRHS(string strInput, string& strResult)
 	return iResult;
 }
 
-
-int CLib::Contract(string strInput, string & strResult)
+int CMathLib::Contract(string strInput, string & strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -351,7 +350,7 @@ int CLib::Contract(string strInput, string & strResult)
 	return iResult;
 }
 
-int CLib::Expand(string strInput, string & strResult)
+int CMathLib::Expand(string strInput, string & strResult)
 {
 	int iResult = 0;
 	if (strInput.empty())
@@ -389,8 +388,24 @@ int CLib::Expand(string strInput, string & strResult)
 	return iResult;
 }
 
+int CMathLib::Contract(string& strResult)
+{
+	if (m_Type == Type::Word)
+		return Contract(m_strToken, strResult);
+	else
+		return -3;
+}
+
+int CMathLib::Expand(string& strResult)
+{
+	if (m_Type == Type::Number)
+		return Expand(m_strToken, strResult);
+	else
+		return -3;
+}
+
 // Commented code works and sets up a slower lookup mechanism than the map
-void CLib::Init()
+void CMathLib::Init()
 {
 	for (int iOne = 0; iOne < nOnes; ++iOne)
 		m_mapWordTo99[ones[iOne]] = nones[iOne];
@@ -431,7 +446,7 @@ void CLib::Init()
 	SetType();
 }
 
-void CLib::Split(string strInput, vector<string>& vstrTokens)
+void CMathLib::Split(string strInput, vector<string>& vstrTokens)
 {
 	if (strInput.empty())
 		return;
@@ -455,7 +470,7 @@ void CLib::Split(string strInput, vector<string>& vstrTokens)
 	} while (ipos != string::npos);
 }
 
-void CLib::SetType()
+void CMathLib::SetType()
 {
 	if (!m_strToken.empty())
 	{
@@ -469,7 +484,7 @@ void CLib::SetType()
 		m_Type = Type::NotSet;
 }
 
-int CLib::BinarySearch(string& strSearch, const vector<string> & vec, int nSize)
+int CMathLib::BinarySearch(string& strSearch, const vector<string> & vec, int nSize)
 {
 	int nLeft = 0;
 	int nRight = nSize - 1;

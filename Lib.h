@@ -8,23 +8,25 @@
 #include <thread>
 #include <mutex>
 
-class CLib
+class CMathLib
 {
 public:
     enum Type : int { NotSet = 0, Number = 1, Word = 2 };
     
-    CLib();
-    CLib(std::string strToken);
-    CLib(const CLib& rhs);
-    ~CLib();
+    CMathLib();
+    CMathLib(std::string strToken);
+    CMathLib(const CMathLib& rhs);
+    ~CMathLib();
 
 public:
-    CLib& operator = (const CLib& rhs);
+    CMathLib& operator = (const CMathLib& rhs);
 
 public:
-	int Contract(std::string strInput, std::string& strResult);
+    int Contract(std::string strInput, std::string& strResult);
 	int Expand(std::string strInput, std::string& strResult);
-	std::string WB();
+    int Contract(std::string& strResult);
+    int Expand(std::string& strResult);
+    static std::string WB();
 
 protected:
 	int ContractLHS(std::string strInput, std::string& strResult);
@@ -100,7 +102,7 @@ protected:
     }
 
 public:
-    bool rem(unsigned long iwght, long double dval, unsigned long nobs)
+    bool RemObs(unsigned long iwght, long double dval, unsigned long nobs)
     {
         long double dlmean = (m_dmean * m_nobs - dval * iwght) / (m_nobs - iwght);
         if (m_nobs > nobs)
@@ -120,7 +122,7 @@ public:
         return false;
     }
 
-    void add(unsigned long iwght, double dv)
+    void AddObs(unsigned long iwght, double dv)
     {
         unsigned long uin = m_nobs + iwght;
         long double dx = iwght * (dv - m_dmean);

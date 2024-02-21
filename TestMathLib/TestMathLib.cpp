@@ -12,7 +12,7 @@ namespace TestMathLib
 	{
 		static void Test(unsigned long long ullb, unsigned long long ulle)
 		{
-			CLib MathLib;
+			CMathLib MathLib;
 
 			int iResult;
 			string s, sr, sv;
