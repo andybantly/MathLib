@@ -6,6 +6,7 @@ using namespace std;
 
 CMathLib::CMathLib()
 {
+	m_strToken.clear();
 	Init();
 }
 
@@ -36,150 +37,6 @@ CMathLib& CMathLib::operator = (const CMathLib& rhs)
 string CMathLib::WB()
 {
 	return huns[nHuns - 1];
-}
-
-int CMathLib::ContractLHS(string strInput, string& strResult)
-{
-	if (strInput.empty())
-		return -1;
-	strResult.clear();
-
-	int iResult = 0;
-	bool bNegative = false;
-	string strNumber;
-
-	vector<string> vstrTokens;
-	Split(strInput, vstrTokens);
-
-	bool bFound = false;
-	vector<string> vstrNumbers;
-	vector<vector<string> > vvstrNumbers;
-	map<string, string>::iterator mit;
-	for (vector<string>::iterator it = vstrTokens.begin(); it != vstrTokens.end(); ++it)
-	{
-		bFound = false;
-		string strToken = *it;
-
-		mit = m_mapWordTo99.find(strToken);
-		if (mit != m_mapWordTo99.end())
-		{
-			vstrNumbers.push_back(mit->second);
-			bFound = true;
-		}
-		else
-		{
-			mit = m_mapWordTo100.find(strToken);
-			if (mit != m_mapWordTo100.end())
-			{
-				vstrNumbers.push_back(mit->second);
-				vvstrNumbers.push_back(vstrNumbers);
-				vstrNumbers.clear();
-				bFound = true;
-			}
-		}
-
-		/*
-		// Lookup works but is probably slower than the map, need to time to find out, so keep the code
-		// Look from 0-19
-		for (int iPos = 0; !bFound && iPos < nOnes; ++iPos)
-		{
-			bFound = strToken == ones[iPos];
-			if (bFound)
-				vstrNumbers.push_back(nones[iPos]);
-		}
-
-		// Next look in 20-90 in increments of 10
-		for (int iPos = 2; !bFound && iPos < nTens; ++iPos)
-		{
-			bFound = strToken == tens[iPos];
-			if (bFound)
-				vstrNumbers.push_back(ntens[iPos]);
-		}
-
-		// Next look at 21-99 skipping increments of 1 skipping the tens
-		for (vector<pair<string, string> >::iterator it = m_vstr21to99.begin(); !bFound && it != m_vstr21to99.end(); ++it)
-		{
-			bFound = strToken == (*it).first;
-			if (bFound)
-				vstrNumbers.push_back((*it).second);
-		}
-
-		// Look at the big numbers that increase in magnitude and if found ends the grouping
-		for (int iPos = 0; !bFound && iPos < nHuns; ++iPos)
-		{
-			bFound = strToken == huns[iPos];
-			if (bFound)
-			{
-				vstrNumbers.push_back(*(m_vstrHuns.begin() + iPos));
-				vvstrNumbers.push_back(vstrNumbers);
-				vstrNumbers.clear();
-			}
-		}
-		*/
-		if (!bFound)
-		{
-			if (strToken == "Negative")
-				bNegative = true;
-			else
-			{
-				iResult = -1;
-				break;
-			}
-		}
-	}
-
-	if (bFound && !vstrNumbers.empty())
-		vvstrNumbers.push_back(vstrNumbers);
-
-	if (iResult == -1)
-		return iResult;
-
-	// Process the number groups
-	for (vector<vector<string> >::iterator vvit = vvstrNumbers.begin(); vvit != vvstrNumbers.end(); ++vvit)
-	{
-		string strGroupNumber = *((*vvit).begin());
-		for (vector<string>::iterator vit = (*vvit).begin() + 1; vit != (*vvit).end(); ++vit)
-		{
-			strNumber = *vit;
-			if (strNumber.length() > 2 &&
-				*(strNumber.end() - 1) == '0')
-				strGroupNumber.append(strNumber.begin() + 1, strNumber.end());
-			else
-				strGroupNumber.replace(strGroupNumber.end() - strNumber.length(), strGroupNumber.end(), strNumber);
-		}
-
-		if (!strResult.empty())
-			strResult.replace(strResult.end() - strGroupNumber.length(), strResult.end(), strGroupNumber);
-		else
-			strResult = strGroupNumber;
-	}
-
-	if (bNegative)
-		strResult = "-" + strResult;
-	return iResult;
-}
-
-int CMathLib::ContractRHS(string strInput, string & strResult)
-{
-	if (strInput.empty())
-		return -1;
-
-	int iResult = 0;
-
-	strResult.clear();
-
-	vector<string> vstrTokens;
-	Split(strInput, vstrTokens);
-
-	string strDigit;
-	for (vector<string>::iterator vit = vstrTokens.begin(); iResult == 0 && vit != vstrTokens.end(); ++vit)
-	{
-		iResult = ContractLHS(*vit, strDigit);
-		if (iResult == 0)
-			strResult += strDigit;
-	}
-
-	return iResult;
 }
 
 int CMathLib::ExpandLHS(string strInput, string& strResult)
@@ -322,31 +179,105 @@ int CMathLib::ExpandRHS(string strInput, string& strResult)
 	return iResult;
 }
 
-int CMathLib::Contract(string strInput, string & strResult)
+int CMathLib::Contract(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
 	strResult.clear();
 
 	int iResult = 0;
-	string strPoint = " Point ";
-	size_t stP1 = strInput.find(strPoint);
-	if (stP1 == string::npos)
-		iResult = ContractLHS(strInput, strResult);
-	else
+	bool bNegative = false;
+	bool bPoint = false;
+
+	vector<string> vstrTokens;
+	Split(strInput, vstrTokens);
+
+	bool bFound = false;
+	vector<string> vstrNumbers;
+	vector<vector<string> > vvstrNumbers;
+	map<string, string>::iterator mit;
+	vector<string>::iterator it;
+	for (it = vstrTokens.begin(); !bPoint && it != vstrTokens.end(); ++it)
 	{
-		string strLhs = strInput.substr(0, stP1);
-		iResult = ContractLHS(strLhs, strResult);
-		if (iResult == 0)
+		bFound = false;
+		string strToken = *it;
+
+		mit = m_mapWordTo99.find(strToken);
+		if (mit != m_mapWordTo99.end())
 		{
-			string strResult2;
-			string strRhs = strInput.substr(stP1 + strPoint.length());
-			iResult = ContractRHS(strRhs, strResult2);
-			if (iResult == 0)
-				strResult += "." + strResult2;
+			vstrNumbers.push_back(mit->second);
+			bFound = true;
+		}
+		else
+		{
+			mit = m_mapWordTo100.find(strToken);
+			if (mit != m_mapWordTo100.end())
+			{
+				vstrNumbers.push_back(mit->second);
+				vvstrNumbers.push_back(vstrNumbers);
+				vstrNumbers.clear();
+				bFound = true;
+			}
+		}
+
+		if (!bFound)
+		{
+			if (strToken == "Negative")  // Make case insensitive
+				bNegative = true;
+			else if (strToken == "Point")
+				bPoint = true;
+			else
+			{
+				iResult = -1;
+				break;
+			}
 		}
 	}
 
+	if ((bFound || bPoint) && !vstrNumbers.empty())
+		vvstrNumbers.push_back(vstrNumbers);
+
+	if (iResult == -1)
+		return iResult;
+
+	// Process the number groups
+	string strNumber;
+	for (vector<vector<string> >::iterator vvit = vvstrNumbers.begin(); vvit != vvstrNumbers.end(); ++vvit)
+	{
+		string strGroupNumber = *((*vvit).begin());
+		for (vector<string>::iterator vit = (*vvit).begin() + 1; vit != (*vvit).end(); ++vit)
+		{
+			strNumber = *vit;
+			if (strNumber.length() > 2 &&
+				*(strNumber.end() - 1) == '0')
+				strGroupNumber.append(strNumber.begin() + 1, strNumber.end());
+			else
+				strGroupNumber.replace(strGroupNumber.end() - strNumber.length(), strGroupNumber.end(), strNumber);
+		}
+
+		if (!strResult.empty())
+			strResult.replace(strResult.end() - strGroupNumber.length(), strResult.end(), strGroupNumber);
+		else
+			strResult = strGroupNumber;
+	}
+
+	if (bNegative)
+		strResult = "-" + strResult;
+
+	if (bPoint)
+	{
+		strResult += ".";
+		for (; iResult == 0 && it != vstrTokens.end(); ++it)
+		{
+			string strToken = *it;
+			mit = m_mapWordTo99.find(strToken);
+			if (mit != m_mapWordTo99.end())
+				strResult += mit->second;
+			else
+				iResult = -1;
+		}
+
+	}
 	return iResult;
 }
 
@@ -391,7 +322,20 @@ int CMathLib::Expand(string strInput, string & strResult)
 int CMathLib::Contract(string& strResult)
 {
 	if (m_Type == Type::Word)
-		return Contract(m_strToken, strResult);
+	{
+		if (m_strResult.empty())
+		{
+			int iRet = Contract(m_strToken, strResult);
+			if (iRet == 0)
+				m_strResult = strResult;
+			return iRet;
+		}
+		else
+		{
+			strResult = m_strResult;
+			return 0;
+		}
+	}
 	else
 		return -3;
 }
@@ -399,7 +343,20 @@ int CMathLib::Contract(string& strResult)
 int CMathLib::Expand(string& strResult)
 {
 	if (m_Type == Type::Number)
-		return Expand(m_strToken, strResult);
+	{
+		if (m_strResult.empty())
+		{
+			int iRet = Expand(m_strToken, strResult);
+			if (iRet == 0)
+				m_strResult = strResult;
+			return iRet;
+		}
+		else
+		{
+			strResult = m_strResult;
+			return 0;
+		}
+	}
 	else
 		return -3;
 }
@@ -407,33 +364,22 @@ int CMathLib::Expand(string& strResult)
 // Commented code works and sets up a slower lookup mechanism than the map
 void CMathLib::Init()
 {
+	m_strResult.clear();
 	for (int iOne = 0; iOne < nOnes; ++iOne)
 		m_mapWordTo99[ones[iOne]] = nones[iOne];
 
 	for (int iTen = 2; iTen < nTens; ++iTen)
 		m_mapWordTo99[tens[iTen]] = ntens[iTen];
 
-//	m_vstr21to99.reserve((nTens - 3) * 9);
 	for (int iTen = 2; iTen < nTens - 1; ++iTen)
 	{
 		for (int iOne = 1; iOne < 10; ++iOne)
 		{
 			string strWord = tens[iTen] + "-" + ones[iOne];
 			string strNum = to_string(iTen * 10 + iOne);
-//			m_vstr21to99.push_back(pair<string, string>(strWord, strNum));
 			m_mapWordTo99[strWord] = strNum;
 		}
 	}
-
-	/*
-	m_vstrHuns.reserve(nHuns);
-	for (int iHun = 0, nZero = 3; iHun < nHuns; iHun++, nZero += 3)
-	{
-		string strZero(nZero, '0');
-		strZero = "1" + strZero;
-		m_vstrHuns.push_back(strZero);
-	}
-	*/
 
 	for (int iHun = 0, nZero = 3; iHun < nHuns; iHun++, nZero += 3)
 	{
@@ -474,10 +420,9 @@ void CMathLib::SetType()
 {
 	if (!m_strToken.empty())
 	{
-		string strResult;
-		if (Expand(m_strToken, strResult) == 0)
+		if (Expand(m_strToken, m_strResult) == 0)
 			m_Type = Type::Number;
-		else if (Contract(m_strToken, strResult) == 0)
+		else if (Contract(m_strToken, m_strResult) == 0)
 			m_Type = Type::Word;
 	}
 	else

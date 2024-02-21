@@ -99,7 +99,7 @@ static void test()
 
 int main()
 {
-	string strInput;
+	string strInput, strResult;
 	bool bAgain = true;
 	do
 	{
@@ -108,8 +108,6 @@ int main()
 		if (strInput != "quit" && strInput != "test")
 		{
 			CMathLib MathLib(strInput);
-
-			string strResult;
 			int iResult = MathLib.Expand(strResult);
 			if (iResult == 0)
 			{
