@@ -107,13 +107,16 @@ int main()
 		cin >> strInput;
 		if (strInput != "quit" && strInput != "test")
 		{
-			string strResult;
 			CMathLib MathLib(strInput);
+
+			string strResult;
 			int iResult = MathLib.Expand(strResult);
 			if (iResult == 0)
 			{
 				cout << strResult << endl;
+
 				CMathLib MathLib2(strResult);
+
 				string strVerify;
 				iResult = MathLib2.Contract(strVerify);
 				if (iResult == 0)

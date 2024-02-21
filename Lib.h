@@ -7,9 +7,31 @@
 #include <ctime>
 #include <thread>
 #include <mutex>
+#include <functional>
 
 class CMathLib
 {
+    struct ci_less
+    {
+        // case-independent (ci) compare_less binary function
+        struct nocase_compare
+        {
+            bool operator() (const unsigned char& c1, const unsigned char& c2) const
+            {
+                return tolower(c1) < tolower(c2);
+            }
+        };
+        bool operator() (const std::string& s1, const std::string& s2) const
+        {
+            return std::lexicographical_compare
+            (
+                s1.begin(), s1.end(),   // source range
+                s2.begin(), s2.end(),   // dest range
+                nocase_compare()        // comparison
+            );
+        }
+    };
+
 public:
     enum Type : int { NotSet = 0, Number = 1, Word = 2 };
     
@@ -44,8 +66,8 @@ protected:
     // These work and am leaving them in as a slower way to lookup, in case needed later
 	//std::vector<std::string> m_vstrHuns;
 	//std::vector <std::pair<std::string, std::string> > m_vstr21to99;
-    std::map<std::string, std::string> m_mapWordTo99;
-    std::map<std::string, std::string> m_mapWordTo100;
+    std::map<std::string, std::string, ci_less> m_mapWordTo99;
+    std::map<std::string, std::string, ci_less> m_mapWordTo100;
 
     Type m_Type;
     std::string m_strToken;
