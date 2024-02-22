@@ -51,6 +51,7 @@ public:
     int Contract(std::string& strResult);
     int Expand(std::string& strResult);
     static std::string WB();
+    Type GetType() { return m_Type; }
 
 private:
     void Init();

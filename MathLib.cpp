@@ -99,26 +99,35 @@ static void test()
 
 int main()
 {
+	int iResult;
 	string strInput, strResult;
 	bool bAgain = true;
 	do
 	{
 		cout << "Enter a number or 'test' for verification or 'quit' to exit: ";
-		cin >> strInput;
+
+		strInput.clear();
+		char c;
+		while ((c = getchar()) != '\n')
+			strInput += c;
 		if (strInput != "quit" && strInput != "test")
 		{
 			CMathLib MathLib(strInput);
-			int iResult = MathLib.Expand(strResult);
+			if (MathLib.GetType() == CMathLib::Type::Number)
+				iResult = MathLib.Expand(strResult);
+			else
+				iResult = MathLib.Contract(strResult);
 			if (iResult == 0)
 			{
-				cout << strResult << endl;
-
-				CMathLib MathLib2(strResult);
-
 				string strVerify;
-				iResult = MathLib2.Contract(strVerify);
+				CMathLib MathLib2(strResult);
+				if (MathLib2.GetType() == CMathLib::Type::Word)
+					iResult = MathLib2.Contract(strVerify);
+				else
+					iResult = MathLib2.Expand(strVerify);
+
 				if (iResult == 0)
-					cout << strVerify << endl;
+					cout << strResult << " = " << strVerify << endl;
 				else if (iResult == -1)
 					cout << "Invalid Number!" << endl;
 				else if (iResult == -2)
