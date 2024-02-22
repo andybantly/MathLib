@@ -217,11 +217,11 @@ int CMathLib::Contract(string strInput, string& strResult)
 
 		if (!bFound)
 		{
-			if (strToken == "Negative")  // Make case insensitive
+			if (Equal(strToken, "Negative"))
 				bNegative = true;
-			else if (strToken == "Point")
+			else if (Equal(strToken, "Point"))
 				bPoint = true;
-			else
+			if (!bNegative && !bPoint)
 			{
 				iResult = -1;
 				break;
@@ -402,4 +402,21 @@ int CMathLib::BinarySearch(string& strSearch, const vector<string> & vec, int nS
 			return nMiddle;
 	}
 	return -1;
+}
+
+bool Equal(const std::string& strLHS, const std::string& strRHS)
+{
+	bool bEqual = true;
+	if (strLHS.length() != strRHS.length())
+		bEqual = false;
+	else
+	{
+		for (size_t stIdx = 0; bEqual && stIdx < strLHS.length(); ++stIdx)
+		{
+			if (tolower(*(strLHS.begin() + stIdx)) !=
+				tolower(*(strRHS.begin() + stIdx)))
+				bEqual = false;
+		}
+	}
+	return bEqual;
 }

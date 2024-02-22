@@ -30,6 +30,8 @@ struct CILT
     }
 };
 
+bool Equal(const std::string& strLHS, const std::string& strRHS);
+
 class CMathLib
 {
 public:
