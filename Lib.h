@@ -50,10 +50,6 @@ public:
     int Expand(std::string& strResult);
     static std::string WB();
 
-protected:
-	int ExpandLHS(std::string strInput, std::string& strResult);
-	int ExpandRHS(std::string strInput, std::string& strResult);
-
 private:
     void Init();
 	void Split(std::string strInput, std::vector<std::string>& vstrTokens);

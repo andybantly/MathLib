@@ -39,7 +39,7 @@ string CMathLib::WB()
 	return huns[nHuns - 1];
 }
 
-int CMathLib::ExpandLHS(string strInput, string& strResult)
+int CMathLib::Expand(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -48,15 +48,22 @@ int CMathLib::ExpandLHS(string strInput, string& strResult)
 	bool bNegative = false;
 	int digs, ld, nd, nh;
 
+	string strLhs;
+	size_t stP1 = strInput.find_first_of('.');
+	if (stP1 == string::npos)
+		strLhs = strInput;
+	else
+		strLhs = strInput.substr(0, stP1);
+
 	strResult.clear();
-	if (*(strInput.begin()) == '-')
+	if (*(strLhs.begin()) == '-')
 	{
 		bNegative = true;
-		strInput = strInput.substr(1);
+		strLhs = strLhs.substr(1);
 	}
 
 start:
-	digs = (int)strInput.length() - 1;
+	digs = (int)strLhs.length() - 1;
 	nh = digs / 3;
 	if (nh <= nHuns)
 	{
@@ -76,11 +83,11 @@ start:
 			break;
 		}
 
-		string strInput2 = strInput.substr(0, nd);
-		int input2, digs2, div, l;
+		string strLhs2 = strLhs.substr(0, nd);
+		int iLhs2, digs2, div, l;
 		try
 		{
-			input2 = stoi(strInput2);
+			iLhs2 = stoi(strLhs2);
 		}
 		catch (invalid_argument)
 		{
@@ -92,53 +99,53 @@ start:
 			bool b10 = false;
 		start2:
 			digs2 = 0;
-			if (input2 > 0)
-				digs2 = (int)(floor(log10((double)input2)));
+			if (iLhs2 > 0)
+				digs2 = (int)(floor(log10((double)iLhs2)));
 			div = 1;
 			for (l = 0; l < digs2; l++)
 				div *= 10;
 
-			if (input2 < 20)
+			if (iLhs2 < 20)
 			{
 				if (!strResult.empty())
 					strResult += (b10 ? "-" : " ");
-				strResult += ones[input2];
+				strResult += ones[iLhs2];
 				b10 = false;
 			}
-			else if (input2 < 100)
+			else if (iLhs2 < 100)
 			{
 				if (!strResult.empty())
 					strResult += " ";
-				strResult += tens[input2 / div];
+				strResult += tens[iLhs2 / div];
 				b10 = true;
-				if ((input2 % div) != 0)
+				if ((iLhs2 % div) != 0)
 				{
-					input2 = input2 % div;
+					iLhs2 = iLhs2 % div;
 					goto start2;
 				}
 			}
-			else if (input2 < 1000)
+			else if (iLhs2 < 1000)
 			{
 				if (!strResult.empty())
 					strResult += " ";
-				strResult += ones[input2 / div] + " " + tens[nTens - 1];
-				if ((input2 % div) != 0)
+				strResult += ones[iLhs2 / div] + " " + tens[nTens - 1];
+				if ((iLhs2 % div) != 0)
 				{
-					input2 = input2 % div;
+					iLhs2 = iLhs2 % div;
 					goto start2;
 				}
 			}
 
-			if (strInput.length() > 3)
+			if (strLhs.length() > 3)
 			{
 				if (!strResult.empty())
 					strResult += " ";
 				strResult += huns[nh - 1];
 			}
 
-			strInput = strInput.substr(nd);
-			strInput.erase(0, strInput.find_first_not_of('0'));
-			if (strInput.length())
+			strLhs = strLhs.substr(nd);
+			strLhs.erase(0, strLhs.find_first_not_of('0'));
+			if (strLhs.length())
 				goto start;
 		}
 	}
@@ -147,33 +154,21 @@ start:
 
 	if (bNegative && iResult == 0)
 		strResult = "Negative " + strResult;
-	return iResult;
-}
 
-int CMathLib::ExpandRHS(string strInput, string& strResult)
-{
-	if (strInput.empty())
-		return -1;
-
-	int iResult = 0, iDigit;
-	string strDigit, strDigitResult;
-
-	strResult.clear();
-
-	for (string::iterator it = strInput.begin(); iResult == 0 && it != strInput.end(); ++it)
+	if (iResult == 0 && stP1 != string::npos)
 	{
-		strDigit = *it;
-		try
+		strResult += " Point";
+		for (string::iterator it = strInput.begin() + stP1 + 1; iResult == 0 && it != strInput.end(); ++it)
 		{
-			iDigit = stoi(strDigit);
-			strResult += ones[iDigit];
-			if (it + 1 != strInput.end())
-				strResult += " ";
-		}
-		catch (invalid_argument)
-		{
-			iResult = -1;
-			break;
+			try
+			{
+				strResult += " " + ones[*it - '0'];
+			}
+			catch (invalid_argument)
+			{
+				iResult = -1;
+				break;
+			}
 		}
 	}
 	return iResult;
@@ -281,44 +276,6 @@ int CMathLib::Contract(string strInput, string& strResult)
 	return iResult;
 }
 
-int CMathLib::Expand(string strInput, string & strResult)
-{
-	int iResult = 0;
-	if (strInput.empty())
-		iResult = -1;
-	else
-	{
-		size_t stP1 = strInput.find_first_of('.');
-		size_t stP2 = string::npos;
-		if (stP1 != string::npos)
-		{
-			stP2 = strInput.find_first_of('.', stP1 + 1);
-			if (stP2 != string::npos)
-				iResult = -1;
-		}
-
-		if (iResult == 0)
-		{
-			if (stP1 == string::npos)
-				iResult = ExpandLHS(strInput, strResult);
-			else
-			{
-				string strLhs = strInput.substr(0, stP1);
-				iResult = ExpandLHS(strLhs, strResult);
-				if (iResult == 0)
-				{
-					string strResult2;
-					string strRhs = strInput.substr(stP1 + 1);
-					iResult = ExpandRHS(strRhs, strResult2);
-					if (iResult == 0)
-						strResult += " Point " + strResult2;
-				}
-			}
-		}
-	}
-	return iResult;
-}
-
 int CMathLib::Contract(string& strResult)
 {
 	if (m_Type == Type::Word)
@@ -361,7 +318,6 @@ int CMathLib::Expand(string& strResult)
 		return -3;
 }
 
-// Commented code works and sets up a slower lookup mechanism than the map
 void CMathLib::Init()
 {
 	m_strResult.clear();
