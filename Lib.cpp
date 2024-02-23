@@ -34,6 +34,11 @@ CMathLib& CMathLib::operator = (const CMathLib& rhs)
 	return *this;
 }
 
+CMathLib& CMathLib::operator + (const CMathLib& rhs)
+{
+	return *this;
+}
+
 string CMathLib::WB()
 {
 	return huns[nHuns - 1];

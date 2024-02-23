@@ -76,7 +76,7 @@ static void test()
 	CDuration Duration("Test Expansion/Contraction:");
 
 	vector<pair<unsigned long long, unsigned long long> > vtp;
-	unsigned long long numt = thread::hardware_concurrency();
+	unsigned long long numt = thread::hardware_concurrency() * 4;
 	unsigned long long dtpt = unsigned long long(-1) / numt;
 
 	vector<thread*> vptp;
@@ -99,6 +99,12 @@ static void test()
 
 int main()
 {
+	CByte B1(49);
+	CByte B2(200);
+	CByte B3 = B1 + B2;
+	CByte B4 = B3 + CByte(6);
+	B4 = B4 + CByte(1); // Overflows, B4.U = 0, B4.C = 1;
+
 	int iResult;
 	string strInput, strResult;
 	bool bAgain = true;
@@ -134,6 +140,8 @@ int main()
 					cout << "The number is out of range. The number must not surpass the +/-" << MathLib.WB() << " range" << endl;
 				else if (iResult == -3)
 					cout << "Wrong number type" << endl;
+
+				MathLib2 = MathLib;
 			}
 			else
 			{
