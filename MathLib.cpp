@@ -97,6 +97,53 @@ static void test()
 		(*it)->join();
 }
 
+string Base10toBase2(string strin)
+{
+	string strout;
+	string strbin;
+	uint8_t idnm = 0;
+	string::iterator it = strin.begin();
+	do
+	{
+		idnm = idnm * 10 + *it - '0';
+		if (idnm < 2 && it + 1 != strin.end())
+		{
+			if (!strout.empty())
+				strout += '0';
+			idnm = idnm * 10 + (*(it + 1) - '0');
+			it += 2;
+		}
+		else
+		{
+			if (strin.length() == 1 && idnm < 2)
+			{
+				strbin += '0' + idnm;
+				break;
+			}
+			it++;
+		}
+
+		uint8_t inum = idnm / 2;
+		idnm = idnm % 2;
+		strout += '0' + inum;
+
+		if (it == strin.end())
+		{
+			strbin += '0' + idnm;
+			strin = strout;
+			strout.clear();
+			idnm = 0;
+			it = strin.begin();
+		}
+	} while (it != strin.end());
+//	for (std::string::reverse_iterator rit = strbin.rbegin(); rit != strbin.rend(); ++rit)
+//		cout << *rit;
+//	cout << endl;
+	std::reverse(strbin.begin(), strbin.end());
+//	cout << strbin << endl;
+	return strbin;
+}
+
 int main()
 {
 	CByte B1(49);
@@ -120,7 +167,10 @@ int main()
 		{
 			CMathLib MathLib(strInput);
 			if (MathLib.GetType() == CMathLib::Type::Number)
+			{
 				iResult = MathLib.Expand(strResult);
+				cout << Base10toBase2(strInput) << endl;
+			}
 			else
 				iResult = MathLib.Contract(strResult);
 			if (iResult == 0)
