@@ -164,14 +164,9 @@ private:
     void SetType();
     int  BinarySearch(std::string& strSearch, const std::vector<std::string> & vec, int nSize);
 
-protected:
-    std::map<std::string, std::string, CILT> m_mapWordTo99;
-    std::map<std::string, std::string, CILT> m_mapWordTo100;
-
     Type m_Type;
     std::string m_strToken;
     std::string m_strResult;
-    std::vector<CByte> m_Number;
 };
 
 class CDuration

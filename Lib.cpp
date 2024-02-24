@@ -4,15 +4,23 @@
 
 using namespace std;
 
+mutex g_map_mutex;
+bool g_bInit = false;
+std::map<std::string, std::string, CILT> g_mapWordTo99;
+std::map<std::string, std::string, CILT> g_mapWordTo100;
+
 CMathLib::CMathLib()
 {
-	m_strToken.clear();
 	Init();
+
+	m_Type = Type::NotSet;
 }
 
 CMathLib::CMathLib(string strToken) : m_strToken(strToken)
 {
 	Init();
+
+	SetType();
 }
 
 CMathLib::CMathLib(const CMathLib& rhs)
@@ -29,7 +37,8 @@ CMathLib& CMathLib::operator = (const CMathLib& rhs)
 	if (this != &rhs)
 	{
 		m_strToken = rhs.m_strToken;
-		Init();
+		m_strResult = rhs.m_strResult;
+		m_Type = rhs.m_Type;
 	}
 	return *this;
 }
@@ -202,16 +211,16 @@ int CMathLib::Contract(string strInput, string& strResult)
 		bFound = false;
 		string strToken = *it;
 
-		mit = m_mapWordTo99.find(strToken);
-		if (mit != m_mapWordTo99.end())
+		mit = g_mapWordTo99.find(strToken);
+		if (mit != g_mapWordTo99.end())
 		{
 			vstrNumbers.push_back(mit->second);
 			bFound = true;
 		}
 		else
 		{
-			mit = m_mapWordTo100.find(strToken);
-			if (mit != m_mapWordTo100.end())
+			mit = g_mapWordTo100.find(strToken);
+			if (mit != g_mapWordTo100.end())
 			{
 				vstrNumbers.push_back(mit->second);
 				vvstrNumbers.push_back(vstrNumbers);
@@ -270,8 +279,8 @@ int CMathLib::Contract(string strInput, string& strResult)
 		for (; iResult == 0 && it != vstrTokens.end(); ++it)
 		{
 			string strToken = *it;
-			mit = m_mapWordTo99.find(strToken);
-			if (mit != m_mapWordTo99.end())
+			mit = g_mapWordTo99.find(strToken);
+			if (mit != g_mapWordTo99.end())
 				strResult += mit->second;
 			else
 				iResult = -1;
@@ -325,12 +334,16 @@ int CMathLib::Expand(string& strResult)
 
 void CMathLib::Init()
 {
-	m_strResult.clear();
+	lock_guard<mutex> guard(g_map_mutex);
+
+	if (g_bInit)
+		return;
+
 	for (int iOne = 0; iOne < nOnes; ++iOne)
-		m_mapWordTo99[ones[iOne]] = nones[iOne];
+		g_mapWordTo99[ones[iOne]] = nones[iOne];
 
 	for (int iTen = 2; iTen < nTens; ++iTen)
-		m_mapWordTo99[tens[iTen]] = ntens[iTen];
+		g_mapWordTo99[tens[iTen]] = ntens[iTen];
 
 	for (int iTen = 2; iTen < nTens - 1; ++iTen)
 	{
@@ -338,7 +351,7 @@ void CMathLib::Init()
 		{
 			string strWord = tens[iTen] + "-" + ones[iOne];
 			string strNum = to_string(iTen * 10 + iOne);
-			m_mapWordTo99[strWord] = strNum;
+			g_mapWordTo99[strWord] = strNum;
 		}
 	}
 
@@ -346,11 +359,10 @@ void CMathLib::Init()
 	{
 		string strHun(nZero, '0');
 		strHun = "1" + strHun;
-		m_mapWordTo100[huns[iHun]] = strHun;
+		g_mapWordTo100[huns[iHun]] = strHun;
 	}
 
-	// Set the numbers type
-	SetType();
+	g_bInit = true;
 }
 
 void CMathLib::Split(string strInput, vector<string>& vstrTokens)
