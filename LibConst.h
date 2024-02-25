@@ -1,11 +1,11 @@
 #pragma once
 #include <string>
 
-const std::string ones[] = { "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
+const std::string g_ones[] = { "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
 							   "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen","Sixteen", "Seventeen", "Eighteen", "Nineteen" };
-const std::string tens[] = { "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety", "Hundred" };
+const std::string g_tens[] = { "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety", "Hundred" };
 
-const std::string huns[] =
+const std::string g_huns[] =
 {
 	"Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion", "Sextillion", "Septillion",
 	"Octillion", "Nonillion", "Decillion", "Undecillion", "Duodecillion", "Tredecillion", "Quattuordecillion", "Quindecillion",
@@ -485,11 +485,11 @@ const std::string huns[] =
 	"Tremilliatrecenoctovigintillion", "Tremilliatrecennovemvigintillion", "Tremilliatrecentrigintillion", "Tremilliatrecenuntrigintillion"
 };
 
-const std::string nones[] = { "0","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15","16", "17", "18", "19" };
-const std::string ntens[] = { "", "", "20", "30", "40", "50", "60", "70", "80", "90", "100" };
+const std::string g_nones[] = { "0","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15","16", "17", "18", "19" };
+const std::string g_ntens[] = { "", "", "20", "30", "40", "50", "60", "70", "80", "90", "100" };
 
-const int nOnes = (sizeof(ones) / sizeof(ones[0]));
-const int nTens = (sizeof(tens) / sizeof(tens[0]));
-const int nHuns = (sizeof(huns) / sizeof(huns[0]));
+const int g_nOnes = (sizeof(g_ones) / sizeof(g_ones[0]));
+const int g_nTens = (sizeof(g_tens) / sizeof(g_tens[0]));
+const int g_nHuns = (sizeof(g_huns) / sizeof(g_huns[0]));
 
 const uint8_t g_bitval[] = {1, 2, 4, 8, 16, 32, 64, 128};

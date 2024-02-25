@@ -143,7 +143,7 @@ int main()
 				else if (iResult == -3)
 					cout << "Wrong number type" << endl;
 
-				MathLib2 = MathLib;
+				CMathLib MathLib3 = MathLib2 + MathLib;
 			}
 			else
 			{

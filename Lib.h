@@ -71,6 +71,7 @@ class CByte
     };
 
 public:
+    
     CByte()
     {
         m_b.U = 0;
@@ -159,7 +160,7 @@ public:
     Type GetType() { return m_Type; }
     const std::string & GetBinary() { return m_strBinary; }
 
-private:
+protected:
     void Init();
 	void Split(std::string strInput, std::vector<std::string>& vstrTokens);
     void SetType();

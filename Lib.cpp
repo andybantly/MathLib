@@ -45,12 +45,28 @@ CMathLib& CMathLib::operator = (const CMathLib& rhs)
 
 CMathLib& CMathLib::operator + (const CMathLib& rhs)
 {
+	CMathLib MLOut;
+	if (m_Type != Type::NotSet && rhs.m_Type != Type::NotSet)
+	{
+		vector<CByte>::iterator lhs_it;
+		vector<CByte>::const_iterator rhs_it;
+		lhs_it = m_vBytes.begin();
+		rhs_it = rhs.m_vBytes.begin();
+
+		CByte ByteOut;
+		do
+		{
+			ByteOut = *lhs_it++ + *rhs_it++;
+		} while (lhs_it != m_vBytes.end() && rhs_it != rhs.m_vBytes.end());
+
+		*this = MLOut;
+	}
 	return *this;
 }
 
 string CMathLib::WB()
 {
-	return huns[nHuns - 1];
+	return g_huns[g_nHuns - 1];
 }
 
 int CMathLib::Expand(string strInput, string& strResult)
@@ -79,7 +95,7 @@ int CMathLib::Expand(string strInput, string& strResult)
 start:
 	digs = (int)strLhs.length() - 1;
 	nh = digs / 3;
-	if (nh <= nHuns)
+	if (nh <= g_nHuns)
 	{
 		ld = digs % 3;
 		switch (ld)
@@ -123,14 +139,14 @@ start:
 			{
 				if (!strResult.empty())
 					strResult += (b10 ? "-" : " ");
-				strResult += ones[iLhs2];
+				strResult += g_ones[iLhs2];
 				b10 = false;
 			}
 			else if (iLhs2 < 100)
 			{
 				if (!strResult.empty())
 					strResult += " ";
-				strResult += tens[iLhs2 / div];
+				strResult += g_tens[iLhs2 / div];
 				b10 = true;
 				if ((iLhs2 % div) != 0)
 				{
@@ -142,7 +158,7 @@ start:
 			{
 				if (!strResult.empty())
 					strResult += " ";
-				strResult += ones[iLhs2 / div] + " " + tens[nTens - 1];
+				strResult += g_ones[iLhs2 / div] + " " + g_tens[g_nTens - 1];
 				if ((iLhs2 % div) != 0)
 				{
 					iLhs2 = iLhs2 % div;
@@ -154,7 +170,7 @@ start:
 			{
 				if (!strResult.empty())
 					strResult += " ";
-				strResult += huns[nh - 1];
+				strResult += g_huns[nh - 1];
 			}
 
 			strLhs = strLhs.substr(nd);
@@ -176,7 +192,7 @@ start:
 		{
 			try
 			{
-				strResult += " " + ones[*it - '0'];
+				strResult += " " + g_ones[*it - '0'];
 			}
 			catch (invalid_argument)
 			{
@@ -339,27 +355,27 @@ void CMathLib::Init()
 	if (g_bInit)
 		return;
 
-	for (int iOne = 0; iOne < nOnes; ++iOne)
-		g_mapWordTo99[ones[iOne]] = nones[iOne];
+	for (int iOne = 0; iOne < g_nOnes; ++iOne)
+		g_mapWordTo99[g_ones[iOne]] = g_nones[iOne];
 
-	for (int iTen = 2; iTen < nTens; ++iTen)
-		g_mapWordTo99[tens[iTen]] = ntens[iTen];
+	for (int iTen = 2; iTen < g_nTens; ++iTen)
+		g_mapWordTo99[g_tens[iTen]] = g_ntens[iTen];
 
-	for (int iTen = 2; iTen < nTens - 1; ++iTen)
+	for (int iTen = 2; iTen < g_nTens - 1; ++iTen)
 	{
 		for (int iOne = 1; iOne < 10; ++iOne)
 		{
-			string strWord = tens[iTen] + "-" + ones[iOne];
+			string strWord = g_tens[iTen] + "-" + g_ones[iOne];
 			string strNum = to_string(iTen * 10 + iOne);
 			g_mapWordTo99[strWord] = strNum;
 		}
 	}
 
-	for (int iHun = 0, nZero = 3; iHun < nHuns; iHun++, nZero += 3)
+	for (int iHun = 0, nZero = 3; iHun < g_nHuns; iHun++, nZero += 3)
 	{
 		string strHun(nZero, '0');
 		strHun = "1" + strHun;
-		g_mapWordTo100[huns[iHun]] = strHun;
+		g_mapWordTo100[g_huns[iHun]] = strHun;
 	}
 
 	g_bInit = true;
