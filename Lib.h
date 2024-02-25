@@ -157,7 +157,7 @@ public:
     int Expand(std::string& strResult);
     static std::string WB();
     Type GetType() { return m_Type; }
-    std::string GetBinary() { return m_strBinary; }
+    const std::string & GetBinary() { return m_strBinary; }
 
 private:
     void Init();

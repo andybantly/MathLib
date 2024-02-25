@@ -126,7 +126,7 @@ int main()
 				iResult = MathLib.Contract(strResult);
 			if (iResult == 0)
 			{
-				string strBinary = MathLib.GetBinary();
+				const string & strBinary = MathLib.GetBinary();
 				string strVerify;
 				CMathLib MathLib2(strResult);
 				if (MathLib2.GetType() == CMathLib::Type::Word)
