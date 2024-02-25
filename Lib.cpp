@@ -421,6 +421,7 @@ int CMathLib::ToBase2()
 
 	string strOut;
 	uint8_t idnm = 0, icnt = 0, sum = 0;
+	deque<char> binary;
 	m_vBytes.clear();
 
 	string::iterator it = strIn.begin();
@@ -445,7 +446,7 @@ int CMathLib::ToBase2()
 			// Check for the sentinel that completes the conversion
 			if (strIn.length() == 1 && idnm < 2)
 			{
-				m_strBinary += '0' + idnm;
+				binary.push_front('0' + idnm);
 				if (idnm)
 					sum += g_bitval[icnt];
 				m_vBytes.push_back(CByte(sum));
@@ -464,7 +465,7 @@ int CMathLib::ToBase2()
 		if (it == strIn.end())
 		{
 			// Add the remainder of 0 or 1 to the binary string
-			m_strBinary += '0' + idnm;
+			binary.push_front('0' + idnm);
 			if (idnm)
 				sum += g_bitval[icnt];
 			icnt++;
@@ -482,7 +483,10 @@ int CMathLib::ToBase2()
 			it = strIn.begin();
 		}
 	}
-	std::reverse(m_strBinary.begin(), m_strBinary.end());
+	
+	// Append the binary string
+	m_strBinary.append(binary.begin(), binary.end());
+
 	return 0;
 }
 
