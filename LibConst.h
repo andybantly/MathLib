@@ -491,3 +491,5 @@ const std::string ntens[] = { "", "", "20", "30", "40", "50", "60", "70", "80", 
 const int nOnes = (sizeof(ones) / sizeof(ones[0]));
 const int nTens = (sizeof(tens) / sizeof(tens[0]));
 const int nHuns = (sizeof(huns) / sizeof(huns[0]));
+
+const uint8_t g_bitval[] = {1, 2, 4, 8, 16, 32, 64, 128};

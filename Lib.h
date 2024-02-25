@@ -157,16 +157,20 @@ public:
     int Expand(std::string& strResult);
     static std::string WB();
     Type GetType() { return m_Type; }
+    std::string GetBinary() { return m_strBinary; }
 
 private:
     void Init();
 	void Split(std::string strInput, std::vector<std::string>& vstrTokens);
     void SetType();
-    int  BinarySearch(std::string& strSearch, const std::vector<std::string> & vec, int nSize);
+    int ToBase2();
+    int BinarySearch(std::string& strSearch, const std::vector<std::string> & vec, int nSize);
 
     Type m_Type;
     std::string m_strToken;
     std::string m_strResult;
+    std::string m_strBinary;
+    std::vector<CByte> m_vBytes;
 };
 
 class CDuration
@@ -261,3 +265,5 @@ public:
         std::cout << "mean=" << m_dmean << " variance=" << m_dvar << " stddev=" << m_dstddev << std::endl;
     }
 };
+
+std::string Base10toBase2(std::string strin);

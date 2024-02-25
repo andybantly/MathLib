@@ -97,68 +97,6 @@ static void test()
 		(*it)->join();
 }
 
-string Base10toBase2(string strin)
-{
-	string strout;
-	string strbin;
-	uint8_t idnm = 0, icnt = 0;
-	string::iterator it = strin.begin();
-	for (;;)
-	{
-		// Compute the denominator of the division
-		idnm = idnm * 10 + *it - '0';
-		if (idnm < 2 && it + 1 != strin.end())
-		{
-			// Carry a 0
-			if (!strout.empty())
-				strout += '0';
-
-			// The denominator has to be greater than 2 now
-			idnm = idnm * 10 + (*(it + 1) - '0');
-
-			// Move to the next character
-			it += 2;
-		}
-		else
-		{
-			// Check for the sentinel that completes the conversion
-			if (strin.length() == 1 && idnm < 2)
-			{
-				strbin += '0' + idnm;
-				icnt++;
-				break;
-			}
-
-			// Move to the next character
-			it++;
-		}
-
-		// Append the digit to the output that becomes the new input from integer division by 2
-		strout += '0' + idnm / 2;
-		idnm = idnm % 2;
-
-		// Has the input been processed
-		if (it == strin.end())
-		{
-			// Add the remainder of 0 or 1 to the binary string
-			strbin += '0' + idnm;
-			icnt++;
-
-			// Reset and start over
-			strin = strout;
-			strout.clear();
-			idnm = 0;
-			it = strin.begin();
-		}
-	}
-//	for (std::string::reverse_iterator rit = strbin.rbegin(); rit != strbin.rend(); ++rit)
-//		cout << *rit;
-//	cout << endl;
-	std::reverse(strbin.begin(), strbin.end());
-//	cout << strbin << endl;
-	return strbin;
-}
-
 int main()
 {
 	CByte B1(49);
@@ -166,6 +104,7 @@ int main()
 	CByte B3 = B1 + B2;
 	CByte B4 = B3 + CByte(6);
 	B4 = B4 + CByte(1); // Overflows, B4.U = 0, B4.C = 1;
+	B4 = 5;
 
 	int iResult;
 	string strInput, strResult;
@@ -182,14 +121,12 @@ int main()
 		{
 			CMathLib MathLib(strInput);
 			if (MathLib.GetType() == CMathLib::Type::Number)
-			{
 				iResult = MathLib.Expand(strResult);
-				cout << Base10toBase2(strInput) << endl;
-			}
 			else
 				iResult = MathLib.Contract(strResult);
 			if (iResult == 0)
 			{
+				string strBinary = MathLib.GetBinary();
 				string strVerify;
 				CMathLib MathLib2(strResult);
 				if (MathLib2.GetType() == CMathLib::Type::Word)
@@ -198,7 +135,7 @@ int main()
 					iResult = MathLib2.Expand(strVerify);
 
 				if (iResult == 0)
-					cout << strResult << " = " << strVerify << endl;
+					cout << strResult << " = " << strVerify << " -> " << strBinary << endl;
 				else if (iResult == -1)
 					cout << "Invalid Number!" << endl;
 				else if (iResult == -2)
