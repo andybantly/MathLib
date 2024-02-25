@@ -409,30 +409,30 @@ int CMathLib::ToBase2()
 	if (m_strToken.empty())
 		return -1;
 
-	string strin;
+	string strIn;
 	if (m_Type == Type::Number)
-		strin = m_strToken;
+		strIn = m_strToken;
 	else
 	{
-		int iRet = Contract(m_strToken, strin);
+		int iRet = Contract(m_strToken, strIn);
 		if (iRet != 0)
 			return iRet;
 	}
 
-	string strout, strbin;
+	string strOut;
 	uint8_t idnm = 0, icnt = 0, sum = 0;
 	m_vBytes.clear();
 
-	string::iterator it = strin.begin();
+	string::iterator it = strIn.begin();
 	for (;;)
 	{
 		// Compute the denominator of the division
 		idnm = idnm * 10 + *it - '0';
-		if (idnm < 2 && it + 1 != strin.end())
+		if (idnm < 2 && it + 1 != strIn.end())
 		{
 			// Carry a 0
-			if (!strout.empty())
-				strout += '0';
+			if (!strOut.empty())
+				strOut += '0';
 
 			// The denominator has to be greater than 2 now
 			idnm = idnm * 10 + (*(it + 1) - '0');
@@ -443,9 +443,9 @@ int CMathLib::ToBase2()
 		else
 		{
 			// Check for the sentinel that completes the conversion
-			if (strin.length() == 1 && idnm < 2)
+			if (strIn.length() == 1 && idnm < 2)
 			{
-				strbin += '0' + idnm;
+				m_strBinary += '0' + idnm;
 				if (idnm)
 					sum += g_bitval[icnt];
 				m_vBytes.push_back(CByte(sum));
@@ -457,14 +457,14 @@ int CMathLib::ToBase2()
 		}
 
 		// Append the digit to the output that becomes the new input from integer division by 2
-		strout += '0' + idnm / 2;
+		strOut += '0' + idnm / 2;
 		idnm = idnm % 2;
 
 		// Has the input been processed
-		if (it == strin.end())
+		if (it == strIn.end())
 		{
 			// Add the remainder of 0 or 1 to the binary string
-			strbin += '0' + idnm;
+			m_strBinary += '0' + idnm;
 			if (idnm)
 				sum += g_bitval[icnt];
 			icnt++;
@@ -476,14 +476,13 @@ int CMathLib::ToBase2()
 			}
 
 			// Reset and start over
-			strin = strout;
-			strout.clear();
+			strIn = strOut;
+			strOut.clear();
 			idnm = 0;
-			it = strin.begin();
+			it = strIn.begin();
 		}
 	}
-	std::reverse(strbin.begin(), strbin.end());
-	m_strBinary = strbin;
+	std::reverse(m_strBinary.begin(), m_strBinary.end());
 	return 0;
 }
 
