@@ -101,41 +101,56 @@ string Base10toBase2(string strin)
 {
 	string strout;
 	string strbin;
-	uint8_t idnm = 0;
+	uint8_t idnm = 0, icnt = 0;
 	string::iterator it = strin.begin();
-	do
+	for (;;)
 	{
+		// Compute the denominator of the division
 		idnm = idnm * 10 + *it - '0';
 		if (idnm < 2 && it + 1 != strin.end())
 		{
+			// Carry a 0
 			if (!strout.empty())
 				strout += '0';
+
+			// The denominator has to be greater than 2 now
 			idnm = idnm * 10 + (*(it + 1) - '0');
+
+			// Move to the next character
 			it += 2;
 		}
 		else
 		{
+			// Check for the sentinel that completes the conversion
 			if (strin.length() == 1 && idnm < 2)
 			{
 				strbin += '0' + idnm;
+				icnt++;
 				break;
 			}
+
+			// Move to the next character
 			it++;
 		}
 
-		uint8_t inum = idnm / 2;
+		// Append the digit to the output that becomes the new input from integer division by 2
+		strout += '0' + idnm / 2;
 		idnm = idnm % 2;
-		strout += '0' + inum;
 
+		// Has the input been processed
 		if (it == strin.end())
 		{
+			// Add the remainder of 0 or 1 to the binary string
 			strbin += '0' + idnm;
+			icnt++;
+
+			// Reset and start over
 			strin = strout;
 			strout.clear();
 			idnm = 0;
 			it = strin.begin();
 		}
-	} while (it != strin.end());
+	}
 //	for (std::string::reverse_iterator rit = strbin.rbegin(); rit != strbin.rend(); ++rit)
 //		cout << *rit;
 //	cout << endl;
