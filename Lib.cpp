@@ -514,6 +514,39 @@ int CMathLib::ToBase2()
 	return 0;
 }
 
+void CMathLib::BuildBase2()
+{
+	string s = "1";
+	cout << s << endl;
+	while (true)
+	{
+		uint8_t iProd;
+		deque<char> mout;
+		bool bCarry = false;
+		for (string::reverse_iterator rit = s.rbegin(); rit != s.rend(); )
+		{
+			uint8_t iMP = *rit++ - '0';
+			iProd = 2 * iMP;
+			if (bCarry)
+			{
+				iProd++;
+				bCarry = false;
+			}
+			if (iProd >= 10)
+			{
+				iProd -= 10;
+				bCarry = true;
+			} // suspect that multiplying by larger like 3,4,5,...,9 changes carry prod
+			mout.push_front('0' + iProd);
+		}
+		if (bCarry)
+			mout.push_front('1');
+		string sout(mout.begin(), mout.end());
+		cout << sout << endl;
+		s = sout;
+	}
+}
+
 int CMathLib::BinarySearch(string& strSearch, const vector<string> & vec, int nSize)
 {
 	int nLeft = 0;

@@ -32,114 +32,114 @@ struct CILT
 
 bool Equal(const std::string& strLHS, const std::string& strRHS);
 
-class CByte
-{
-    struct _Byte
-    {
-        unsigned B1 : 1;
-        unsigned B2 : 1;
-        unsigned B3 : 1;
-        unsigned B4 : 1;
-        unsigned B5 : 1;
-        unsigned B6 : 1;
-        unsigned B7 : 1;
-        unsigned B8 : 1;
-    };
-
-    struct _Carry
-    {
-        unsigned C0 : 1;
-        unsigned C1 : 1;
-        unsigned C2 : 1;
-        unsigned C3 : 1;
-        unsigned C4 : 1;
-        unsigned C5 : 1;
-        unsigned C6 : 1;
-        unsigned C7 : 1;
-    };
-
-    union BYTE
-    {
-        struct _Byte B;
-        uint8_t U;
-    };
-
-    union CARRY
-    {
-        struct _Carry C;
-        uint8_t U;
-    };
-
-public:
-    friend class CMathLib;
-    
-    CByte()
-    {
-        m_b.U = 0;
-        m_c.U = 0;
-    }
-
-    CByte(uint8_t byte)
-    {
-        m_b.U = byte;
-        m_c.U = 0;
-    };
-
-    CByte(const CByte& rhs)
-    {
-        *this = rhs;
-    }
-
-    CByte& operator = (const CByte& rhs)
-    {
-        if (this != &rhs)
-        {
-            m_b = rhs.m_b;
-            m_c = rhs.m_c;
-        }
-        return *this;
-    }
-
-    CByte& operator + (const CByte& rhs)
-    {
-        CByte Out;
-
-        Out.m_b.B.B1 = m_c.C.C0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);
-        m_c.C.C1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & m_c.C.C0) | (m_b.B.B1 & m_c.C.C0);
-
-        Out.m_b.B.B2 = m_c.C.C1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
-        m_c.C.C2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & m_c.C.C1) | (m_b.B.B2 & m_c.C.C1);
-
-        Out.m_b.B.B3 = m_c.C.C2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
-        m_c.C.C3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & m_c.C.C2) | (m_b.B.B3 & m_c.C.C2);
-
-        Out.m_b.B.B4 = m_c.C.C3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
-        m_c.C.C4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & m_c.C.C3) | (m_b.B.B4 & m_c.C.C3);
-
-        Out.m_b.B.B5 = m_c.C.C4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
-        m_c.C.C5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & m_c.C.C4) | (m_b.B.B5 & m_c.C.C4);
-
-        Out.m_b.B.B6 = m_c.C.C5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
-        m_c.C.C6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & m_c.C.C5) | (m_b.B.B6 & m_c.C.C5);
-
-        Out.m_b.B.B7 = m_c.C.C6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
-        m_c.C.C7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & m_c.C.C6) | (m_b.B.B7 & m_c.C.C6);
-
-        Out.m_b.B.B8 = m_c.C.C7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
-        Out.m_c.C.C0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & m_c.C.C7) | (m_b.B.B8 & m_c.C.C7);
-
-        *this = Out;
-
-        return *this;
-    }
-
-protected:
-    BYTE m_b;
-    CARRY m_c;
-};
-
 class CMathLib
 {
+    class CByte
+    {
+        struct _Byte
+        {
+            unsigned B1 : 1;
+            unsigned B2 : 1;
+            unsigned B3 : 1;
+            unsigned B4 : 1;
+            unsigned B5 : 1;
+            unsigned B6 : 1;
+            unsigned B7 : 1;
+            unsigned B8 : 1;
+        };
+
+        struct _Carry
+        {
+            unsigned C0 : 1;
+            unsigned C1 : 1;
+            unsigned C2 : 1;
+            unsigned C3 : 1;
+            unsigned C4 : 1;
+            unsigned C5 : 1;
+            unsigned C6 : 1;
+            unsigned C7 : 1;
+        };
+
+        union BYTE
+        {
+            struct _Byte B;
+            uint8_t U;
+        };
+
+        union CARRY
+        {
+            struct _Carry C;
+            uint8_t U;
+        };
+
+    public:
+        friend class CMathLib;
+
+        CByte()
+        {
+            m_b.U = 0;
+            m_c.U = 0;
+        }
+
+        CByte(uint8_t byte)
+        {
+            m_b.U = byte;
+            m_c.U = 0;
+        };
+
+        CByte(const CByte& rhs)
+        {
+            *this = rhs;
+        }
+
+        CByte& operator = (const CByte& rhs)
+        {
+            if (this != &rhs)
+            {
+                m_b = rhs.m_b;
+                m_c = rhs.m_c;
+            }
+            return *this;
+        }
+
+        CByte& operator + (const CByte& rhs)
+        {
+            CByte Out;
+
+            Out.m_b.B.B1 = m_c.C.C0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);
+            m_c.C.C1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & m_c.C.C0) | (m_b.B.B1 & m_c.C.C0);
+
+            Out.m_b.B.B2 = m_c.C.C1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
+            m_c.C.C2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & m_c.C.C1) | (m_b.B.B2 & m_c.C.C1);
+
+            Out.m_b.B.B3 = m_c.C.C2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
+            m_c.C.C3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & m_c.C.C2) | (m_b.B.B3 & m_c.C.C2);
+
+            Out.m_b.B.B4 = m_c.C.C3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
+            m_c.C.C4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & m_c.C.C3) | (m_b.B.B4 & m_c.C.C3);
+
+            Out.m_b.B.B5 = m_c.C.C4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
+            m_c.C.C5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & m_c.C.C4) | (m_b.B.B5 & m_c.C.C4);
+
+            Out.m_b.B.B6 = m_c.C.C5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
+            m_c.C.C6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & m_c.C.C5) | (m_b.B.B6 & m_c.C.C5);
+
+            Out.m_b.B.B7 = m_c.C.C6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
+            m_c.C.C7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & m_c.C.C6) | (m_b.B.B7 & m_c.C.C6);
+
+            Out.m_b.B.B8 = m_c.C.C7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
+            Out.m_c.C.C0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & m_c.C.C7) | (m_b.B.B8 & m_c.C.C7);
+
+            *this = Out;
+
+            return *this;
+        }
+
+    protected:
+        BYTE m_b;
+        CARRY m_c;
+    };
+
 public:
     enum Type : int { NotSet = 0, Number = 1, Word = 2 };
     
@@ -166,6 +166,7 @@ protected:
 	void Split(std::string strInput, std::vector<std::string>& vstrTokens);
     void SetType();
     int ToBase2();
+    void BuildBase2();
     int BinarySearch(std::string& strSearch, const std::vector<std::string> & vec, int nSize);
 
     Type m_Type;

@@ -144,7 +144,7 @@ int main()
 				else if (iResult == -3)
 					cout << "Wrong number type" << endl;
 
-				CMathLib MathLib3("8");
+				CMathLib MathLib3("9999999999");
 				CMathLib MathLib4("65535");
 				CMathLib MathLib5 = MathLib3 + MathLib4;
 			}
