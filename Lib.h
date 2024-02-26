@@ -71,6 +71,7 @@ class CByte
     };
 
 public:
+    friend class CMathLib;
     
     CByte()
     {
@@ -266,5 +267,3 @@ public:
         std::cout << "mean=" << m_dmean << " variance=" << m_dvar << " stddev=" << m_dstddev << std::endl;
     }
 };
-
-std::string Base10toBase2(std::string strin);

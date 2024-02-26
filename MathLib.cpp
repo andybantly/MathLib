@@ -99,12 +99,13 @@ static void test()
 
 int main()
 {
+	/*
 	CByte B1(49);
 	CByte B2(200);
 	CByte B3 = B1 + B2;
 	CByte B4 = B3 + CByte(6);
 	B4 = B4 + CByte(1); // Overflows, B4.U = 0, B4.C = 1;
-	B4 = 5;
+	B4 = 5; */
 
 	int iResult;
 	string strInput, strResult;
@@ -143,7 +144,9 @@ int main()
 				else if (iResult == -3)
 					cout << "Wrong number type" << endl;
 
-				CMathLib MathLib3 = MathLib2 + MathLib;
+				CMathLib MathLib3("8");
+				CMathLib MathLib4("65535");
+				CMathLib MathLib5 = MathLib3 + MathLib4;
 			}
 			else
 			{

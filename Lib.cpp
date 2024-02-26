@@ -36,9 +36,11 @@ CMathLib& CMathLib::operator = (const CMathLib& rhs)
 {
 	if (this != &rhs)
 	{
+		m_Type = rhs.m_Type;
 		m_strToken = rhs.m_strToken;
 		m_strResult = rhs.m_strResult;
-		m_Type = rhs.m_Type;
+		m_strBinary = rhs.m_strBinary;
+		m_vBytes = rhs.m_vBytes;
 	}
 	return *this;
 }
@@ -50,15 +52,21 @@ CMathLib& CMathLib::operator + (const CMathLib& rhs)
 	{
 		vector<CByte>::iterator lhs_it;
 		vector<CByte>::const_iterator rhs_it;
-		lhs_it = m_vBytes.begin();
-		rhs_it = rhs.m_vBytes.begin();
-
-		CByte ByteOut;
-		do
+		CByte Zero(0);
+		unsigned int iCIn = 0;
+		for (lhs_it = m_vBytes.begin(), rhs_it = rhs.m_vBytes.begin(); 
+			lhs_it != m_vBytes.end() || rhs_it != rhs.m_vBytes.end();)
 		{
-			ByteOut = *lhs_it++ + *rhs_it++;
-		} while (lhs_it != m_vBytes.end() && rhs_it != rhs.m_vBytes.end());
-
+			CByte & lhsb = lhs_it != m_vBytes.end() ? *lhs_it++ : Zero;
+			const CByte & rhsb = rhs_it != rhs.m_vBytes.end() ? *rhs_it++ : Zero;
+			lhsb.m_c.C.C0 = iCIn;
+			CByte sumb = lhsb + rhsb;
+			iCIn = sumb.m_c.C.C0;
+			sumb.m_c.U = 0;
+			MLOut.m_vBytes.push_back(sumb);
+		}
+		if (iCIn)
+			MLOut.m_vBytes.push_back(CByte(1));
 		*this = MLOut;
 	}
 	return *this;
@@ -540,77 +548,4 @@ bool Equal(const std::string& strLHS, const std::string& strRHS)
 		}
 	}
 	return bEqual;
-}
-
-string Base10toBase2(string strin)
-{
-	vector<CByte> vb;
-	string strout;
-	string strbin;
-	uint8_t idnm = 0, icnt = 0, sum = 0;
-	string::iterator it = strin.begin();
-	for (;;)
-	{
-		// Compute the denominator of the division
-		idnm = idnm * 10 + *it - '0';
-		if (idnm < 2 && it + 1 != strin.end())
-		{
-			// Carry a 0
-			if (!strout.empty())
-				strout += '0';
-
-			// The denominator has to be greater than 2 now
-			idnm = idnm * 10 + (*(it + 1) - '0');
-
-			// Move to the next character
-			it += 2;
-		}
-		else
-		{
-			// Check for the sentinel that completes the conversion
-			if (strin.length() == 1 && idnm < 2)
-			{
-				strbin += '0' + idnm;
-				if (idnm)
-					sum += g_bitval[icnt];
-				vb.push_back(CByte(sum));
-				break;
-			}
-
-			// Move to the next character
-			it++;
-		}
-
-		// Append the digit to the output that becomes the new input from integer division by 2
-		strout += '0' + idnm / 2;
-		idnm = idnm % 2;
-
-		// Has the input been processed
-		if (it == strin.end())
-		{
-			// Add the remainder of 0 or 1 to the binary string
-			strbin += '0' + idnm;
-			if (idnm)
-				sum += g_bitval[icnt];
-			icnt++;
-			if (icnt == 8)
-			{
-				vb.push_back(CByte(sum));
-				icnt = 0;
-				sum = 0;
-			}
-
-			// Reset and start over
-			strin = strout;
-			strout.clear();
-			idnm = 0;
-			it = strin.begin();
-		}
-	}
-	//	for (std::string::reverse_iterator rit = strbin.rbegin(); rit != strbin.rend(); ++rit)
-	//		cout << *rit;
-	//	cout << endl;
-	std::reverse(strbin.begin(), strbin.end());
-	//	cout << strbin << endl;
-	return strbin;
 }
