@@ -32,7 +32,7 @@ struct CILT
 
 bool Equal(const std::string& strLHS, const std::string& strRHS);
 
-class CMathLib
+class CNumber
 {
     class CByte
     {
@@ -73,7 +73,7 @@ class CMathLib
         };
 
     public:
-        friend class CMathLib;
+        friend class CNumber;
 
         CByte()
         {
@@ -143,14 +143,14 @@ class CMathLib
 public:
     enum Type : int { NotSet = 0, Number = 1, Word = 2 };
     
-    CMathLib();
-    CMathLib(std::string strToken);
-    CMathLib(const CMathLib& rhs);
-    ~CMathLib();
+    CNumber();
+    CNumber(std::string strToken);
+    CNumber(const CNumber& rhs);
+    ~CNumber();
 
 public:
-    CMathLib& operator = (const CMathLib& rhs);
-    CMathLib& operator + (const CMathLib& rhs);
+    CNumber& operator = (const CNumber& rhs);
+    CNumber& operator + (const CNumber& rhs);
 
 public:
     int Contract(std::string strInput, std::string& strResult);

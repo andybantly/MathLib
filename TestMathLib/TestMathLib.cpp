@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "..\Lib.h"
+#include "..\Number.h"
 
 using namespace std;
 
@@ -12,7 +12,7 @@ namespace TestMathLib
 	{
 		static void Test(unsigned long long ullb, unsigned long long ulle)
 		{
-			CMathLib MathLib;
+			CNumber MathLib;
 
 			int iResult;
 			string s, sr, sv;

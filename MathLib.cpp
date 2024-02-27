@@ -2,7 +2,7 @@
 //
 
 #include "MathLib.h"
-#include "Lib.h"
+#include "Number.h"
 #pragma warning(disable:6385)
 
 using namespace std;
@@ -11,7 +11,7 @@ mutex g_io_mutex;
 
 static void ttest(unsigned long long ullb, unsigned long long ulle)
 {
-	CMathLib MathLib;
+	CNumber Number;
 
 	string s, sr, sv;
 	unsigned long long ull = ullb;
@@ -28,7 +28,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 	do
 	{
 		s = to_string(ull++);
-		if (MathLib.Expand(s, sr) != 0)
+		if (Number.Expand(s, sr) != 0)
 		{
 			lock_guard<mutex> guard(g_io_mutex);
 			cout << s << " did not expand" << endl;
@@ -36,7 +36,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 		}
 		else
 		{
-			if (MathLib.Contract(sr, sv) != 0)
+			if (Number.Contract(sr, sv) != 0)
 			{
 				lock_guard<mutex> guard(g_io_mutex);
 				cout << sr << " did not contract" << endl;
@@ -120,17 +120,17 @@ int main()
 			strInput += c;
 		if (strInput != "quit" && strInput != "test")
 		{
-			CMathLib MathLib(strInput);
-			if (MathLib.GetType() == CMathLib::Type::Number)
-				iResult = MathLib.Expand(strResult);
+			CNumber Number(strInput);
+			if (Number.GetType() == CNumber::Type::Number)
+				iResult = Number.Expand(strResult);
 			else
-				iResult = MathLib.Contract(strResult);
+				iResult = Number.Contract(strResult);
 			if (iResult == 0)
 			{
-				const string & strBinary = MathLib.GetBinary();
+				const string & strBinary = Number.GetBinary();
 				string strVerify;
-				CMathLib MathLib2(strResult);
-				if (MathLib2.GetType() == CMathLib::Type::Word)
+				CNumber MathLib2(strResult);
+				if (MathLib2.GetType() == CNumber::Type::Word)
 					iResult = MathLib2.Contract(strVerify);
 				else
 					iResult = MathLib2.Expand(strVerify);
@@ -140,20 +140,20 @@ int main()
 				else if (iResult == -1)
 					cout << "Invalid Number!" << endl;
 				else if (iResult == -2)
-					cout << "The number is out of range. The number must not surpass the +/-" << MathLib.WB() << " range" << endl;
+					cout << "The number is out of range. The number must not surpass the +/-" << Number.WB() << " range" << endl;
 				else if (iResult == -3)
 					cout << "Wrong number type" << endl;
 
-				CMathLib MathLib3("9999999999");
-				CMathLib MathLib4("65535");
-				CMathLib MathLib5 = MathLib3 + MathLib4;
+				CNumber N3("9999999999");
+				CNumber N4("65535");
+				CNumber N5 = N3 + N4;
 			}
 			else
 			{
 				if (iResult == -1)
 					cout << "Invalid Number!" << endl;
 				else if (iResult == -2)
-					cout << "The number is out of range. The number must not surpass the +/-" << MathLib.WB() << " range" << endl;
+					cout << "The number is out of range. The number must not surpass the +/-" << Number.WB() << " range" << endl;
 				else if (iResult == -3)
 					cout << "Wrong number type" << endl;
 			}

@@ -1,5 +1,5 @@
-#include "Lib.h"
-#include "LibConst.h"
+#include "Number.h"
+#include "Constants.h"
 #pragma warning(disable:6385)
 
 using namespace std;
@@ -9,30 +9,30 @@ bool g_bInit = false;
 std::map<std::string, std::string, CILT> g_mapWordTo99;
 std::map<std::string, std::string, CILT> g_mapWordTo100;
 
-CMathLib::CMathLib()
+CNumber::CNumber()
 {
 	Init();
 
 	m_Type = Type::NotSet;
 }
 
-CMathLib::CMathLib(string strToken) : m_strToken(strToken)
+CNumber::CNumber(string strToken) : m_strToken(strToken)
 {
 	Init();
 
 	SetType();
 }
 
-CMathLib::CMathLib(const CMathLib& rhs)
+CNumber::CNumber(const CNumber& rhs)
 {
 	*this = rhs;
 }
 
-CMathLib::~CMathLib()
+CNumber::~CNumber()
 {
 }
 
-CMathLib& CMathLib::operator = (const CMathLib& rhs)
+CNumber& CNumber::operator = (const CNumber& rhs)
 {
 	if (this != &rhs)
 	{
@@ -45,9 +45,9 @@ CMathLib& CMathLib::operator = (const CMathLib& rhs)
 	return *this;
 }
 
-CMathLib& CMathLib::operator + (const CMathLib& rhs)
+CNumber& CNumber::operator + (const CNumber& rhs)
 {
-	CMathLib MLOut;
+	CNumber MLOut;
 	if (m_Type != Type::NotSet && rhs.m_Type != Type::NotSet)
 	{
 		vector<CByte>::iterator lhs_it;
@@ -67,17 +67,18 @@ CMathLib& CMathLib::operator + (const CMathLib& rhs)
 		}
 		if (iCIn)
 			MLOut.m_vBytes.push_back(CByte(1));
+
 		*this = MLOut;
 	}
 	return *this;
 }
 
-string CMathLib::WB()
+string CNumber::WB()
 {
 	return g_huns[g_nHuns - 1];
 }
 
-int CMathLib::Expand(string strInput, string& strResult)
+int CNumber::Expand(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -212,7 +213,7 @@ start:
 	return iResult;
 }
 
-int CMathLib::Contract(string strInput, string& strResult)
+int CNumber::Contract(string strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -314,7 +315,7 @@ int CMathLib::Contract(string strInput, string& strResult)
 	return iResult;
 }
 
-int CMathLib::Contract(string& strResult)
+int CNumber::Contract(string& strResult)
 {
 	if (m_Type == Type::Word)
 	{
@@ -335,7 +336,7 @@ int CMathLib::Contract(string& strResult)
 		return -3;
 }
 
-int CMathLib::Expand(string& strResult)
+int CNumber::Expand(string& strResult)
 {
 	if (m_Type == Type::Number)
 	{
@@ -356,7 +357,7 @@ int CMathLib::Expand(string& strResult)
 		return -3;
 }
 
-void CMathLib::Init()
+void CNumber::Init()
 {
 	lock_guard<mutex> guard(g_map_mutex);
 
@@ -389,7 +390,7 @@ void CMathLib::Init()
 	g_bInit = true;
 }
 
-void CMathLib::Split(string strInput, vector<string>& vstrTokens)
+void CNumber::Split(string strInput, vector<string>& vstrTokens)
 {
 	if (strInput.empty())
 		return;
@@ -413,7 +414,7 @@ void CMathLib::Split(string strInput, vector<string>& vstrTokens)
 	} while (ipos != string::npos);
 }
 
-void CMathLib::SetType()
+void CNumber::SetType()
 {
 	if (!m_strToken.empty())
 	{
@@ -428,7 +429,7 @@ void CMathLib::SetType()
 		m_Type = Type::NotSet;
 }
 
-int CMathLib::ToBase2()
+int CNumber::ToBase2()
 {
 	if (m_strToken.empty())
 		return -1;
@@ -467,7 +468,7 @@ int CMathLib::ToBase2()
 		}
 		else
 		{
-			// Check for the sentinel that completes the conversion
+			// Check for completion the conversion
 			if (strIn.length() == 1 && idnm < 2)
 			{
 				binary.push_front('0' + idnm);
@@ -492,6 +493,8 @@ int CMathLib::ToBase2()
 			binary.push_front('0' + idnm);
 			if (idnm)
 				sum += g_bitval[icnt];
+
+			// If 8 bits have been processed, store the numerical value
 			icnt++;
 			if (icnt == 8)
 			{
@@ -514,7 +517,7 @@ int CMathLib::ToBase2()
 	return 0;
 }
 
-void CMathLib::BuildBase2()
+void CNumber::BuildBase2()
 {
 	string s = "1";
 	cout << s << endl;
@@ -547,7 +550,7 @@ void CMathLib::BuildBase2()
 	}
 }
 
-int CMathLib::BinarySearch(string& strSearch, const vector<string> & vec, int nSize)
+int CNumber::BinarySearch(string& strSearch, const vector<string> & vec, int nSize)
 {
 	int nLeft = 0;
 	int nRight = nSize - 1;
