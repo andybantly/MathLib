@@ -223,9 +223,11 @@ int CNumber::Contract(string strInput, string& strResult)
 	bool bNegative = false;
 	bool bPoint = false;
 
+	// Build the token list
 	vector<string> vstrTokens;
 	Split(strInput, vstrTokens);
 
+	// Build the number groups
 	bool bFound = false;
 	vector<string> vstrNumbers;
 	vector<vector<string> > vvstrNumbers;
@@ -390,26 +392,23 @@ void CNumber::Init()
 	g_bInit = true;
 }
 
-void CNumber::Split(string strInput, vector<string>& vstrTokens)
+void CNumber::Split(const string& strInput, vector<string>& vstrTokens)
 {
 	if (strInput.empty())
 		return;
 
 	std::string strToken;
-	size_t ipos;
-
+	size_t istart = 0, ipos;
 	do
 	{
-		ipos = strInput.find(' ');
+		ipos = strInput.find(' ', istart);
 		if (ipos == string::npos)
-			vstrTokens.push_back(strInput);
+			vstrTokens.push_back(strInput.substr(istart));
 		else
 		{
-			strToken = strInput.substr(0, ipos);
+			strToken = strInput.substr(istart, ipos - istart);
 			vstrTokens.push_back(strToken);
-			ipos = strInput.find(' ');
-			if (ipos != string::npos)
-				strInput.erase(0, ipos + 1);
+			istart = ipos + 1;
 		}
 	} while (ipos != string::npos);
 }
@@ -550,7 +549,7 @@ void CNumber::BuildBase2()
 	}
 }
 
-int CNumber::BinarySearch(string& strSearch, const vector<string> & vec, int nSize)
+int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)
 {
 	int nLeft = 0;
 	int nRight = nSize - 1;
