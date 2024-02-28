@@ -166,7 +166,8 @@ protected:
 	void Split(const std::string& strInput, std::vector<std::string>& vstrTokens);
     void SetType();
     int ToBase2();
-    void BuildBase2();
+    void ExpandBinary();
+    void Add(const std::string& strS1, const std::string& strS2, std::string& strSum);
     int BinarySearch(const std::string& strSearch, const std::vector<std::string> & vec, int nSize);
 
     Type m_Type;

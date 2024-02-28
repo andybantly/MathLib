@@ -67,6 +67,9 @@ CNumber& CNumber::operator + (const CNumber& rhs)
 		}
 		if (iCIn)
 			MLOut.m_vBytes.push_back(CByte(1));
+		
+		// Expand the binary to decimal
+		ExpandBinary();
 
 		*this = MLOut;
 	}
@@ -516,16 +519,21 @@ int CNumber::ToBase2()
 	return 0;
 }
 
-void CNumber::BuildBase2()
+void CNumber::ExpandBinary()
 {
-	string s = "1";
-	cout << s << endl;
-	while (true)
+	unsigned int bit;
+	uint64_t uiPos = 1;
+	string strLastNum = "0", strNum = "1";
+	string strSum;
+
+	vector<CByte>::iterator bits = m_vBytes.begin();
+	CByte Byte = *bits;
+	do
 	{
 		uint8_t iProd;
 		deque<char> mout;
 		bool bCarry = false;
-		for (string::reverse_iterator rit = s.rbegin(); rit != s.rend(); )
+		for (string::reverse_iterator rit = strNum.rbegin(); rit != strNum.rend(); )
 		{
 			uint8_t iMP = *rit++ - '0';
 			iProd = 2 * iMP;
@@ -543,10 +551,57 @@ void CNumber::BuildBase2()
 		}
 		if (bCarry)
 			mout.push_front('1');
-		string sout(mout.begin(), mout.end());
-		cout << sout << endl;
-		s = sout;
+
+		bit = Byte.m_b.U & uiPos;
+		if (bit)
+		{
+			Add(strNum, strLastNum, strSum);
+			strLastNum = strSum;
+		}
+		strNum = string(mout.begin(), mout.end());
+
+		uiPos *= 2;
+		if ((uiPos % 256) == 0)
+		{
+			bits++;
+			if (bits != m_vBytes.end())
+			{
+				Byte = *bits;
+				uiPos = 1;
+			}
+		}
+	} while (bits != m_vBytes.end());
+}
+
+void CNumber::Add(const string& strS1, const string& strS2, string& strSum)
+{
+	uint8_t iSum;
+	deque<char> Sum;
+	bool bCarry = false;
+	char cZero = '0';
+
+	string::const_reverse_iterator S1_rit;
+	string::const_reverse_iterator S2_rit;
+	for (S1_rit = strS1.rbegin(), S2_rit = strS2.rbegin();
+		S1_rit != strS1.rend() || S2_rit != strS2.rend();)
+	{
+		iSum = ((S1_rit != strS1.rend() ? *S1_rit++ : cZero) - '0') +
+			((S2_rit != strS2.rend() ? *S2_rit++ : cZero) - '0');
+		if (bCarry)
+		{
+			iSum++;
+			bCarry = false;
+		}
+		if (iSum >= 10)
+		{
+			iSum -= 10;
+			bCarry = true;
+		}
+		Sum.push_front('0' + iSum);
 	}
+	if (bCarry)
+		Sum.push_front('1');
+	strSum = string(Sum.begin(), Sum.end());
 }
 
 int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)
