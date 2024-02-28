@@ -99,11 +99,11 @@ static void test()
 
 int main()
 {
-	CNumber N3("9999999999");
+	//CNumber N3("9999999999");
 //	CNumber N4("65535");
 //	CNumber N5 = N3 + N4;
 
-	CNumber N6("Fifteen");
+	//CNumber N6("Fifteen");
 //	CNumber N7("Twenty");
 //	CNumber N8 = N6 + N7;
 
@@ -129,7 +129,9 @@ int main()
 				const string& strNumber = Number.GetNumber();
 				const string& strBinary = Number.GetBinary();
 				const string& strPhrase = Number.GetPhrase();
-				cout << strNumber << " = " << strPhrase << " = " << strBinary << endl;
+				string strBase10;
+				Number.ToBase10(strBase10);
+				cout << strNumber << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
 			}
 			catch (std::exception& e)
 			{

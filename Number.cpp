@@ -398,7 +398,7 @@ int CNumber::ToBase2()
 	string strOut;
 	uint8_t idnm = 0, icnt = 0, sum = 0;
 	deque<char> binary;
-	m_vBytes.clear();
+	//m_vBytes.clear();
 
 	string strIn = m_strNumber;
 	string::iterator it = strIn.begin();
@@ -426,7 +426,7 @@ int CNumber::ToBase2()
 				binary.push_front('0' + idnm);
 				if (idnm)
 					sum += g_bitval[icnt];
-				m_vBytes.push_back(CByte(sum));
+				//m_vBytes.push_back(CByte(sum));
 				break;
 			}
 
@@ -450,7 +450,7 @@ int CNumber::ToBase2()
 			icnt++;
 			if (icnt == 8)
 			{
-				m_vBytes.push_back(CByte(sum));
+				//m_vBytes.push_back(CByte(sum));
 				icnt = 0;
 				sum = 0;
 			}
@@ -469,15 +469,13 @@ int CNumber::ToBase2()
 	return 0;
 }
 
-void CNumber::ExpandBinary()
+void CNumber::ToBase10(string& strResult)
 {
-	unsigned int bit;
+	strResult.clear();
 	uint64_t uiPos = 1;
 	string strLastNum = "0", strNum = "1";
-	string strSum;
 
-	vector<CByte>::iterator bits = m_vBytes.begin();
-	CByte Byte = *bits;
+	string::const_reverse_iterator crit = m_strBinary.rbegin();
 	do
 	{
 		uint8_t iProd;
@@ -502,25 +500,13 @@ void CNumber::ExpandBinary()
 		if (bCarry)
 			mout.push_front('1');
 
-		bit = Byte.m_b.U & uiPos;
-		if (bit)
+		if (*crit++ == '1')
 		{
-			Add(strNum, strLastNum, strSum);
-			strLastNum = strSum;
+			Add(strNum, strLastNum, strResult);
+			strLastNum = strResult;
 		}
 		strNum = string(mout.begin(), mout.end());
-
-		uiPos *= 2;
-		if ((uiPos % 256) == 0)
-		{
-			bits++;
-			if (bits != m_vBytes.end())
-			{
-				Byte = *bits;
-				uiPos = 1;
-			}
-		}
-	} while (bits != m_vBytes.end());
+	} while (crit != m_strBinary.rend());
 }
 
 void CNumber::Add(const string& strS1, const string& strS2, string& strSum)
