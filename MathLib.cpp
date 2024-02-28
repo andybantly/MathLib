@@ -130,7 +130,7 @@ int main()
 				const string& strBinary = Number.GetBinary();
 				const string& strPhrase = Number.GetPhrase();
 				string strBase10;
-				Number.ToBase10(strBase10);
+				Number.ToBase10(strBinary, strBase10);
 				cout << strNumber << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
 			}
 			catch (std::exception& e)

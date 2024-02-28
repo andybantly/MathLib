@@ -100,7 +100,7 @@ string CNumber::WB()
 	return g_huns[g_nHuns - 1];
 }
 
-int CNumber::Expand(string strInput, string& strResult)
+int CNumber::Expand(const string& strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -219,7 +219,7 @@ start:
 	if (iResult == 0 && stP1 != string::npos)
 	{
 		strResult += " Point";
-		for (string::iterator it = strInput.begin() + stP1 + 1; iResult == 0 && it != strInput.end(); ++it)
+		for (string::const_iterator it = strInput.begin() + stP1 + 1; iResult == 0 && it != strInput.end(); ++it)
 		{
 			try
 			{
@@ -235,7 +235,7 @@ start:
 	return iResult;
 }
 
-int CNumber::Contract(string strInput, string& strResult)
+int CNumber::Contract(const string& strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
@@ -469,13 +469,13 @@ int CNumber::ToBase2()
 	return 0;
 }
 
-void CNumber::ToBase10(string& strResult)
+void CNumber::ToBase10(const string& strInput, string& strResult)
 {
 	strResult.clear();
 	uint64_t uiPos = 1;
 	string strLastNum = "0", strNum = "1";
 
-	string::const_reverse_iterator crit = m_strBinary.rbegin();
+	string::const_reverse_iterator crit = strInput.rbegin();
 	do
 	{
 		uint8_t iProd;
@@ -506,7 +506,7 @@ void CNumber::ToBase10(string& strResult)
 			strLastNum = strResult;
 		}
 		strNum = string(mout.begin(), mout.end());
-	} while (crit != m_strBinary.rend());
+	} while (crit != strInput.rend());
 }
 
 void CNumber::Add(const string& strS1, const string& strS2, string& strSum)

@@ -151,9 +151,9 @@ public:
     CNumber& operator + (const CNumber& rhs);
 
 public:
-    int Contract(std::string strInput, std::string& strResult);
-	int Expand(std::string strInput, std::string& strResult);
-    void ToBase10(std::string& strResult);
+    int Contract(const std::string& strInput, std::string& strResult);
+	int Expand(const std::string& strInput, std::string& strResult);
+    void ToBase10(const std::string& strInput, std::string& strResult);
     static std::string WB();
     const std::string& GetNumber() { return m_strNumber; }
     const std::string& GetPhrase() { return m_strPhrase; }
