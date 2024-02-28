@@ -14,24 +14,26 @@ CNumber::CNumber()
 	Init();
 }
 
-CNumber::CNumber(string strToken)
+CNumber::CNumber(const string& strToken)
 {
 	Init();
+	SetInput(strToken);
+}
 
+void CNumber::SetInput(const string& strInput)
+{
 	int iRet;
-	iRet = Expand(strToken, m_strPhrase);
+	iRet = Expand(strInput, m_strPhrase);
 	if (iRet == 0)
-		m_strNumber = strToken;
+		m_strNumber = strInput;
 	else
 	{
-		iRet = Contract(strToken, m_strNumber);
+		iRet = Contract(strInput, m_strNumber);
 		if (iRet == 0)
-			m_strPhrase = strToken;
+			m_strPhrase = strInput;
 		else
 			throw(std::exception("Invalid number"));
 	}
-	if (iRet == 0)
-		ToBase2();
 }
 
 CNumber::CNumber(const CNumber& rhs)
@@ -393,14 +395,20 @@ void CNumber::Split(const string& strInput, vector<string>& vstrTokens)
 	} while (ipos != string::npos);
 }
 
-int CNumber::ToBase2()
+const string& CNumber::GetBinary()
+{
+	if (m_strBinary.empty())
+		ToBase2(m_strNumber, m_strBinary);
+	return m_strBinary;
+}
+
+void CNumber::ToBase2(const string& strInput, string& strResult)
 {
 	string strOut;
 	uint8_t idnm = 0, icnt = 0, sum = 0;
 	deque<char> binary;
-	//m_vBytes.clear();
 
-	string strIn = m_strNumber;
+	string strIn = strInput;
 	string::iterator it = strIn.begin();
 	for (;;)
 	{
@@ -464,9 +472,8 @@ int CNumber::ToBase2()
 	}
 	
 	// Append the binary string
-	m_strBinary.append(binary.begin(), binary.end());
-
-	return 0;
+	strResult.append(binary.begin(), binary.end());
+//	m_strBinary.append(binary.begin(), binary.end());
 }
 
 void CNumber::ToBase10(const string& strInput, string& strResult)
