@@ -148,7 +148,7 @@ public:
 
 public:
     CNumber& operator = (const CNumber& rhs);
-    CNumber& operator + (const CNumber& rhs);
+    CNumber operator + (const CNumber& rhs);
 
 public:
     void SetInput(const std::string& strInput);
@@ -170,7 +170,6 @@ protected:
     std::string m_strNumber;
     std::string m_strPhrase;
     std::string m_strBinary;
-    std::vector<CByte> m_vBytes;
 };
 
 class CDuration

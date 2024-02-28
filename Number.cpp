@@ -56,45 +56,12 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 	return *this;
 }
 
-CNumber& CNumber::operator + (const CNumber& rhs)
-{/*
-	CNumber MLOut;
-	if (m_Type != Type::NotSet && rhs.m_Type != Type::NotSet)
-	{
-		vector<CByte>::iterator lhs_it;
-		vector<CByte>::const_iterator rhs_it;
-		CByte Zero(0);
-		unsigned int iCIn = 0;
-		for (lhs_it = m_vBytes.begin(), rhs_it = rhs.m_vBytes.begin(); 
-			lhs_it != m_vBytes.end() || rhs_it != rhs.m_vBytes.end();)
-		{
-			CByte & lhsb = lhs_it != m_vBytes.end() ? *lhs_it++ : Zero;
-			const CByte & rhsb = rhs_it != rhs.m_vBytes.end() ? *rhs_it++ : Zero;
-			lhsb.m_c.C.C0 = iCIn;
-			CByte sumb = lhsb + rhsb;
-			iCIn = sumb.m_c.C.C0;
-			sumb.m_c.U = 0;
-			MLOut.m_vBytes.push_back(sumb);
-		}
-		if (iCIn)
-			MLOut.m_vBytes.push_back(CByte(1));
-
-		if ((m_Type == Type::Number) && (rhs.m_Type == Type::Number))
-		{ }
-		else if ((m_Type == Type::Number) && (rhs.m_Type == Type::Word))
-		{ }
-		else if ((m_Type == Type::Word) && (rhs.m_Type == Type::Number))
-		{ }
-		else if ((m_Type == Type::Word) && (rhs.m_Type == Type::Word))
-		{ }
-
-		// Expand the binary to decimal
-		ExpandBinary();
-
-		*this = MLOut;
-	}
-	*/
-	return *this;
+CNumber CNumber::operator + (const CNumber& rhs)
+{
+	string strResult;
+	Add(m_strNumber, rhs.m_strNumber, strResult);
+	CNumber Out(strResult);
+	return Out;
 }
 
 string CNumber::WB()
