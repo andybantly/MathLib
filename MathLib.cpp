@@ -99,15 +99,18 @@ static void test()
 
 int main()
 {
-	/*
-	CByte B1(49);
-	CByte B2(200);
-	CByte B3 = B1 + B2;
-	CByte B4 = B3 + CByte(6);
-	B4 = B4 + CByte(1); // Overflows, B4.U = 0, B4.C = 1;
-	B4 = 5; */
+	CNumber N3("9999999999");
+//	CNumber N4("65535");
+//	CNumber N5 = N3 + N4;
 
-	int iResult;
+	CNumber N6("Fifteen");
+//	CNumber N7("Twenty");
+//	CNumber N8 = N6 + N7;
+
+//	CNumber N9 = N4 + N6;
+//	CNumber N10 = N7 + N3;
+
+	//int iResult;
 	string strInput, strResult;
 	bool bAgain = true;
 	do
@@ -120,42 +123,17 @@ int main()
 			strInput += c;
 		if (strInput != "quit" && strInput != "test")
 		{
-			CNumber Number(strInput);
-			if (Number.GetType() == CNumber::Type::Number)
-				iResult = Number.Expand(strResult);
-			else
-				iResult = Number.Contract(strResult);
-			if (iResult == 0)
+			try
 			{
-				const string & strBinary = Number.GetBinary();
-				string strVerify;
-				CNumber MathLib2(strResult);
-				if (MathLib2.GetType() == CNumber::Type::Word)
-					iResult = MathLib2.Contract(strVerify);
-				else
-					iResult = MathLib2.Expand(strVerify);
-
-				if (iResult == 0)
-					cout << strResult << " = " << strVerify << " -> " << strBinary << endl;
-				else if (iResult == -1)
-					cout << "Invalid Number!" << endl;
-				else if (iResult == -2)
-					cout << "The number is out of range. The number must not surpass the +/-" << Number.WB() << " range" << endl;
-				else if (iResult == -3)
-					cout << "Wrong number type" << endl;
-
-				CNumber N3("9999999999");
-				CNumber N4("65535");
-				CNumber N5 = N3 + N4;
+				CNumber Number(strInput);
+				const string& strNumber = Number.GetNumber();
+				const string& strBinary = Number.GetBinary();
+				const string& strPhrase = Number.GetPhrase();
+				cout << strNumber << " = " << strPhrase << " = " << strBinary << endl;
 			}
-			else
+			catch (std::exception& e)
 			{
-				if (iResult == -1)
-					cout << "Invalid Number!" << endl;
-				else if (iResult == -2)
-					cout << "The number is out of range. The number must not surpass the +/-" << Number.WB() << " range" << endl;
-				else if (iResult == -3)
-					cout << "Wrong number type" << endl;
+				cout << e.what() << endl;
 			}
 		}
 		else

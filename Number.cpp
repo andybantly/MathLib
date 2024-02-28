@@ -12,15 +12,26 @@ std::map<std::string, std::string, CILT> g_mapWordTo100;
 CNumber::CNumber()
 {
 	Init();
-
-	m_Type = Type::NotSet;
 }
 
-CNumber::CNumber(string strToken) : m_strToken(strToken)
+CNumber::CNumber(string strToken)
 {
 	Init();
 
-	SetType();
+	int iRet;
+	iRet = Expand(strToken, m_strPhrase);
+	if (iRet == 0)
+		m_strNumber = strToken;
+	else
+	{
+		iRet = Contract(strToken, m_strNumber);
+		if (iRet == 0)
+			m_strPhrase = strToken;
+		else
+			throw(std::exception("Invalid number"));
+	}
+	if (iRet == 0)
+		ToBase2();
 }
 
 CNumber::CNumber(const CNumber& rhs)
@@ -36,17 +47,15 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 {
 	if (this != &rhs)
 	{
-		m_Type = rhs.m_Type;
-		m_strToken = rhs.m_strToken;
-		m_strResult = rhs.m_strResult;
+		m_strNumber = rhs.m_strNumber;
+		m_strPhrase = rhs.m_strPhrase;
 		m_strBinary = rhs.m_strBinary;
-		m_vBytes = rhs.m_vBytes;
 	}
 	return *this;
 }
 
 CNumber& CNumber::operator + (const CNumber& rhs)
-{
+{/*
 	CNumber MLOut;
 	if (m_Type != Type::NotSet && rhs.m_Type != Type::NotSet)
 	{
@@ -67,12 +76,22 @@ CNumber& CNumber::operator + (const CNumber& rhs)
 		}
 		if (iCIn)
 			MLOut.m_vBytes.push_back(CByte(1));
-		
+
+		if ((m_Type == Type::Number) && (rhs.m_Type == Type::Number))
+		{ }
+		else if ((m_Type == Type::Number) && (rhs.m_Type == Type::Word))
+		{ }
+		else if ((m_Type == Type::Word) && (rhs.m_Type == Type::Number))
+		{ }
+		else if ((m_Type == Type::Word) && (rhs.m_Type == Type::Word))
+		{ }
+
 		// Expand the binary to decimal
 		ExpandBinary();
 
 		*this = MLOut;
 	}
+	*/
 	return *this;
 }
 
@@ -320,48 +339,6 @@ int CNumber::Contract(string strInput, string& strResult)
 	return iResult;
 }
 
-int CNumber::Contract(string& strResult)
-{
-	if (m_Type == Type::Word)
-	{
-		if (m_strResult.empty())
-		{
-			int iRet = Contract(m_strToken, strResult);
-			if (iRet == 0)
-				m_strResult = strResult;
-			return iRet;
-		}
-		else
-		{
-			strResult = m_strResult;
-			return 0;
-		}
-	}
-	else
-		return -3;
-}
-
-int CNumber::Expand(string& strResult)
-{
-	if (m_Type == Type::Number)
-	{
-		if (m_strResult.empty())
-		{
-			int iRet = Expand(m_strToken, strResult);
-			if (iRet == 0)
-				m_strResult = strResult;
-			return iRet;
-		}
-		else
-		{
-			strResult = m_strResult;
-			return 0;
-		}
-	}
-	else
-		return -3;
-}
-
 void CNumber::Init()
 {
 	lock_guard<mutex> guard(g_map_mutex);
@@ -416,41 +393,14 @@ void CNumber::Split(const string& strInput, vector<string>& vstrTokens)
 	} while (ipos != string::npos);
 }
 
-void CNumber::SetType()
-{
-	if (!m_strToken.empty())
-	{
-		if (Expand(m_strToken, m_strResult) == 0)
-			m_Type = Type::Number;
-		else if (Contract(m_strToken, m_strResult) == 0)
-			m_Type = Type::Word;
-		if (m_Type != Type::NotSet)
-			ToBase2();
-	}
-	else
-		m_Type = Type::NotSet;
-}
-
 int CNumber::ToBase2()
 {
-	if (m_strToken.empty())
-		return -1;
-
-	string strIn;
-	if (m_Type == Type::Number)
-		strIn = m_strToken;
-	else
-	{
-		int iRet = Contract(m_strToken, strIn);
-		if (iRet != 0)
-			return iRet;
-	}
-
 	string strOut;
 	uint8_t idnm = 0, icnt = 0, sum = 0;
 	deque<char> binary;
 	m_vBytes.clear();
 
+	string strIn = m_strNumber;
 	string::iterator it = strIn.begin();
 	for (;;)
 	{
