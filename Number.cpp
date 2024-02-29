@@ -448,7 +448,11 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 	strResult.clear();
 	uint64_t uiPos = 1;
 	string strLastNum = "0", strNum = "1";
-
+	if (strInput == strLastNum)
+	{
+		strResult = strLastNum;
+		return;
+	}
 	string::const_reverse_iterator crit = strInput.rbegin();
 	do
 	{

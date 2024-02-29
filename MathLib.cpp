@@ -99,20 +99,9 @@ static void test()
 
 int main()
 {
-	CNumber N3("9999999999");
-	CNumber N4("65535");
-	CNumber N5 = N3 + N4;
-
-	//CNumber N6("Fifteen");
-//	CNumber N7("Twenty");
-//	CNumber N8 = N6 + N7;
-
-//	CNumber N9 = N4 + N6;
-//	CNumber N10 = N7 + N3;
-
-	//int iResult;
 	string strInput, strResult;
 	bool bAgain = true;
+	CNumber LastNumber("0");
 	do
 	{
 		cout << "Enter a number or 'test' for verification or 'quit' to exit: ";
@@ -127,11 +116,16 @@ int main()
 			{
 				CNumber Number(strInput);
 				const string& strNumber = Number.GetNumber();
-				const string& strBinary = Number.GetBinary();
 				const string& strPhrase = Number.GetPhrase();
+				const string& strBinary = Number.GetBinary();
 				string strBase10;
 				Number.ToBase10(strBinary, strBase10);
 				cout << strNumber << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
+				cout << "+ " << LastNumber.GetNumber() << endl;
+				CNumber Sum = Number + LastNumber;
+				Sum.ToBase10(Sum.GetBinary(), strBase10);
+				cout << Sum.GetNumber() << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
+				LastNumber = Number;
 			}
 			catch (std::exception& e)
 			{
