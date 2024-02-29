@@ -372,7 +372,7 @@ const string& CNumber::GetBinary()
 void CNumber::ToBase2(const string& strInput, string& strResult)
 {
 	string strOut;
-	uint8_t idnm = 0, icnt = 0, sum = 0;
+	uint8_t idnm = 0;
 	deque<char> binary;
 
 	string strIn = strInput;
@@ -399,9 +399,6 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 			if (strIn.length() == 1 && idnm < 2)
 			{
 				binary.push_front('0' + idnm);
-				if (idnm)
-					sum += g_bitval[icnt];
-				//m_vBytes.push_back(CByte(sum));
 				break;
 			}
 
@@ -418,17 +415,6 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 		{
 			// Add the remainder of 0 or 1 to the binary string
 			binary.push_front('0' + idnm);
-			if (idnm)
-				sum += g_bitval[icnt];
-
-			// If 8 bits have been processed, store the numerical value
-			icnt++;
-			if (icnt == 8)
-			{
-				//m_vBytes.push_back(CByte(sum));
-				icnt = 0;
-				sum = 0;
-			}
 
 			// Reset and start over
 			strIn = strOut;
@@ -440,19 +426,18 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 	
 	// Append the binary string
 	strResult.append(binary.begin(), binary.end());
-//	m_strBinary.append(binary.begin(), binary.end());
 }
 
 void CNumber::ToBase10(const string& strInput, string& strResult)
 {
-	strResult.clear();
-	uint64_t uiPos = 1;
-	string strLastNum = "0", strNum = "1";
-	if (strInput == strLastNum)
+	if (strInput == "0")
 	{
-		strResult = strLastNum;
+		strResult = "0";
 		return;
 	}
+
+	uint64_t uiPos = 1;
+	string strLastNum = "0", strNum = "1";
 	string::const_reverse_iterator crit = strInput.rbegin();
 	do
 	{
