@@ -142,7 +142,7 @@ class CNumber
 {
 public:
     CNumber();
-    CNumber(const std::string& strToken);
+    CNumber(const std::string& strInput);
     CNumber(const CNumber& rhs);
     ~CNumber();
 

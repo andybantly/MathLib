@@ -14,10 +14,10 @@ CNumber::CNumber()
 	Init();
 }
 
-CNumber::CNumber(const string& strToken)
+CNumber::CNumber(const string& strInput)
 {
 	Init();
-	SetInput(strToken);
+	SetInput(strInput);
 }
 
 void CNumber::SetInput(const string& strInput)
@@ -34,6 +34,7 @@ void CNumber::SetInput(const string& strInput)
 		else
 			throw(std::exception("Invalid number"));
 	}
+	m_strBinary.empty();
 }
 
 CNumber::CNumber(const CNumber& rhs)
