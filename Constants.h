@@ -492,4 +492,5 @@ const int g_nOnes = (sizeof(g_ones) / sizeof(g_ones[0]));
 const int g_nTens = (sizeof(g_tens) / sizeof(g_tens[0]));
 const int g_nHuns = (sizeof(g_huns) / sizeof(g_huns[0]));
 
-const uint8_t g_bitval[] = {1, 2, 4, 8, 16, 32, 64, 128};
+const int8_t g_cZero = '0';
+const int8_t g_cOne = '1';

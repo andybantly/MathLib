@@ -34,7 +34,7 @@ void CNumber::SetInput(const string& strInput)
 		else
 			throw(std::exception("Invalid number"));
 	}
-	m_strBinary.empty();
+	m_strBinary.clear();
 }
 
 CNumber::CNumber(const CNumber& rhs)
@@ -61,6 +61,14 @@ CNumber CNumber::operator + (const CNumber& rhs)
 {
 	string strResult;
 	Add(m_strNumber, rhs.m_strNumber, strResult);
+	CNumber Out(strResult);
+	return Out;
+}
+
+CNumber CNumber::operator - (const CNumber& rhs)
+{
+	string strResult;
+	Sub(m_strNumber, rhs.m_strNumber, strResult);
 	CNumber Out(strResult);
 	return Out;
 }
@@ -175,7 +183,7 @@ start:
 			}
 
 			strLhs = strLhs.substr(nd);
-			strLhs.erase(0, strLhs.find_first_not_of('0'));
+			strLhs.erase(0, strLhs.find_first_not_of(g_cZero));
 			if (strLhs.length())
 				goto start;
 		}
@@ -193,7 +201,7 @@ start:
 		{
 			try
 			{
-				strResult += " " + g_ones[*it - '0'];
+				strResult += " " + g_ones[*it - g_cZero];
 			}
 			catch (invalid_argument)
 			{
@@ -277,7 +285,7 @@ int CNumber::Contract(const string& strInput, string& strResult)
 		{
 			strNumber = *vit;
 			if (strNumber.length() > 2 &&
-				*(strNumber.end() - 1) == '0')
+				*(strNumber.end() - 1) == g_cZero)
 				strGroupNumber.append(strNumber.begin() + 1, strNumber.end());
 			else
 				strGroupNumber.replace(strGroupNumber.end() - strNumber.length(), strGroupNumber.end(), strNumber);
@@ -334,7 +342,7 @@ void CNumber::Init()
 
 	for (int iHun = 0, nZero = 3; iHun < g_nHuns; iHun++, nZero += 3)
 	{
-		string strHun(nZero, '0');
+		string strHun(nZero, g_cZero);
 		strHun = "1" + strHun;
 		g_mapWordTo100[g_huns[iHun]] = strHun;
 	}
@@ -381,15 +389,15 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 	for (;;)
 	{
 		// Compute the denominator of the division
-		idnm = idnm * 10 + *it - '0';
+		idnm = idnm * 10 + *it - g_cZero;
 		if (idnm < 2 && it + 1 != strIn.end())
 		{
 			// Carry a 0
 			if (!strOut.empty())
-				strOut += '0';
+				strOut += g_cZero;
 
 			// The denominator has to be greater than 2 now
-			idnm = idnm * 10 + (*(it + 1) - '0');
+			idnm = idnm * 10 + (*(it + 1) - g_cZero);
 
 			// Move to the next character
 			it += 2;
@@ -399,7 +407,7 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 			// Check for completion the conversion
 			if (strIn.length() == 1 && idnm < 2)
 			{
-				binary.push_front('0' + idnm);
+				binary.push_front(g_cZero + idnm);
 				break;
 			}
 
@@ -408,14 +416,14 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 		}
 
 		// Append the digit to the output that becomes the new input from integer division by 2
-		strOut += '0' + idnm / 2;
+		strOut += g_cZero + idnm / 2;
 		idnm = idnm % 2;
 
 		// Has the input been processed
 		if (it == strIn.end())
 		{
 			// Add the remainder of 0 or 1 to the binary string
-			binary.push_front('0' + idnm);
+			binary.push_front(g_cZero + idnm);
 
 			// Reset and start over
 			strIn = strOut;
@@ -447,7 +455,7 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 		bool bCarry = false;
 		for (string::reverse_iterator rit = strNum.rbegin(); rit != strNum.rend(); )
 		{
-			uint8_t iMP = *rit++ - '0';
+			uint8_t iMP = *rit++ - g_cZero;
 			iProd = 2 * iMP;
 			if (bCarry)
 			{
@@ -459,12 +467,12 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 				iProd -= 10;
 				bCarry = true;
 			} // suspect that multiplying by larger like 3,4,5,...,9 changes carry prod
-			mout.push_front('0' + iProd);
+			mout.push_front(g_cZero + iProd);
 		}
 		if (bCarry)
-			mout.push_front('1');
+			mout.push_front(g_cOne);
 
-		if (*crit++ == '1')
+		if (*crit++ == g_cOne)
 		{
 			Add(strNum, strLastNum, strResult);
 			strLastNum = strResult;
@@ -478,32 +486,72 @@ void CNumber::Add(const string& strS1, const string& strS2, string& strSum)
 	uint8_t iSum;
 	deque<char> Sum;
 	bool bCarry = false;
-	char cZero = '0';
 
-	string::const_reverse_iterator S1_rit;
-	string::const_reverse_iterator S2_rit;
-	for (S1_rit = strS1.rbegin(), S2_rit = strS2.rbegin();
-		S1_rit != strS1.rend() || S2_rit != strS2.rend();)
+	string::const_reverse_iterator S1_crit;
+	string::const_reverse_iterator S2_crit;
+	for (S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
+		S1_crit != strS1.rend() || S2_crit != strS2.rend();)
 	{
-		iSum = ((S1_rit != strS1.rend() ? *S1_rit++ : cZero) - '0') +
-			((S2_rit != strS2.rend() ? *S2_rit++ : cZero) - '0');
+		iSum = ((S1_crit != strS1.rend() ? *S1_crit++ : g_cZero) - g_cZero) +
+			((S2_crit != strS2.rend() ? *S2_crit++ : g_cZero) - g_cZero);
+
 		if (bCarry)
 		{
 			iSum++;
 			bCarry = false;
 		}
+
 		if (iSum >= 10)
 		{
 			iSum -= 10;
 			bCarry = true;
 		}
-		Sum.push_front('0' + iSum);
+
+		Sum.push_front(g_cZero + iSum);
 	}
 	if (bCarry)
-		Sum.push_front('1');
+		Sum.push_front(g_cOne);
 	strSum = string(Sum.begin(), Sum.end());
 }
 
+void CNumber::Sub(const string& strS1, const string& strS2, string& strSum)
+{
+	int8_t iSum = 0, iSub = 0;
+	deque<char> Sum;
+	bool bNeg = false;
+
+	string::const_reverse_iterator S1_crit;
+	string::const_reverse_iterator S2_crit;
+	for (S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
+		S1_crit != strS1.rend() || S2_crit != strS2.rend();)
+	{
+		int8_t S1 = (S1_crit != strS1.rend() ? *S1_crit++ : g_cZero) - g_cZero;
+		int8_t S2 = (S2_crit != strS2.rend() ? *S2_crit++ : g_cZero) - g_cZero;
+		
+		if (S1 >= S2)
+		{
+			iSum = S1 - S2;
+			if (iSub)
+			{
+				iSum -= iSub;
+				iSub = 0;
+			}
+		}
+		else
+		{
+			iSum = S1 + 10 - S2 - iSub;
+			iSub = 1;
+		}
+
+		Sum.push_front(g_cZero + iSum);
+	}
+
+	if (bNeg)
+		Sum.push_front('-');
+
+	strSum = string(Sum.begin(), Sum.end());
+}
+		
 int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)
 {
 	int nLeft = 0;

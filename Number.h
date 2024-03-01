@@ -149,6 +149,7 @@ public:
 public:
     CNumber& operator = (const CNumber& rhs);
     CNumber operator + (const CNumber& rhs);
+    CNumber operator - (const CNumber& rhs);
 
 public:
     void SetInput(const std::string& strInput);
@@ -165,6 +166,7 @@ protected:
     void Init();
 	void Split(const std::string& strInput, std::vector<std::string>& vstrTokens);
     void Add(const std::string& strS1, const std::string& strS2, std::string& strSum);
+    void Sub(const std::string& strS1, const std::string& strS2, std::string& strSum);
     int BinarySearch(const std::string& strSearch, const std::vector<std::string> & vec, int nSize);
 
     std::string m_strNumber;
