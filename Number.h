@@ -169,6 +169,7 @@ protected:
     void Sub(const std::string& strS1, const std::string& strS2, std::string& strSum);
     int BinarySearch(const std::string& strSearch, const std::vector<std::string> & vec, int nSize);
 
+    bool m_bNegative;
     std::string m_strNumber;
     std::string m_strPhrase;
     std::string m_strBinary;

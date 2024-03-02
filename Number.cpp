@@ -9,12 +9,12 @@ bool g_bInit = false;
 std::map<std::string, std::string, CILT> g_mapWordTo99;
 std::map<std::string, std::string, CILT> g_mapWordTo100;
 
-CNumber::CNumber()
+CNumber::CNumber() : m_bNegative(false)
 {
 	Init();
 }
 
-CNumber::CNumber(const string& strInput)
+CNumber::CNumber(const string& strInput) : m_bNegative(false)
 {
 	Init();
 	SetInput(strInput);
@@ -50,6 +50,7 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 {
 	if (this != &rhs)
 	{
+		m_bNegative = rhs.m_bNegative;
 		m_strNumber = rhs.m_strNumber;
 		m_strPhrase = rhs.m_strPhrase;
 		m_strBinary = rhs.m_strBinary;
@@ -84,7 +85,7 @@ int CNumber::Expand(const string& strInput, string& strResult)
 		return -1;
 
 	int iResult = 0;
-	bool bNegative = false;
+	m_bNegative = false;
 	int digs, ld, nd, nh;
 
 	string strLhs;
@@ -97,7 +98,7 @@ int CNumber::Expand(const string& strInput, string& strResult)
 	strResult.clear();
 	if (*(strLhs.begin()) == '-')
 	{
-		bNegative = true;
+		m_bNegative = true;
 		strLhs = strLhs.substr(1);
 	}
 
@@ -191,7 +192,7 @@ start:
 	else
 		iResult = -2;
 
-	if (bNegative && iResult == 0)
+	if (m_bNegative && iResult == 0)
 		strResult = "Negative " + strResult;
 
 	if (iResult == 0 && stP1 != string::npos)
@@ -220,7 +221,7 @@ int CNumber::Contract(const string& strInput, string& strResult)
 	strResult.clear();
 
 	int iResult = 0;
-	bool bNegative = false;
+	m_bNegative = false;
 	bool bPoint = false;
 
 	// Build the token list
@@ -259,10 +260,10 @@ int CNumber::Contract(const string& strInput, string& strResult)
 		if (!bFound)
 		{
 			if (Equal(strToken, "Negative"))
-				bNegative = true;
+				m_bNegative = true;
 			else if (Equal(strToken, "Point"))
 				bPoint = true;
-			if (!bNegative && !bPoint)
+			if (!m_bNegative && !bPoint)
 			{
 				iResult = -1;
 				break;
@@ -297,7 +298,7 @@ int CNumber::Contract(const string& strInput, string& strResult)
 			strResult = strGroupNumber;
 	}
 
-	if (bNegative)
+	if (m_bNegative)
 		strResult = "-" + strResult;
 
 	if (bPoint)
@@ -489,11 +490,17 @@ void CNumber::Add(const string& strS1, const string& strS2, string& strSum)
 
 	string::const_reverse_iterator S1_crit;
 	string::const_reverse_iterator S2_crit;
+
 	for (S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
 		S1_crit != strS1.rend() || S2_crit != strS2.rend();)
 	{
-		iSum = ((S1_crit != strS1.rend() ? *S1_crit++ : g_cZero) - g_cZero) +
-			((S2_crit != strS2.rend() ? *S2_crit++ : g_cZero) - g_cZero);
+		uint8_t S1 = S1_crit != strS1.rend() ? *S1_crit++ : g_cZero;
+		uint8_t S2 = S2_crit != strS2.rend() ? *S2_crit++ : g_cZero;
+
+		uint8_t N1 = S1 - g_cZero;
+		uint8_t N2 = S2 - g_cZero;
+
+		iSum = N1 +	N2;
 
 		if (bCarry)
 		{
@@ -509,28 +516,34 @@ void CNumber::Add(const string& strS1, const string& strS2, string& strSum)
 
 		Sum.push_front(g_cZero + iSum);
 	}
+
 	if (bCarry)
 		Sum.push_front(g_cOne);
+
 	strSum = string(Sum.begin(), Sum.end());
 }
 
 void CNumber::Sub(const string& strS1, const string& strS2, string& strSum)
 {
-	int8_t iSum = 0, iSub = 0;
+	uint8_t iSum = 0, iSub = 0;
 	deque<char> Sum;
 	bool bNeg = false;
 
 	string::const_reverse_iterator S1_crit;
 	string::const_reverse_iterator S2_crit;
+
 	for (S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
 		S1_crit != strS1.rend() || S2_crit != strS2.rend();)
 	{
-		int8_t S1 = (S1_crit != strS1.rend() ? *S1_crit++ : g_cZero) - g_cZero;
-		int8_t S2 = (S2_crit != strS2.rend() ? *S2_crit++ : g_cZero) - g_cZero;
+		uint8_t S1 = S1_crit != strS1.rend() ? *S1_crit++ : g_cZero;
+		uint8_t S2 = S2_crit != strS2.rend() ? *S2_crit++ : g_cZero;
+
+		uint8_t N1 = S1 - g_cZero;
+		uint8_t N2 = S2 - g_cZero;
 		
-		if (S1 >= S2)
+		if (N1 >= N2)
 		{
-			iSum = S1 - S2;
+			iSum = N1 - N2;
 			if (iSub)
 			{
 				iSum -= iSub;
@@ -539,7 +552,7 @@ void CNumber::Sub(const string& strS1, const string& strS2, string& strSum)
 		}
 		else
 		{
-			iSum = S1 + 10 - S2 - iSub;
+			iSum = N1 + 10 - N2 - iSub;
 			iSub = 1;
 		}
 
@@ -586,4 +599,48 @@ bool Equal(const std::string& strLHS, const std::string& strRHS)
 		}
 	}
 	return bEqual;
+}
+
+bool Greater(const std::string& strLHS, const std::string& strRHS)
+{
+	bool bGreater = false;
+	if (*strLHS.begin() != '-' && *strRHS.begin() != '-')
+	{
+		if (strLHS.length() > strRHS.length())
+			bGreater = true;
+		else if (strLHS.length() < strRHS.length())
+			bGreater = false;
+		else
+		{
+			for (size_t stIdx = 0; stIdx < strLHS.length(); ++stIdx)
+			{
+				if (tolower(*(strLHS.begin() + stIdx)) > tolower(*(strRHS.begin() + stIdx)))
+					bGreater = true;
+				else if (tolower(*(strLHS.begin() + stIdx)) < tolower(*(strRHS.begin() + stIdx)))
+					bGreater = false;
+			}
+		}
+	}
+	else if (*strLHS.begin() == '-' && *strRHS.begin() == '-')
+	{
+		if (strLHS.length() > strRHS.length())
+			bGreater = false;
+		else if (strLHS.length() < strRHS.length())
+			bGreater = true;
+		else
+		{
+			for (size_t stIdx = 1; stIdx < strLHS.length(); ++stIdx)
+			{
+				if (tolower(*(strLHS.begin() + stIdx)) > tolower(*(strRHS.begin() + stIdx)))
+					bGreater = false;
+				else if (tolower(*(strLHS.begin() + stIdx)) < tolower(*(strRHS.begin() + stIdx)))
+					bGreater = true;
+			}
+		}
+	}
+	else if (*strLHS.begin() != '-' && *strRHS.begin() == '-')
+		bGreater = true;
+	else if (*strLHS.begin() == '-' && *strRHS.begin() != '-')
+		bGreater = false;
+	return bGreater;
 }
