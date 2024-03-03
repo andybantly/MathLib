@@ -60,17 +60,15 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 
 CNumber CNumber::operator + (const CNumber& rhs)
 {
-	string strResult;
-	Add(m_strNumber, rhs.m_strNumber, strResult);
-	CNumber Out(strResult);
+	CNumber Out;
+	Add(*this, rhs, Out);
 	return Out;
 }
 
 CNumber CNumber::operator - (const CNumber& rhs)
 {
-	string strResult;
-	Sub(m_strNumber, rhs.m_strNumber, strResult);
-	CNumber Out(strResult);
+	CNumber Out;
+	Sub(*this, rhs, Out);
 	return Out;
 }
 
@@ -440,14 +438,13 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 
 void CNumber::ToBase10(const string& strInput, string& strResult)
 {
+	strResult = "0";
 	if (strInput == "0")
-	{
-		strResult = "0";
 		return;
-	}
 
+	CNumber Out;
 	uint64_t uiPos = 1;
-	string strLastNum = "0", strNum = "1";
+	string strNum = "1";
 	string::const_reverse_iterator crit = strInput.rbegin();
 	do
 	{
@@ -470,23 +467,27 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 			} // suspect that multiplying by larger like 3,4,5,...,9 changes carry prod
 			mout.push_front(g_cZero + iProd);
 		}
+
 		if (bCarry)
 			mout.push_front(g_cOne);
 
 		if (*crit++ == g_cOne)
 		{
-			Add(strNum, strLastNum, strResult);
-			strLastNum = strResult;
+			Add(CNumber(strNum), CNumber(strResult), Out);
+			strResult = Out.GetNumber();
 		}
 		strNum = string(mout.begin(), mout.end());
 	} while (crit != strInput.rend());
 }
 
-void CNumber::Add(const string& strS1, const string& strS2, string& strSum)
+void CNumber::Add(const CNumber& Num1, const CNumber& Num2, CNumber& Out)
 {
 	uint8_t iSum;
 	deque<char> Sum;
 	bool bCarry = false;
+
+	const string& strS1 = Num1.m_strNumber;
+	const string& strS2 = Num2.m_strNumber;
 
 	string::const_reverse_iterator S1_crit;
 	string::const_reverse_iterator S2_crit;
@@ -520,14 +521,17 @@ void CNumber::Add(const string& strS1, const string& strS2, string& strSum)
 	if (bCarry)
 		Sum.push_front(g_cOne);
 
-	strSum = string(Sum.begin(), Sum.end());
+	Out.SetInput(string(Sum.begin(), Sum.end()));
 }
 
-void CNumber::Sub(const string& strS1, const string& strS2, string& strSum)
+void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, CNumber& Out)
 {
 	uint8_t iSum = 0, iSub = 0;
 	deque<char> Sum;
 	bool bNeg = false;
+
+	const string& strS1 = Num1.m_strNumber;
+	const string& strS2 = Num2.m_strNumber;
 
 	string::const_reverse_iterator S1_crit;
 	string::const_reverse_iterator S2_crit;
@@ -540,7 +544,7 @@ void CNumber::Sub(const string& strS1, const string& strS2, string& strSum)
 
 		uint8_t N1 = S1 - g_cZero;
 		uint8_t N2 = S2 - g_cZero;
-		
+
 		if (N1 >= N2)
 		{
 			iSum = N1 - N2;
@@ -562,7 +566,7 @@ void CNumber::Sub(const string& strS1, const string& strS2, string& strSum)
 	if (bNeg)
 		Sum.push_front('-');
 
-	strSum = string(Sum.begin(), Sum.end());
+	Out.SetInput(string(Sum.begin(), Sum.end()));
 }
 		
 int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)

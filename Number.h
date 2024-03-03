@@ -165,8 +165,8 @@ public:
 protected:
     void Init();
 	void Split(const std::string& strInput, std::vector<std::string>& vstrTokens);
-    void Add(const std::string& strS1, const std::string& strS2, std::string& strSum);
-    void Sub(const std::string& strS1, const std::string& strS2, std::string& strSum);
+    void Add(const CNumber& Num1, const CNumber& Num2, CNumber& Out);
+    void Sub(const CNumber& Num1, const CNumber& Num2, CNumber& Out);
     int BinarySearch(const std::string& strSearch, const std::vector<std::string> & vec, int nSize);
 
     bool m_bNegative;
