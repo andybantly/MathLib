@@ -492,11 +492,14 @@ void CNumber::Add(const CNumber& Num1, const CNumber& Num2, CNumber& Out)
 	string::const_reverse_iterator S1_crit;
 	string::const_reverse_iterator S2_crit;
 
+	string::const_reverse_iterator S1_crend = (Num1.m_bNegative ? strS1.rend() - 1 : strS1.rend());
+	string::const_reverse_iterator S2_crend = (Num2.m_bNegative ? strS2.rend() - 1 : strS2.rend());
+
 	for (S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
-		S1_crit != strS1.rend() || S2_crit != strS2.rend();)
+		S1_crit != S1_crend	|| S2_crit != S2_crend;)
 	{
-		uint8_t S1 = S1_crit != strS1.rend() ? *S1_crit++ : g_cZero;
-		uint8_t S2 = S2_crit != strS2.rend() ? *S2_crit++ : g_cZero;
+		uint8_t S1 = S1_crit != S1_crend ? *S1_crit++ : g_cZero;
+		uint8_t S2 = S2_crit != S2_crend ? *S2_crit++ : g_cZero;
 
 		uint8_t N1 = S1 - g_cZero;
 		uint8_t N2 = S2 - g_cZero;
@@ -536,11 +539,14 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, CNumber& Out)
 	string::const_reverse_iterator S1_crit;
 	string::const_reverse_iterator S2_crit;
 
+	string::const_reverse_iterator S1_crend = (Num1.m_bNegative ? strS1.rend() - 1 : strS1.rend());
+	string::const_reverse_iterator S2_crend = (Num2.m_bNegative ? strS2.rend() - 1 : strS2.rend());
+
 	for (S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
-		S1_crit != strS1.rend() || S2_crit != strS2.rend();)
+		S1_crit != S1_crend || S2_crit != S2_crend;)
 	{
-		uint8_t S1 = S1_crit != strS1.rend() ? *S1_crit++ : g_cZero;
-		uint8_t S2 = S2_crit != strS2.rend() ? *S2_crit++ : g_cZero;
+		uint8_t S1 = S1_crit != S1_crend ? *S1_crit++ : g_cZero;
+		uint8_t S2 = S2_crit != S2_crend ? *S2_crit++ : g_cZero;
 
 		uint8_t N1 = S1 - g_cZero;
 		uint8_t N2 = S2 - g_cZero;
