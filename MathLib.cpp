@@ -99,8 +99,8 @@ static void test()
 
 int main()
 {
-	CNumber N1("-6");
-	CNumber N2("356");
+	CNumber N1("0");
+	CNumber N2("0");
 	CNumber N3 = N2 - N1;
 	N3 = N1 + N2;
 

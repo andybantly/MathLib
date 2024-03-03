@@ -61,7 +61,10 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 CNumber CNumber::operator + (const CNumber& rhs)
 {
 	CNumber Out;
-	Add(*this, rhs, Out);
+	if (m_bNegative == rhs.m_bNegative)
+		Add(*this, rhs, Out);
+	else
+		Sub(*this, rhs, Out);
 	return Out;
 }
 
@@ -518,11 +521,17 @@ void CNumber::Add(const CNumber& Num1, const CNumber& Num2, CNumber& Out)
 			bCarry = true;
 		}
 
-		Sum.push_front(g_cZero + iSum);
+		if (!Sum.empty() || (Sum.empty() && iSum))
+			Sum.push_front(g_cZero + iSum);
 	}
 
 	if (bCarry)
 		Sum.push_front(g_cOne);
+
+	if (Sum.empty())
+		Sum.push_front(g_cZero);
+	else if (Num1.m_bNegative)
+		Sum.push_front('-');
 
 	Out.SetInput(string(Sum.begin(), Sum.end()));
 }
@@ -566,10 +575,13 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, CNumber& Out)
 			iSub = 1;
 		}
 
-		Sum.push_front(g_cZero + iSum);
+		if (!Sum.empty() || (Sum.empty() && iSum))
+			Sum.push_front(g_cZero + iSum);
 	}
 
-	if (bNeg)
+	if (Sum.empty())
+		Sum.push_front(g_cZero);
+	else if (bNeg)
 		Sum.push_front('-');
 
 	Out.SetInput(string(Sum.begin(), Sum.end()));
