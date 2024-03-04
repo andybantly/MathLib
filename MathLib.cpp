@@ -76,7 +76,7 @@ static void test()
 	CDuration Duration("Test Expansion/Contraction:");
 
 	vector<pair<unsigned long long, unsigned long long> > vtp;
-	unsigned long long numt = thread::hardware_concurrency() * 4;
+	unsigned long long numt = thread::hardware_concurrency() * 2;
 	unsigned long long dtpt = unsigned long long(-1) / numt;
 
 	vector<thread*> vptp;
@@ -99,10 +99,13 @@ static void test()
 
 int main()
 {
-	CNumber N1("0");
-	CNumber N2("0");
-	CNumber N3 = N2 - N1;
+	CNumber N1("-15");
+	CNumber N2("10");
+	CNumber N3 = N2 + N1;
 	N3 = N1 + N2;
+	N2 = "-10";
+	N3 = N1 - N2;
+	N3 = N2 - N1;
 
 	string strInput, strResult;
 	bool bAgain = true;

@@ -148,6 +148,7 @@ public:
 
 public:
     CNumber& operator = (const CNumber& rhs);
+    CNumber& operator = (const std::string& rhs);
     CNumber operator + (const CNumber& rhs);
     CNumber operator - (const CNumber& rhs);
 
@@ -168,6 +169,7 @@ protected:
     void Add(const CNumber& Num1, const CNumber& Num2, CNumber& Out);
     void Sub(const CNumber& Num1, const CNumber& Num2, CNumber& Out);
     int BinarySearch(const std::string& strSearch, const std::vector<std::string> & vec, int nSize);
+    int ABSGreater(const CNumber& LHS, const CNumber& RHS);
 
     bool m_bNegative;
     std::string m_strNumber;

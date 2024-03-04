@@ -36,7 +36,7 @@ namespace TestMathLib
 		TEST_METHOD(TestLib)
 		{
 			vector<pair<unsigned long long, unsigned long long> > vtp;
-			unsigned long long numt = thread::hardware_concurrency();
+			unsigned long long numt = thread::hardware_concurrency() * 2;
 			unsigned long long dtpt = unsigned long long(-1) / numt;
 
 			vector<thread*> vptp;
@@ -55,6 +55,9 @@ namespace TestMathLib
 
 			for (vector<thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
 				(*it)->join();
+
+			for (vector<thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
+				delete* it;
 		}
 	};
 }
