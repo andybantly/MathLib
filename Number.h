@@ -151,6 +151,7 @@ public:
     CNumber& operator = (const std::string& rhs);
     CNumber operator + (const CNumber& rhs);
     CNumber operator - (const CNumber& rhs);
+    operator const char * () { return m_strNumber.c_str(); }
 
 public:
     void SetInput(const std::string& strInput);
@@ -166,10 +167,10 @@ public:
 protected:
     void Init();
 	void Split(const std::string& strInput, std::vector<std::string>& vstrTokens);
-    void Add(const CNumber& Num1, const CNumber& Num2, CNumber& Out);
-    void Sub(const CNumber& Num1, const CNumber& Num2, CNumber& Out);
+    void Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    void Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     int BinarySearch(const std::string& strSearch, const std::vector<std::string> & vec, int nSize);
-    int ABSGreater(const CNumber& LHS, const CNumber& RHS);
+    std::pair<int, int> Greater(const CNumber& LHS, const CNumber& RHS);
 
     bool m_bNegative;
     std::string m_strNumber;

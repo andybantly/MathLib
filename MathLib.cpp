@@ -99,14 +99,6 @@ static void test()
 
 int main()
 {
-	CNumber N1("-15");
-	CNumber N2("10");
-	CNumber N3 = N2 + N1;
-	N3 = N1 + N2;
-	N2 = "-10";
-	N3 = N1 - N2;
-	N3 = N2 - N1;
-
 	string strInput, strResult;
 	bool bAgain = true;
 	CNumber LastNumber("0");
