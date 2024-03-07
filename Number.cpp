@@ -649,12 +649,8 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 		if (N1 >= N2 + iSub)
 		{
-			iSum = N1 - N2;
-			if (iSub)
-			{
-				iSum -= iSub;
-				iSub = 0;
-			}
+			iSum = N1 - N2 - iSub;
+			iSub = 0;
 		}
 		else
 		{
