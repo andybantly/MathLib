@@ -76,8 +76,8 @@ static void test()
 	CDuration Duration("Test Expansion/Contraction:");
 
 	vector<pair<unsigned long long, unsigned long long> > vtp;
-	unsigned long long numt = thread::hardware_concurrency() * 2;
-	unsigned long long dtpt = unsigned long long(-1) / numt;
+	unsigned long long numt = thread::hardware_concurrency();
+	unsigned long long dtpt = INT_MAX / numt;
 
 	vector<thread*> vptp;
 	unsigned long long ullb, ulle;
@@ -87,7 +87,7 @@ static void test()
 		if (it + 1 != numt)
 			ulle = ullb + dtpt - 1;
 		else
-			ulle = unsigned long long(-1);
+			ulle = INT_MAX;
 
 		thread* ptp = new thread(ttest, ullb, ulle);
 		vptp.push_back(ptp);
@@ -102,6 +102,14 @@ static void test()
 
 int main()
 {
+	CNumber N1("21902");
+	CNumber N2("-4703");
+	CNumber N3;
+	N3 = N1 + N2;
+
+	N1 = "25466"; N2 = "-24367";
+	N3 = N1 + N2;
+
 	string strInput, strResult;
 	bool bAgain = true;
 	CNumber LastNumber("0");

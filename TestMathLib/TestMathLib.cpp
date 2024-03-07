@@ -101,6 +101,16 @@ namespace TestMathLib
 			N1 = "-2005"; N2 = "-1004";
 			N3 = N1 + N2;
 			Assert::AreEqual("-3009", N3);
+
+			// Corner case 25466 + -24367 = 1099
+			N1 = "25466"; N2 = "-24367";
+			N3 = N1 + N2;
+			Assert::AreEqual("1099", N3);
+
+			// Corner case 21902 + -4703
+			N1 = "21902"; N2 = "-4703";
+			N3 = N1 + N2;
+			Assert::AreEqual("17199", N3);
 		}
 
 		TEST_METHOD(Subtraction)
@@ -173,11 +183,30 @@ namespace TestMathLib
 			Assert::AreEqual("-1001", N3);
 		}
 
+		TEST_METHOD(RandomMath)
+		{
+			srand((unsigned)time(NULL));
+			for (int i = 0; i < RAND_MAX; ++i)
+			{
+				CRndPair Rnd;
+				CNumber N1(Rnd.Num1());
+				CNumber N2(Rnd.Num2());
+				CNumber N3;
+				if (Rnd.OP() == -1)
+					N3 = N1 - N2;
+				else
+					N3 = N1 + N2;
+				const std::string& strSUM = Rnd.Sum();
+				Assert::AreEqual(strSUM.c_str(), N3);
+			}
+		}
+
 		TEST_METHOD(TestLib)
 		{
 			vector<pair<unsigned long long, unsigned long long> > vtp;
 			unsigned long long numt = thread::hardware_concurrency();
-			unsigned long long dtpt = unsigned long long(-1) / numt;
+//			unsigned long long dtpt = unsigned long long(-1) / numt;
+			unsigned long long dtpt = INT_MAX / numt;
 
 			vector<thread*> vptp;
 			unsigned long long ullb, ulle;
@@ -187,7 +216,7 @@ namespace TestMathLib
 				if (it + 1 != numt)
 					ulle = ullb + dtpt - 1;
 				else
-					ulle = unsigned long long(-1);
+					ulle = INT_MAX; // unsigned long long(-1);
 
 				thread* ptp = new thread(Test, ullb, ulle);
 				vptp.push_back(ptp);

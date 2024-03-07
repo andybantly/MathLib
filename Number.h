@@ -271,3 +271,35 @@ public:
         std::cout << "mean=" << m_dmean << " variance=" << m_dvar << " stddev=" << m_dstddev << std::endl;
     }
 };
+
+class CRndPair
+{
+public:
+    CRndPair()
+    {
+        m_iOp = rand() > RAND_MAX / 2 ? 1 : -1;
+        m_iNum1 = (rand() * rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
+        m_iNum2 = (rand() * rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
+        m_strNum1 = std::to_string(m_iNum1);
+        m_strNum2 = std::to_string(m_iNum2);
+
+        if (m_iOp == 1)
+            m_iSum = m_iNum1 + m_iNum2;
+        else
+            m_iSum = m_iNum1 - m_iNum2;
+        m_strSum = std::to_string(m_iSum);
+    }
+    const int& OP() const { return m_iOp; }
+    const std::string& Num1() { return m_strNum1; }
+    const std::string& Num2() { return m_strNum2; }
+    const std::string& Sum() { return m_strSum; }
+
+protected:
+    int m_iOp; // 1 = addition, -1 = subtraction
+    int m_iNum1;
+    int m_iNum2;
+    int m_iSum;
+    std::string m_strNum1;
+    std::string m_strNum2;
+    std::string m_strSum;
+};

@@ -647,7 +647,7 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		uint8_t N1 = S1 - g_cZero;
 		uint8_t N2 = S2 - g_cZero;
 
-		if (N1 >= N2)
+		if (N1 >= N2 + iSub)
 		{
 			iSum = N1 - N2;
 			if (iSub)
