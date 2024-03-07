@@ -42,13 +42,28 @@ namespace TestMathLib
 			N3 = N1 + N2;
 			Assert::AreEqual("25", N3);
 
+			// 10 + -15 = -5
+			N1 = "10"; N2 = "-15";
+			N3 = N1 + N2;
+			Assert::AreEqual("-5", N3);
+
+			// -10 + 15 = 5
+			N1 = "-10"; N2 = "15";
+			N3 = N1 + N2;
+			Assert::AreEqual("5", N3);
+
+			// -10 + -15 = -25
+			N1 = "-10"; N2 = "-15";
+			N3 = N1 + N2;
+			Assert::AreEqual("-25", N3);
+
 			// 15 + 10 = 25
 			N1 = "15"; N2 = "10";
 			N3 = N1 + N2;
 			Assert::AreEqual("25", N3);
 
-			// -10 + 15 = 5
-			N1 = "-10"; N2 = "15";
+			// 15 + -10 = 5
+			N1 = "15"; N2 = "-10";
 			N3 = N1 + N2;
 			Assert::AreEqual("5", N3);
 
@@ -56,11 +71,6 @@ namespace TestMathLib
 			N1 = "-15"; N2 = "10";
 			N3 = N1 + N2;
 			Assert::AreEqual("-5", N3);
-
-			// -10 + -15 = -25
-			N1 = "-10"; N2 = "-15";
-			N3 = N1 + N2;
-			Assert::AreEqual("-25", N3);
 
 			// -15 + -10 = -25
 			N1 = "-15"; N2 = "-10";
@@ -72,13 +82,13 @@ namespace TestMathLib
 			N3 = N1 + N2;
 			Assert::AreEqual("20", N3);
 
-			// -10 + 10 = 0
-			N1 = "-10"; N2 = "10";
+			// 10 + -10 = 0
+			N1 = "10"; N2 = "-10";
 			N3 = N1 + N2;
 			Assert::AreEqual("0", N3);
 
-			// 10 + -10 = 0
-			N1 = "10"; N2 = "-10";
+			// -10 + 10 = 0
+			N1 = "-10"; N2 = "10";
 			N3 = N1 + N2;
 			Assert::AreEqual("0", N3);
 
@@ -102,18 +112,13 @@ namespace TestMathLib
 			N3 = N1 - N2;
 			Assert::AreEqual("-5", N3);
 
-			// 15 - 10 = 5
-			N1 = "15"; N2 = "10";
+			// 10 - -15 = 25
+			N1 = "10"; N2 = "-15";
 			N3 = N1 - N2;
-			Assert::AreEqual("5", N3);
+			Assert::AreEqual("25", N3);
 
 			// -10 - 15 = -25
 			N1 = "-10"; N2 = "15";
-			N3 = N1 - N2;
-			Assert::AreEqual("-25", N3);
-
-			// -15 - 10 = -25
-			N1 = "-15"; N2 = "10";
 			N3 = N1 - N2;
 			Assert::AreEqual("-25", N3);
 
@@ -121,6 +126,21 @@ namespace TestMathLib
 			N1 = "-10"; N2 = "-15";
 			N3 = N1 - N2;
 			Assert::AreEqual("5", N3);
+
+			// 15 - 10 = 5
+			N1 = "15"; N2 = "10";
+			N3 = N1 - N2;
+			Assert::AreEqual("5", N3);
+
+			// 15 - -10 = 25
+			N1 = "15"; N2 = "-10";
+			N3 = N1 - N2;
+			Assert::AreEqual("25", N3);
+
+			// -15 - 10 = -25
+			N1 = "-15"; N2 = "10";
+			N3 = N1 - N2;
+			Assert::AreEqual("-25", N3);
 
 			// -15 - -10 = -5
 			N1 = "-15"; N2 = "-10";
@@ -132,13 +152,13 @@ namespace TestMathLib
 			N3 = N1 - N2;
 			Assert::AreEqual("0", N3);
 
-			// -10 - 10 = 0
-			N1 = "-10"; N2 = "10";
-			N3 = N1 - N2;
-			Assert::AreEqual("0", N3);
-
-			// 10 - -10 = -20
+			// 10 - -10 = 20
 			N1 = "10"; N2 = "-10";
+			N3 = N1 - N2;
+			Assert::AreEqual("20", N3);
+
+			// -10 - 10 = -20
+			N1 = "-10"; N2 = "10";
 			N3 = N1 - N2;
 			Assert::AreEqual("-20", N3);
 
@@ -156,7 +176,7 @@ namespace TestMathLib
 		TEST_METHOD(TestLib)
 		{
 			vector<pair<unsigned long long, unsigned long long> > vtp;
-			unsigned long long numt = thread::hardware_concurrency() * 2;
+			unsigned long long numt = thread::hardware_concurrency();
 			unsigned long long dtpt = unsigned long long(-1) / numt;
 
 			vector<thread*> vptp;

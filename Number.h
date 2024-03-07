@@ -154,19 +154,20 @@ public:
     operator const char * () { return m_strNumber.c_str(); }
 
 public:
-    void SetInput(const std::string& strInput);
+    void SetNumber(const std::string& strInput);
     int Contract(const std::string& strInput, std::string& strResult);
 	int Expand(const std::string& strInput, std::string& strResult);
     void ToBase2(const std::string& strInput, std::string& strResult);
     void ToBase10(const std::string& strInput, std::string& strResult);
     static std::string WB();
-    const std::string& GetNumber() { return m_strNumber; }
-    const std::string& GetPhrase() { return m_strPhrase; }
+    const std::string& GetNumber();
+    const std::string& GetPhrase();
     const std::string& GetBinary();
 
 protected:
     void Init();
-	void Split(const std::string& strInput, std::vector<std::string>& vstrTokens);
+    int Convert();
+    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens);
     void Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     int BinarySearch(const std::string& strSearch, const std::vector<std::string> & vec, int nSize);

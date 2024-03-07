@@ -17,7 +17,8 @@ CNumber::CNumber() : m_bNegative(false)
 CNumber::CNumber(const string& strInput) : m_bNegative(false)
 {
 	Init();
-	SetInput(strInput);
+	
+	SetNumber(strInput);
 }
 
 CNumber::CNumber(const CNumber& rhs)
@@ -43,7 +44,7 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 
 CNumber& CNumber::operator = (const string& rhs)
 {
-	SetInput(rhs);
+	SetNumber(rhs);
 	return *this;
 }
 
@@ -55,12 +56,34 @@ CNumber CNumber::operator + (const CNumber& rhs)
 	else
 	{
 		pair<int, int> GT = Greater(*this, rhs);
-		if (GT.second < 0)
-			Sub(rhs, *this, false, Out);
-		else if (GT.second > 0)
-			Sub(*this, rhs, true, Out);
-		else
-			Out = "0";
+		if (!m_bNegative && rhs.m_bNegative) // LHS positive, RHS negative
+		{
+			switch (GT.second)
+			{
+			case -1: // RHS > LHS
+				Sub(rhs, *this, true, Out);
+				break;
+			case 1: // LHS > RHS
+				Sub(*this, rhs, false, Out);
+				break;
+			default:
+				Out = "0";
+			}
+		}
+		else // LHS negative, RHS positive
+		{
+			switch (GT.second)
+			{
+			case -1: // RHS > LHS
+				Sub(rhs, *this, false, Out);
+				break;
+			case 1: // LHS > RHS
+				Sub(*this, rhs, true, Out);
+				break;
+			default:
+				Out = "0";
+			}
+		}
 	}
 	return Out;
 }
@@ -68,25 +91,52 @@ CNumber CNumber::operator + (const CNumber& rhs)
 CNumber CNumber::operator - (const CNumber& rhs)
 {
 	CNumber Out;
-	pair<int, int> GT = Greater(*this, rhs);
-	Sub(rhs, *this, true, Out);
+	if ((!m_bNegative && rhs.m_bNegative) || // LHS positive, RHS negative
+		(m_bNegative && !rhs.m_bNegative)) // LHS negative, RHS positive
+		Add(*this, rhs, m_bNegative, Out);
+	else
+	{
+		pair<int, int> GT = Greater(*this, rhs);
+		if (!m_bNegative && !rhs.m_bNegative) // Both positive
+		{
+			switch (GT.first)
+			{
+			case -1: // ABS(RHS) > ABS(LHS)
+				Sub(rhs, *this, true, Out);
+				break;
+			case 1: // ABS(LHS) > ABS(RHS)
+				Sub(*this, rhs, false, Out);
+				break;
+			default:
+				Out = "0"; // ABS(LHS) = ABS(RHS)
+			}
+		}
+		else // Both negative
+		{
+			switch (GT.first)
+			{
+			case -1: // ABS(LHS) > ABS(RHS)
+				Sub(*this, rhs, true, Out);
+				break;
+			case 1: // ABS(RHS) > ABS(LHS)
+				Sub(rhs, *this, false, Out);
+				break;
+			default:
+				Out = "0";
+			}
+		}
+	}
+
 	return Out;
 }
 
-void CNumber::SetInput(const string& strInput)
+void CNumber::SetNumber(const string& strInput)
 {
-	int iRet;
-	iRet = Expand(strInput, m_strPhrase);
-	if (iRet == 0)
-		m_strNumber = strInput;
-	else
-	{
-		iRet = Contract(strInput, m_strNumber);
-		if (iRet == 0)
-			m_strPhrase = strInput;
-		else
-			throw(std::exception("Invalid number"));
-	}
+	m_bNegative = false;
+	if (!strInput.empty())
+		m_bNegative = *(strInput.begin()) == '-';
+	m_strNumber = strInput;
+	m_strPhrase.clear();
 	m_strBinary.clear();
 }
 
@@ -367,6 +417,19 @@ void CNumber::Init()
 	g_bInit = true;
 }
 
+int CNumber::Convert()
+{
+	int iRet = Expand(m_strNumber, m_strPhrase);
+	if (iRet != 0)
+	{
+		m_strPhrase = m_strNumber;
+		iRet = Contract(m_strPhrase, m_strNumber);
+		if (iRet != 0)
+			throw(std::exception("Invalid Number"));
+	}
+	return iRet;
+}
+
 void CNumber::Split(const string& strInput, vector<string>& vstrTokens)
 {
 	if (strInput.empty())
@@ -388,6 +451,18 @@ void CNumber::Split(const string& strInput, vector<string>& vstrTokens)
 	} while (ipos != string::npos);
 }
 
+const string& CNumber::GetNumber()
+{
+	return m_strNumber;
+}
+
+const string& CNumber::GetPhrase()
+{
+	if (m_strPhrase.empty())
+		Convert();
+	return m_strPhrase;
+}
+
 const string& CNumber::GetBinary()
 {
 	if (m_strBinary.empty())
@@ -397,12 +472,16 @@ const string& CNumber::GetBinary()
 
 void CNumber::ToBase2(const string& strInput, string& strResult)
 {
+	if (strInput.empty())
+		return;
 	string strOut;
 	uint8_t idnm = 0;
 	deque<char> binary;
 
 	string strIn = strInput;
 	string::iterator it = strIn.begin();
+	if (m_bNegative)
+		it++;
 	for (;;)
 	{
 		// Compute the denominator of the division
@@ -449,7 +528,9 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 			it = strIn.begin();
 		}
 	}
-	
+	if (m_bNegative)
+		binary.push_front('-');
+
 	// Append the binary string
 	strResult.append(binary.begin(), binary.end());
 }
@@ -542,7 +623,7 @@ void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	if (bNeg)
 		Sum.push_front('-');
 
-	Out.SetInput(string(Sum.begin(), Sum.end()));
+	Out.SetNumber(string(Sum.begin(), Sum.end()));
 }
 
 void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
@@ -600,7 +681,7 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	else if (bNeg)
 		Sum.push_front('-');
 
-	Out.SetInput(string(Sum.begin(), Sum.end()));
+	Out.SetNumber(string(Sum.begin(), Sum.end()));
 }
 		
 int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)
@@ -643,45 +724,64 @@ bool Equal(const std::string& strLHS, const std::string& strRHS)
 // Greater.second is ABS(LHS) > ABS(RHS)
 pair<int, int> CNumber::Greater(const CNumber& LHS, const CNumber& RHS)
 {
-	std::pair<int, int> Greater(0,0);
+	pair<int, int> GT(0, 0);
 
 	const string& strLHS = LHS.m_strNumber;
 	const string& strRHS = RHS.m_strNumber;
 
 	if (LHS.m_bNegative && !RHS.m_bNegative)
-		Greater.first = -1;
+		GT.first = -1;
 	else if (!LHS.m_bNegative && RHS.m_bNegative)
-		Greater.first = 1;
+		GT.first = 1;
 	else if (!LHS.m_bNegative && !RHS.m_bNegative && strLHS.length() != strRHS.length())
-		Greater.first = strLHS.length() > strRHS.length() ? 1 : -1;
+		GT.first = strLHS.length() > strRHS.length() ? 1 : -1;
 	else if (LHS.m_bNegative && RHS.m_bNegative && strLHS.length() != strRHS.length())
-		Greater.first = strLHS.length() > strRHS.length() ? -1 : 1;
+		GT.first = strLHS.length() > strRHS.length() ? -1 : 1;
 
 	size_t n1Len = strLHS.length() - (LHS.m_bNegative ? 1 : 0);
 	size_t n2Len = strRHS.length() - (RHS.m_bNegative ? 1 : 0);
 
 	if (n1Len > n2Len)
-		Greater.second = 1;
+		GT.second = 1;
 	else if (n1Len < n2Len)
-		Greater.second = -1;
+		GT.second = -1;
 
 	string::const_iterator LHS_cbeg = (LHS.m_bNegative ? strLHS.begin() + 1 : strLHS.begin());
 	string::const_iterator RHS_cbeg = (RHS.m_bNegative ? strRHS.begin() + 1 : strRHS.begin());
 
 	for (string::const_iterator LHS_cit = LHS_cbeg, RHS_cit = RHS_cbeg;
-		Greater.second == 0 && (LHS_cit != strLHS.end() || RHS_cit != strRHS.end());)
+		GT.second == 0 && (LHS_cit != strLHS.end() || RHS_cit != strRHS.end());)
 	{
 		uint8_t iLHS = (LHS_cit != strLHS.end() ? *LHS_cit++ : g_cZero) - g_cZero;
 		uint8_t iRHS = (RHS_cit != strRHS.end() ? *RHS_cit++ : g_cZero) - g_cZero;
 
 		if (iLHS < iRHS)
-			Greater.second = -1;
+			GT.second = -1;
 		else if (iLHS > iRHS)
-			Greater.second = 1;
+			GT.second = 1;
+	}
 
-		if (Greater.first == 0)
-			Greater.first = Greater.second;
+	if (GT.second)
+	{
+		if (GT.second == -1)
+		{
+			if ((!LHS.m_bNegative && !RHS.m_bNegative) ||
+				(LHS.m_bNegative && !RHS.m_bNegative))
+				GT.first = -1;
+			else if ((!LHS.m_bNegative && RHS.m_bNegative) ||
+				(LHS.m_bNegative && RHS.m_bNegative))
+				GT.first = 1;
+		}
+		else if (GT.second == 1)
+		{
+			if ((!LHS.m_bNegative && !RHS.m_bNegative) ||
+				(!LHS.m_bNegative && RHS.m_bNegative))
+				GT.first = 1;
+			else if ((LHS.m_bNegative && !RHS.m_bNegative) ||
+				(LHS.m_bNegative && RHS.m_bNegative))
+				GT.first = -1;
+		}
 	}
 		
-	return Greater;
+	return GT;
 }

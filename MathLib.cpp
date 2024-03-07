@@ -95,6 +95,9 @@ static void test()
 
 	for (vector<thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
 		(*it)->join();
+
+	for (vector<thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
+		delete* it;
 }
 
 int main()
