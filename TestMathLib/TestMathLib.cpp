@@ -183,6 +183,71 @@ namespace TestMathLib
 			Assert::AreEqual("-1001", N3);
 		}
 
+		TEST_METHOD(Multiplication)
+		{
+			CNumber N1, N2, N3;
+
+			// 10 * 15 = 150
+			N1 = "10"; N2 = "15";
+			N3 = N1 * N2;
+			Assert::AreEqual("150", N3);
+
+			// 10 * -15 = -150
+			N1 = "10"; N2 = "-15";
+			N3 = N1 * N2;
+			Assert::AreEqual("-150", N3);
+
+			// -10 * 15 = -150
+			N1 = "-10"; N2 = "15";
+			N3 = N1 * N2;
+			Assert::AreEqual("-150", N3);
+
+			// -10 * -15 = 150
+			N1 = "-10"; N2 = "-15";
+			N3 = N1 * N2;
+			Assert::AreEqual("150", N3);
+
+			// 15 * 10 = 150
+			N1 = "15"; N2 = "10";
+			N3 = N1 * N2;
+			Assert::AreEqual("150", N3);
+
+			// 15 * -10 = -150
+			N1 = "15"; N2 = "-10";
+			N3 = N1 * N2;
+			Assert::AreEqual("-150", N3);
+
+			// -15 * 10 = -150
+			N1 = "-15"; N2 = "10";
+			N3 = N1 * N2;
+			Assert::AreEqual("-150", N3);
+
+			// -15 * -10 = 150
+			N1 = "-15"; N2 = "-10";
+			N3 = N1 * N2;
+			Assert::AreEqual("150", N3);
+
+			// 10 * 0 = 0
+			N1 = "10"; N2 = "0";
+			N3 = N1 * N2;
+			Assert::AreEqual("0", N3);
+
+			// -10 * 0 = 0
+			N1 = "-10"; N2 = "0";
+			N3 = N1 * N2;
+			Assert::AreEqual("0", N3);
+
+			// 0 * 10 = 0
+			N1 = "0"; N2 = "10";
+			N3 = N1 * N2;
+			Assert::AreEqual("0", N3);
+
+			// 0 * -10 = 0
+			N1 = "0"; N2 = "-10";
+			N3 = N1 * N2;
+			Assert::AreEqual("0", N3);
+		}
+
 		TEST_METHOD(RandomMath)
 		{
 			srand((unsigned)time(NULL));
@@ -192,10 +257,19 @@ namespace TestMathLib
 				CNumber N1(Rnd.Num1());
 				CNumber N2(Rnd.Num2());
 				CNumber N3;
-				if (Rnd.OP() == -1)
-					N3 = N1 - N2;
-				else
+
+				switch (Rnd.OP())
+				{
+				case 1:
 					N3 = N1 + N2;
+					break;
+				case 2:
+					N3 = N1 - N2;
+					break;
+				default:
+					N3 = N1 * N2;
+				}
+
 				const std::string& strSUM = Rnd.Sum();
 				Assert::AreEqual(strSUM.c_str(), N3);
 			}

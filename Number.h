@@ -279,16 +279,18 @@ class CRndPair
 public:
     CRndPair()
     {
-        m_iOp = rand() > RAND_MAX / 2 ? 1 : -1;
-        m_iNum1 = (rand() * rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
-        m_iNum2 = (rand() * rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
+        m_iOp = rand() % 3 + 1;
+        m_iNum1 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
+        m_iNum2 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
         m_strNum1 = std::to_string(m_iNum1);
         m_strNum2 = std::to_string(m_iNum2);
 
         if (m_iOp == 1)
             m_iSum = m_iNum1 + m_iNum2;
-        else
+        else if (m_iOp == 2)
             m_iSum = m_iNum1 - m_iNum2;
+        else
+            m_iSum = m_iNum1 * m_iNum2;
         m_strSum = std::to_string(m_iSum);
     }
     const int& OP() const { return m_iOp; }

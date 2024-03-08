@@ -102,8 +102,8 @@ static void test()
 
 int main()
 {
-	CNumber N1("9999");
-	CNumber N2("99");
+	CNumber N1("-1010");
+	CNumber N2("10");
 	CNumber N3;
 	N3 = N1 * N2;
 

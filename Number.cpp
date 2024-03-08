@@ -702,7 +702,7 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	for (string::const_reverse_iterator S2_crit = strS2.rbegin(); S2_crit != S2_crend; ++S2_crit)
 	{
 		for (int iZero = 0; iZero < nZero; ++iZero)
-			Mult.push_front(g_cZero);
+			LZ.push_front(g_cZero);
 
 		uint8_t iCarry = 0;
 		for (string::const_reverse_iterator S1_crit = strS1.rbegin(); S1_crit != S1_crend; ++S1_crit)
@@ -718,22 +718,48 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 				iCarry = 0;
 			}
 
+			uint8_t iVal;
 			if (iProd >= 10)
 			{
 				iCarry = iProd / 10;
 				iRem = iProd % 10;
-
-				Mult.push_front(iRem + g_cZero);
+				iVal = iRem;
 			}
 			else
-				Mult.push_front(iProd + g_cZero);
+				iVal = iProd;
+
+			if (iVal)
+			{
+				if (!LZ.empty())
+				{
+					for (deque<char>::const_iterator cit = LZ.begin(); cit != LZ.end(); ++cit)
+						Mult.push_front(g_cZero);
+					LZ.clear();
+				}
+				Mult.push_front(iVal + g_cZero);
+			}
+			else
+				LZ.push_front(g_cZero);
 		}
 		
 		if (iCarry)
+		{
+			if (!LZ.empty())
+			{
+				for (deque<char>::const_iterator cit = LZ.begin(); cit != LZ.end(); ++cit)
+					Mult.push_front(g_cZero);
+			}
 			Mult.push_front(iCarry + g_cZero);
+		}
 
-		vSum.push_back(string(Mult.begin(), Mult.end()));
+		if (!Mult.empty())
+		{
+			if (bNeg)
+				Mult.push_front('-');
+			vSum.push_back(string(Mult.begin(), Mult.end()));
+		}
 		Mult.clear();
+		LZ.clear();
 		
 		nZero++;
 	}
@@ -744,10 +770,15 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		Mult.clear();
 	}
 	
-	vector<string>::const_iterator vcit = vSum.begin();
-	Out.SetNumber(*vcit++);
-	for (;vcit != vSum.end(); ++vcit)
-		Out = Out + *vcit;
+	if (vSum.size())
+	{
+		vector<string>::const_iterator vcit = vSum.begin();
+		Out.SetNumber(*vcit++);
+		for (; vcit != vSum.end(); ++vcit)
+			Out = Out + *vcit;
+	}
+	else
+		Out = "0";
 }
 
 int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)
