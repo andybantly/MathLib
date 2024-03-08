@@ -299,7 +299,7 @@ public:
     const std::string& Sum() { return m_strSum; }
 
 protected:
-    int m_iOp; // 1 = addition, -1 = subtraction
+    int m_iOp;
     int m_iNum1;
     int m_iNum2;
     int m_iSum;

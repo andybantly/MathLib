@@ -251,12 +251,13 @@ namespace TestMathLib
 		TEST_METHOD(RandomMath)
 		{
 			srand((unsigned)time(NULL));
-			for (int i = 0; i < RAND_MAX; ++i)
+			int nRM = RAND_MAX * 4;
+			CNumber N1, N2, N3;
+			for (int i = 0; i < nRM; ++i)
 			{
 				CRndPair Rnd;
-				CNumber N1(Rnd.Num1());
-				CNumber N2(Rnd.Num2());
-				CNumber N3;
+				N1 = Rnd.Num1();
+				N2 = Rnd.Num2();
 
 				switch (Rnd.OP())
 				{
@@ -279,8 +280,7 @@ namespace TestMathLib
 		{
 			vector<pair<unsigned long long, unsigned long long> > vtp;
 			unsigned long long numt = thread::hardware_concurrency();
-//			unsigned long long dtpt = unsigned long long(-1) / numt;
-			unsigned long long dtpt = INT_MAX / numt;
+			unsigned long long dtpt = (RAND_MAX * 4) / numt;
 
 			vector<thread*> vptp;
 			unsigned long long ullb, ulle;
@@ -290,7 +290,7 @@ namespace TestMathLib
 				if (it + 1 != numt)
 					ulle = ullb + dtpt - 1;
 				else
-					ulle = INT_MAX; // unsigned long long(-1);
+					ulle = (RAND_MAX * 4);
 
 				thread* ptp = new thread(Test, ullb, ulle);
 				vptp.push_back(ptp);

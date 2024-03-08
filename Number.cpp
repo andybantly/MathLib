@@ -4,8 +4,9 @@
 
 using namespace std;
 
-mutex g_map_mutex;
 bool g_bInit = false;
+mutex g_map_mutex;
+
 std::map<std::string, std::string, CILT> g_mapWordTo99;
 std::map<std::string, std::string, CILT> g_mapWordTo100;
 
@@ -350,7 +351,6 @@ int CNumber::Contract(const string& strInput, string& strResult)
 	if (iResult == -1)
 		return iResult;
 
-	// Process the number groups
 	string strNumber;
 	for (vector<vector<string> >::iterator vvit = vvstrNumbers.begin(); vvit != vvstrNumbers.end(); ++vvit)
 	{
