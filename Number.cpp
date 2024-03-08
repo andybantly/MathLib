@@ -130,6 +130,13 @@ CNumber CNumber::operator - (const CNumber& rhs)
 	return Out;
 }
 
+CNumber CNumber::operator * (const CNumber& rhs)
+{
+	CNumber Out;
+	Mul(*this, rhs, m_bNegative != rhs.m_bNegative, Out);
+	return Out;
+}
+
 void CNumber::SetNumber(const string& strInput)
 {
 	m_bNegative = false;
@@ -542,7 +549,6 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 		return;
 
 	CNumber Out;
-	uint64_t uiPos = 1;
 	string strNum = "1";
 	string::const_reverse_iterator crit = strInput.rbegin();
 	do
@@ -680,6 +686,70 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	Out.SetNumber(string(Sum.begin(), Sum.end()));
 }
 		
+void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
+{
+	deque<char> Mult;
+	deque<char> LZ;
+	vector<string> vSum;
+	uint8_t nZero = 0, iProd = 0, iRem = 0;
+
+	const string& strS1 = Num1.m_strNumber;
+	const string& strS2 = Num2.m_strNumber;
+
+	string::const_reverse_iterator S1_crend = (Num1.m_bNegative ? strS1.rend() - 1 : strS1.rend());
+	string::const_reverse_iterator S2_crend = (Num2.m_bNegative ? strS2.rend() - 1 : strS2.rend());
+
+	for (string::const_reverse_iterator S2_crit = strS2.rbegin(); S2_crit != S2_crend; ++S2_crit)
+	{
+		for (int iZero = 0; iZero < nZero; ++iZero)
+			Mult.push_front(g_cZero);
+
+		uint8_t iCarry = 0;
+		for (string::const_reverse_iterator S1_crit = strS1.rbegin(); S1_crit != S1_crend; ++S1_crit)
+		{
+			uint8_t N1 = (S1_crit != S1_crend ? *S1_crit : g_cZero) - g_cZero;
+			uint8_t N2 = (S2_crit != S2_crend ? *S2_crit : g_cZero) - g_cZero;
+
+			iProd = N1 * N2;
+
+			if (iCarry)
+			{
+				iProd += iCarry;
+				iCarry = 0;
+			}
+
+			if (iProd >= 10)
+			{
+				iCarry = iProd / 10;
+				iRem = iProd % 10;
+
+				Mult.push_front(iRem + g_cZero);
+			}
+			else
+				Mult.push_front(iProd + g_cZero);
+		}
+		
+		if (iCarry)
+			Mult.push_front(iCarry + g_cZero);
+
+		vSum.push_back(string(Mult.begin(), Mult.end()));
+		Mult.clear();
+		
+		nZero++;
+	}
+
+	if (Mult.size())
+	{
+		vSum.push_back(string(Mult.begin(), Mult.end()));
+		Mult.clear();
+	}
+	
+	vector<string>::const_iterator vcit = vSum.begin();
+	Out.SetNumber(*vcit++);
+	for (;vcit != vSum.end(); ++vcit)
+		Out = Out + *vcit;
+}
+
 int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)
 {
 	int nLeft = 0;
