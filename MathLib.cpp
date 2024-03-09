@@ -102,10 +102,11 @@ static void test()
 
 int main()
 {
-	CNumber N1("-1010");
+	CNumber N1("1010");
 	CNumber N2("10");
 	CNumber N3;
 	N3 = N1 * N2;
+	N3 = N3 / N2;
 
 	string strInput, strResult;
 	bool bAgain = true;

@@ -138,6 +138,20 @@ CNumber CNumber::operator * (const CNumber& rhs)
 	return Out;
 }
 
+CNumber CNumber::operator / (const CNumber& rhs)
+{
+	CNumber Out;
+	Div(*this, rhs, m_bNegative != rhs.m_bNegative, Out);
+	return Out;
+}
+
+CNumber CNumber::operator % (const CNumber& rhs)
+{
+	CNumber Out;
+	Mod(*this, rhs, m_bNegative != rhs.m_bNegative, Out);
+	return Out;
+}
+
 void CNumber::SetNumber(const string& strInput)
 {
 	m_bNegative = false;
@@ -781,6 +795,29 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		Out = "0";
 }
 
+void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
+{
+	deque<char> Div;
+	vector<string> vSum;
+	uint8_t iProd = 0, iRem = 0;
+
+	const string& strS1 = Num1.m_strNumber;
+	const string& strS2 = Num2.m_strNumber;
+
+	const CNumber Two("2");
+
+	CNumber N2DB = Num2;
+	while (ABSGreater(Num1, N2DB) > 0)
+		Mul(N2DB, Two, false, N2DB);
+
+	string::const_reverse_iterator S1_crend = (Num1.m_bNegative ? strS1.rend() - 1 : strS1.rend());
+	string::const_reverse_iterator S2_crend = (Num2.m_bNegative ? strS2.rend() - 1 : strS2.rend());
+}
+
+void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
+{
+}
+
 int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)
 {
 	int nLeft = 0;
@@ -815,6 +852,40 @@ bool Equal(const std::string& strLHS, const std::string& strRHS)
 		}
 	}
 	return bEqual;
+}
+
+// ABS greater than
+int CNumber::ABSGreater(const CNumber& LHS, const CNumber& RHS)
+{
+	int GT = 0;
+
+	const string& strLHS = LHS.m_strNumber;
+	const string& strRHS = RHS.m_strNumber;
+
+	size_t n1Len = strLHS.length() - (LHS.m_bNegative ? 1 : 0);
+	size_t n2Len = strRHS.length() - (RHS.m_bNegative ? 1 : 0);
+
+	if (n1Len > n2Len)
+		GT = 1;
+	else if (n1Len < n2Len)
+		GT = -1;
+
+	string::const_iterator LHS_cbeg = (LHS.m_bNegative ? strLHS.begin() + 1 : strLHS.begin());
+	string::const_iterator RHS_cbeg = (RHS.m_bNegative ? strRHS.begin() + 1 : strRHS.begin());
+
+	for (string::const_iterator LHS_cit = LHS_cbeg, RHS_cit = RHS_cbeg;
+		GT == 0 && (LHS_cit != strLHS.end() || RHS_cit != strRHS.end());)
+	{
+		uint8_t iLHS = (LHS_cit != strLHS.end() ? *LHS_cit++ : g_cZero) - g_cZero;
+		uint8_t iRHS = (RHS_cit != strRHS.end() ? *RHS_cit++ : g_cZero) - g_cZero;
+
+		if (iLHS < iRHS)
+			GT = -1;
+		else if (iLHS > iRHS)
+			GT = 1;
+	}
+
+	return GT;
 }
 
 // Greater.first is LHS > RHS
