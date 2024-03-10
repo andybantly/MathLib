@@ -248,10 +248,76 @@ namespace TestMathLib
 			Assert::AreEqual("0", N3);
 		}
 
+		TEST_METHOD(Division)
+		{
+			CNumber N1, N2, N3;
+
+			// 150 / 10 = 15
+			N1 = "150"; N2 = "10";
+			N3 = N1 / N2;
+			Assert::AreEqual("15", N3);
+
+			// -150 / 10 = -15
+			N1 = "-150"; N2 = "10";
+			N3 = N1 / N2;
+			Assert::AreEqual("-15", N3);
+
+			// -150 / -10 = 15
+			N1 = "-150"; N2 = "-10";
+			N3 = N1 / N2;
+			Assert::AreEqual("15", N3);
+
+			// 150 / -10 = -15
+			N1 = "150"; N2 = "-10";
+			N3 = N1 / N2;
+			Assert::AreEqual("-15", N3);
+
+			// 150 / 15 = 10
+			N1 = "150"; N2 = "15";
+			N3 = N1 / N2;
+			Assert::AreEqual("10", N3);
+
+			// -150 / 15 = -10
+			N1 = "-150"; N2 = "15";
+			N3 = N1 / N2;
+			Assert::AreEqual("-10", N3);
+
+			// -150 / -15 = 10
+			N1 = "-150"; N2 = "-15";
+			N3 = N1 / N2;
+			Assert::AreEqual("10", N3);
+
+			// 150 / -15 = -10
+			N1 = "150"; N2 = "-15";
+			N3 = N1 / N2;
+			Assert::AreEqual("-10", N3);
+
+			// 0 / 10 = 0
+			N1 = "0"; N2 = "10";
+			N3 = N1 / N2;
+			Assert::AreEqual("0", N3);
+
+			// 0 / -10 = 0
+			N1 = "0"; N2 = "-10";
+			N3 = N1 / N2;
+			Assert::AreEqual("0", N3);
+
+			// 0 / 0 = Division by Zero
+			N1 = "0"; N2 = "0";
+			N3 = N1 / N2;
+			Assert::AreEqual("", N3);
+
+			// -10 / 0 = Division by Zero
+			N1 = "-10"; N2 = "0";
+			N3 = N1 / N2;
+			N3 = N1 / N2;
+			Assert::AreEqual("", N3);
+		}
+
 		TEST_METHOD(RandomMath)
 		{
 			srand((unsigned)time(NULL));
-			int nRM = RAND_MAX * 4;
+			int nRM = RAND_MAX * 5;
 			CNumber N1, N2, N3;
 			for (int i = 0; i < nRM; ++i)
 			{
@@ -267,12 +333,105 @@ namespace TestMathLib
 				case 2:
 					N3 = N1 - N2;
 					break;
-				default:
+				case 3:
 					N3 = N1 * N2;
+					break;
+				case 4:
+					N3 = N1 / N2;
+					break;
+				default:
+					N3 = N1 % N2;
 				}
 
 				const std::string& strSUM = Rnd.Sum();
-				Assert::AreEqual(strSUM.c_str(), N3);
+				Assert::AreEqual(strSUM, N3.GetNumber());
+			}
+		}
+
+		TEST_METHOD(RandomAdd)
+		{
+			srand((unsigned)time(NULL));
+			int nRM = RAND_MAX;
+			CNumber N1, N2, N3;
+			for (int i = 0; i < nRM; ++i)
+			{
+				CRndPair Rnd(1);
+				N1 = Rnd.Num1();
+				N2 = Rnd.Num2();
+				N3 = N1 + N2;
+
+				const std::string& strSUM = Rnd.Sum();
+				Assert::AreEqual(strSUM, N3.GetNumber());
+			}
+		}
+
+		TEST_METHOD(RandomSub)
+		{
+			srand((unsigned)time(NULL));
+			int nRM = RAND_MAX;
+			CNumber N1, N2, N3;
+			for (int i = 0; i < nRM; ++i)
+			{
+				CRndPair Rnd(2);
+				N1 = Rnd.Num1();
+				N2 = Rnd.Num2();
+				N3 = N1 - N2;
+
+				const std::string& strSUM = Rnd.Sum();
+				Assert::AreEqual(strSUM, N3.GetNumber());
+			}
+		}
+
+		TEST_METHOD(RandomMul)
+		{
+			srand((unsigned)time(NULL));
+			int nRM = RAND_MAX;
+			CNumber N1, N2, N3;
+			for (int i = 0; i < nRM; ++i)
+			{
+				CRndPair Rnd(3);
+				N1 = Rnd.Num1();
+				N2 = Rnd.Num2();
+				N3 = N1 * N2;
+
+				const std::string& strSUM = Rnd.Sum();
+				Assert::AreEqual(strSUM, N3.GetNumber());
+			}
+		}
+
+		TEST_METHOD(RandomDiv)
+		{
+			srand((unsigned)time(NULL));
+			int nRM = RAND_MAX;
+			CNumber N1, N2, N3;
+			for (int i = 0; i < nRM; ++i)
+			{
+				CRndPair Rnd(4);
+				N1 = Rnd.Num1();
+				N2 = Rnd.Num2();
+				N3 = N1 / N2;
+
+				const std::string& strSUM = Rnd.Sum();
+				if (strSUM != N3.GetNumber())
+					Assert::AreEqual(strSUM, N3.GetNumber());
+			}
+		}
+
+		TEST_METHOD(RandomMod)
+		{
+			srand((unsigned)time(NULL));
+			int nRM = RAND_MAX;
+			CNumber N1, N2, N3;
+			for (int i = 0; i < nRM; ++i)
+			{
+				CRndPair Rnd(5);
+				N1 = Rnd.Num1();
+				N2 = Rnd.Num2();
+				N3 = N1 % N2;
+
+				const std::string& strSUM = Rnd.Sum();
+				if (strSUM != N3.GetNumber())
+					Assert::AreEqual(strSUM, N3.GetNumber());
 			}
 		}
 

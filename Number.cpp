@@ -24,6 +24,13 @@ CNumber::CNumber(const string& strInput) : m_bNegative(false)
 	SetNumber(strInput);
 }
 
+CNumber::CNumber(const char* pInput) : m_bNegative(false)
+{
+	Init();
+
+	SetNumber(pInput);
+}
+
 CNumber::CNumber(const CNumber& rhs)
 {
 	*this = rhs;
@@ -48,6 +55,12 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 CNumber& CNumber::operator = (const string& rhs)
 {
 	SetNumber(rhs);
+	return *this;
+}
+
+CNumber& CNumber::operator = (const char* prhs)
+{
+	SetNumber(prhs);
 	return *this;
 }
 
@@ -150,7 +163,7 @@ CNumber CNumber::operator / (const CNumber& rhs)
 CNumber CNumber::operator % (const CNumber& rhs)
 {
 	CNumber Out;
-	Mod(*this, rhs, m_bNegative != rhs.m_bNegative, Out);
+	Mod(*this, rhs, m_bNegative, Out);
 	return Out;
 }
 
@@ -799,9 +812,11 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
-	if (Equal(Num1.m_strNumber, Num2.m_strNumber))
+	if (Equal(Num2.m_strNumber, "0"))
+		return;
+	if (ABSGreater(Num1.m_strNumber, Num2.m_strNumber) == 0)
 	{
-		Out = "1";
+		Out = !bNeg ? "1" : "-1";
 		return;
 	}
 	else
@@ -811,10 +826,10 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	CNumber N2DB = Num2;
 	vector<pair<CNumber, CNumber> > vMultTableMap;
 	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (ABSGreater(Num1, N2DB) > 0)
+	while (ABSGreater(Num1, N2DB) >= 0)
 	{
-		Mul(N2DB, g_Two, false, N2DB);
-		Mul(NBIN, g_Two, false, NBIN);
+		Mul(N2DB, g_Two, bNeg, N2DB);
+		Mul(NBIN, g_Two, bNeg, NBIN);
 		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	}
 
@@ -827,9 +842,9 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	{
 		if (ABSGreater(N1, vit->second) >= 0)
 		{
-			Sub(N1, vit->second, false, N1);
-			Add(vit->first, Out, false, Out);
-			if (ABSGreater(N1, Num2) <= 0)
+			Sub(N1, vit->second, bNeg, N1);
+			Add(vit->first, Out, bNeg, Out);
+			if (ABSGreater(N1, Num2) < 0)
 				break;
 		}
 	}
@@ -837,18 +852,25 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
-	Out = "0";
-	if (Equal(Num1.m_strNumber, Num2.m_strNumber))
+	if (Equal(Num2.m_strNumber, "0"))
 		return;
 
-	CNumber NBIN("1");
+	if (ABSGreater(Num1.m_strNumber, Num2.m_strNumber) == 0)
+	{
+		Out = "0";
+		return;
+	}
+
+	Out = Num1;
+
+	CNumber NBIN(!bNeg ? "1" : "-1");
 	CNumber N2DB = Num2;
 	vector<pair<CNumber, CNumber> > vMultTableMap;
 	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (ABSGreater(Num1, N2DB) > 0)
+	while (ABSGreater(Num1, N2DB) >= 0)
 	{
-		Mul(N2DB, g_Two, false, N2DB);
-		Mul(NBIN, g_Two, false, NBIN);
+		Mul(N2DB, g_Two, bNeg, N2DB);
+		Mul(NBIN, g_Two, bNeg, NBIN);
 		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	}
 
@@ -861,12 +883,13 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	{
 		if (ABSGreater(N1, vit->second) >= 0)
 		{
-			Sub(N1, vit->second, false, N1);
-			Add(vit->first, Out, false, Out);
-			if (ABSGreater(N1, Num2) <= 0)
+			Sub(N1, vit->second, bNeg, N1);
+			Add(vit->first, Out, bNeg, Out);
+			if (ABSGreater(N1, Num2) < 0)
 				break;
 		}
 	}
+
 	Out = N1;
 }
 

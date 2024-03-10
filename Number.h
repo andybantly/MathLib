@@ -142,6 +142,7 @@ class CNumber
 {
 public:
     CNumber();
+    CNumber(const char* pInput);
     CNumber(const std::string& strInput);
     CNumber(const CNumber& rhs);
     ~CNumber();
@@ -149,12 +150,14 @@ public:
 public:
     CNumber& operator = (const CNumber& rhs);
     CNumber& operator = (const std::string& rhs);
+    CNumber& operator = (const char* prhs);
     CNumber operator + (const CNumber& rhs);
     CNumber operator - (const CNumber& rhs);
     CNumber operator * (const CNumber& rhs);
     CNumber operator / (const CNumber& rhs);
     CNumber operator % (const CNumber& rhs);
-    operator const char * () { return m_strNumber.c_str(); }
+    operator std::string& () { return m_strNumber; }
+    operator const char* () { return m_strNumber.c_str(); }
 
 public:
     void SetNumber(const std::string& strInput);
@@ -284,26 +287,54 @@ class CRndPair
 public:
     CRndPair()
     {
-        m_iOp = rand() % 3 + 1;
+        m_iOp = rand() % 5 + 1;
+        Calc();
+    }
+
+    CRndPair(int iOp) : m_iOp(iOp)
+    {
+        Calc();
+    }
+protected:
+
+    void Calc()
+    {
         m_iNum1 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
-        m_iNum2 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
+        do
+        {
+            m_iNum2 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
+        } while (m_iOp > 3 && m_iNum2 == 0); // Don't allow division by 0
         m_strNum1 = std::to_string(m_iNum1);
         m_strNum2 = std::to_string(m_iNum2);
 
-        if (m_iOp == 1)
+        switch (m_iOp)
+        {
+        case 1:
             m_iSum = m_iNum1 + m_iNum2;
-        else if (m_iOp == 2)
+            break;
+        case 2:
             m_iSum = m_iNum1 - m_iNum2;
-        else
+            break;
+        case 3:
             m_iSum = m_iNum1 * m_iNum2;
+            break;
+        case 4:
+            m_iSum = m_iNum1 / m_iNum2;
+            break;
+        default:
+            m_iSum = m_iNum1 % m_iNum2;
+        }
+
         m_strSum = std::to_string(m_iSum);
     }
+
+public:
     const int& OP() const { return m_iOp; }
     const std::string& Num1() { return m_strNum1; }
     const std::string& Num2() { return m_strNum2; }
     const std::string& Sum() { return m_strSum; }
 
-protected:
+private:
     int m_iOp;
     int m_iNum1;
     int m_iNum2;

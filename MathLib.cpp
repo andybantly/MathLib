@@ -102,14 +102,6 @@ static void test()
 
 int main()
 {
-	CNumber N1("1010");
-	CNumber N2("10");
-	CNumber N3;
-	N3 = N1 * N2;
-	CNumber N4;
-	N4 = N3 / CNumber("9");
-	N4 = N3 % CNumber("9");
-
 	string strInput, strResult;
 	bool bAgain = true;
 	CNumber LastNumber("0");
