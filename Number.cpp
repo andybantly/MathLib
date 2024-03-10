@@ -10,6 +10,8 @@ mutex g_map_mutex;
 std::map<std::string, std::string, CILT> g_mapWordTo99;
 std::map<std::string, std::string, CILT> g_mapWordTo100;
 
+const CNumber g_Two("2");
+
 CNumber::CNumber() : m_bNegative(false)
 {
 	Init();
@@ -56,10 +58,10 @@ CNumber CNumber::operator + (const CNumber& rhs)
 		Add(*this, rhs, m_bNegative, Out);
 	else
 	{
-		pair<int, int> GT = Greater(*this, rhs);
+		int iGT = ABSGreater(*this, rhs);
 		if (!m_bNegative && rhs.m_bNegative) // LHS positive, RHS negative
 		{
-			switch (GT.second)
+			switch (iGT)
 			{
 			case -1: // RHS > LHS
 				Sub(rhs, *this, true, Out);
@@ -73,7 +75,7 @@ CNumber CNumber::operator + (const CNumber& rhs)
 		}
 		else // LHS negative, RHS positive
 		{
-			switch (GT.second)
+			switch (iGT)
 			{
 			case -1: // RHS > LHS
 				Sub(rhs, *this, false, Out);
@@ -98,28 +100,28 @@ CNumber CNumber::operator - (const CNumber& rhs)
 	else
 	{
 		pair<int, int> GT = Greater(*this, rhs);
-		if (!m_bNegative && !rhs.m_bNegative) // Both positive
+		if (!m_bNegative) // Both positive
 		{
 			switch (GT.first)
 			{
-			case -1: // ABS(RHS) > ABS(LHS)
+			case -1:
 				Sub(rhs, *this, true, Out);
 				break;
-			case 1: // ABS(LHS) > ABS(RHS)
+			case 1:
 				Sub(*this, rhs, false, Out);
 				break;
 			default:
-				Out = "0"; // ABS(LHS) = ABS(RHS)
+				Out = "0";
 			}
 		}
 		else // Both negative
 		{
 			switch (GT.first)
 			{
-			case -1: // ABS(LHS) > ABS(RHS)
+			case -1:
 				Sub(*this, rhs, true, Out);
 				break;
-			case 1: // ABS(RHS) > ABS(LHS)
+			case 1:
 				Sub(rhs, *this, false, Out);
 				break;
 			default:
@@ -583,7 +585,7 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 			{
 				iProd -= 10;
 				bCarry = true;
-			} // suspect that multiplying by larger like 3,4,5,...,9 changes carry prod
+			}
 			mout.push_front(g_cZero + iProd);
 		}
 
@@ -797,25 +799,75 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
-	deque<char> Div;
-	vector<string> vSum;
-	uint8_t iProd = 0, iRem = 0;
+	if (Equal(Num1.m_strNumber, Num2.m_strNumber))
+	{
+		Out = "1";
+		return;
+	}
+	else
+		Out = "0";
 
-	const string& strS1 = Num1.m_strNumber;
-	const string& strS2 = Num2.m_strNumber;
-
-	const CNumber Two("2");
-
+	CNumber NBIN("1");
 	CNumber N2DB = Num2;
+	vector<pair<CNumber, CNumber> > vMultTableMap;
+	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	while (ABSGreater(Num1, N2DB) > 0)
-		Mul(N2DB, Two, false, N2DB);
+	{
+		Mul(N2DB, g_Two, false, N2DB);
+		Mul(NBIN, g_Two, false, NBIN);
+		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	}
 
-	string::const_reverse_iterator S1_crend = (Num1.m_bNegative ? strS1.rend() - 1 : strS1.rend());
-	string::const_reverse_iterator S2_crend = (Num2.m_bNegative ? strS2.rend() - 1 : strS2.rend());
+	if (vMultTableMap.size() == 1)
+		return;
+
+	CNumber N1 = Num1;
+	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
+	for (; vit != vMultTableMap.rend(); ++vit)
+	{
+		if (ABSGreater(N1, vit->second) >= 0)
+		{
+			Sub(N1, vit->second, false, N1);
+			Add(vit->first, Out, false, Out);
+			if (ABSGreater(N1, Num2) <= 0)
+				break;
+		}
+	}
 }
 
 void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
+	Out = "0";
+	if (Equal(Num1.m_strNumber, Num2.m_strNumber))
+		return;
+
+	CNumber NBIN("1");
+	CNumber N2DB = Num2;
+	vector<pair<CNumber, CNumber> > vMultTableMap;
+	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	while (ABSGreater(Num1, N2DB) > 0)
+	{
+		Mul(N2DB, g_Two, false, N2DB);
+		Mul(NBIN, g_Two, false, NBIN);
+		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	}
+
+	if (vMultTableMap.size() == 1)
+		return;
+
+	CNumber N1 = Num1;
+	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
+	for (; vit != vMultTableMap.rend(); ++vit)
+	{
+		if (ABSGreater(N1, vit->second) >= 0)
+		{
+			Sub(N1, vit->second, false, N1);
+			Add(vit->first, Out, false, Out);
+			if (ABSGreater(N1, Num2) <= 0)
+				break;
+		}
+	}
+	Out = N1;
 }
 
 int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)
@@ -857,42 +909,44 @@ bool Equal(const std::string& strLHS, const std::string& strRHS)
 // ABS greater than
 int CNumber::ABSGreater(const CNumber& LHS, const CNumber& RHS)
 {
-	int GT = 0;
+	int iGT = 0;
 
 	const string& strLHS = LHS.m_strNumber;
 	const string& strRHS = RHS.m_strNumber;
 
-	size_t n1Len = strLHS.length() - (LHS.m_bNegative ? 1 : 0);
-	size_t n2Len = strRHS.length() - (RHS.m_bNegative ? 1 : 0);
+	uint8_t iOff1 = LHS.m_bNegative ? 1 : 0;
+	uint8_t iOff2 = RHS.m_bNegative ? 1 : 0;
+	size_t n1Len = strLHS.length() - iOff1;
+	size_t n2Len = strRHS.length() - iOff2;
 
 	if (n1Len > n2Len)
-		GT = 1;
+		iGT = 1;
 	else if (n1Len < n2Len)
-		GT = -1;
-
-	string::const_iterator LHS_cbeg = (LHS.m_bNegative ? strLHS.begin() + 1 : strLHS.begin());
-	string::const_iterator RHS_cbeg = (RHS.m_bNegative ? strRHS.begin() + 1 : strRHS.begin());
-
-	for (string::const_iterator LHS_cit = LHS_cbeg, RHS_cit = RHS_cbeg;
-		GT == 0 && (LHS_cit != strLHS.end() || RHS_cit != strRHS.end());)
+		iGT = -1;
+	else
 	{
-		uint8_t iLHS = (LHS_cit != strLHS.end() ? *LHS_cit++ : g_cZero) - g_cZero;
-		uint8_t iRHS = (RHS_cit != strRHS.end() ? *RHS_cit++ : g_cZero) - g_cZero;
+		string::const_iterator LHS_cbeg = strLHS.begin() + iOff1;
+		string::const_iterator RHS_cbeg = strRHS.begin() + iOff2;
 
-		if (iLHS < iRHS)
-			GT = -1;
-		else if (iLHS > iRHS)
-			GT = 1;
+		for (string::const_iterator LHS_cit = LHS_cbeg, RHS_cit = RHS_cbeg;
+			iGT == 0 && (LHS_cit != strLHS.end() || RHS_cit != strRHS.end());)
+		{
+			uint8_t iLHS = (LHS_cit != strLHS.end() ? *LHS_cit++ : g_cZero) - g_cZero;
+			uint8_t iRHS = (RHS_cit != strRHS.end() ? *RHS_cit++ : g_cZero) - g_cZero;
+
+			if (iLHS < iRHS)
+				iGT = -1;
+			else if (iLHS > iRHS)
+				iGT = 1;
+		}
 	}
 
-	return GT;
+	return iGT;
 }
 
-// Greater.first is LHS > RHS
-// Greater.second is ABS(LHS) > ABS(RHS)
 pair<int, int> CNumber::Greater(const CNumber& LHS, const CNumber& RHS)
 {
-	pair<int, int> GT(0, 0);
+	pair<int, int> GT(0, ABSGreater(LHS, RHS));
 
 	const string& strLHS = LHS.m_strNumber;
 	const string& strRHS = RHS.m_strNumber;
@@ -906,30 +960,7 @@ pair<int, int> CNumber::Greater(const CNumber& LHS, const CNumber& RHS)
 	else if (LHS.m_bNegative && RHS.m_bNegative && strLHS.length() != strRHS.length())
 		GT.first = strLHS.length() > strRHS.length() ? -1 : 1;
 
-	size_t n1Len = strLHS.length() - (LHS.m_bNegative ? 1 : 0);
-	size_t n2Len = strRHS.length() - (RHS.m_bNegative ? 1 : 0);
-
-	if (n1Len > n2Len)
-		GT.second = 1;
-	else if (n1Len < n2Len)
-		GT.second = -1;
-
-	string::const_iterator LHS_cbeg = (LHS.m_bNegative ? strLHS.begin() + 1 : strLHS.begin());
-	string::const_iterator RHS_cbeg = (RHS.m_bNegative ? strRHS.begin() + 1 : strRHS.begin());
-
-	for (string::const_iterator LHS_cit = LHS_cbeg, RHS_cit = RHS_cbeg;
-		GT.second == 0 && (LHS_cit != strLHS.end() || RHS_cit != strRHS.end());)
-	{
-		uint8_t iLHS = (LHS_cit != strLHS.end() ? *LHS_cit++ : g_cZero) - g_cZero;
-		uint8_t iRHS = (RHS_cit != strRHS.end() ? *RHS_cit++ : g_cZero) - g_cZero;
-
-		if (iLHS < iRHS)
-			GT.second = -1;
-		else if (iLHS > iRHS)
-			GT.second = 1;
-	}
-
-	if (GT.second)
+	if (!GT.first && GT.second)
 	{
 		if (GT.second == -1)
 		{
