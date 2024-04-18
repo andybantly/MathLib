@@ -824,21 +824,21 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 	CNumber NBIN("1");
 	CNumber N2DB = Num2;
-	vector<pair<CNumber, CNumber> > vMultTableMap;
-	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	vector<pair<CNumber, CNumber> > vMultTableVec;
+	vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	while (ABSGreater(Num1, N2DB) >= 0)
 	{
 		Mul(N2DB, g_Two, bNeg, N2DB);
 		Mul(NBIN, g_Two, bNeg, NBIN);
-		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+		vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	}
 
-	if (vMultTableMap.size() == 1)
+	if (vMultTableVec.size() == 1)
 		return;
 
 	CNumber N1 = Num1;
-	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
-	for (; vit != vMultTableMap.rend(); ++vit)
+	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableVec.rbegin() + 1;
+	for (; vit != vMultTableVec.rend(); ++vit)
 	{
 		if (ABSGreater(N1, vit->second) >= 0)
 		{
