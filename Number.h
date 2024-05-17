@@ -173,17 +173,17 @@ public:
 protected:
     void Init();
     int Convert();
-    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens);
+    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
     void Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    int BinarySearch(const std::string& strSearch, const std::vector<std::string>& vec, int nSize);
     int ABSGreater(const CNumber& LHS, const CNumber& RHS);
     std::pair<int, int> Greater(const CNumber& LHS, const CNumber& RHS);
 
     bool m_bNegative;
+    int m_iDecPos; // 0 = Integer, Not 0 = Floating Point
     std::string m_strNumber;
     std::string m_strPhrase;
     std::string m_strBinary;

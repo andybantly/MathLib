@@ -12,19 +12,19 @@ std::map<std::string, std::string, CILT> g_mapWordTo100;
 
 const CNumber g_Two("2");
 
-CNumber::CNumber() : m_bNegative(false)
+CNumber::CNumber()
 {
 	Init();
 }
 
-CNumber::CNumber(const string& strInput) : m_bNegative(false)
+CNumber::CNumber(const string& strInput)
 {
 	Init();
 	
 	SetNumber(strInput);
 }
 
-CNumber::CNumber(const char* pInput) : m_bNegative(false)
+CNumber::CNumber(const char* pInput)
 {
 	Init();
 
@@ -46,6 +46,7 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 	{
 		m_bNegative = rhs.m_bNegative;
 		m_strNumber = rhs.m_strNumber;
+		m_iDecPos   = rhs.m_iDecPos;
 		m_strPhrase = rhs.m_strPhrase;
 		m_strBinary = rhs.m_strBinary;
 	}
@@ -169,10 +170,27 @@ CNumber CNumber::operator % (const CNumber& rhs)
 
 void CNumber::SetNumber(const string& strInput)
 {
-	m_bNegative = false;
 	if (!strInput.empty())
+	{
 		m_bNegative = *(strInput.begin()) == '-';
-	m_strNumber = strInput;
+		if (!m_bNegative && !isdigit(*(strInput.begin())) ||
+			!isdigit(*(strInput.end() - 1)))
+			Contract(strInput, m_strNumber);
+		else
+			m_strNumber = strInput;
+	}
+	else
+	{
+		m_strNumber.clear();
+		m_bNegative = false;
+	}
+
+	size_t stPos = strInput.find('.'); // TODO - Not locale independent, make it so
+	if (stPos != string::npos)
+		m_iDecPos = (int)(strInput.length() - stPos);
+	else
+		m_iDecPos = 0;
+
 	m_strPhrase.clear();
 	m_strBinary.clear();
 }
@@ -192,7 +210,7 @@ int CNumber::Expand(const string& strInput, string& strResult)
 	int digs, ld, nd, nh;
 
 	string strLhs;
-	size_t stP1 = strInput.find_first_of('.');
+	size_t stP1 = strInput.find('.');
 	if (stP1 == string::npos)
 		strLhs = strInput;
 	else
@@ -422,10 +440,10 @@ int CNumber::Contract(const string& strInput, string& strResult)
 
 void CNumber::Init()
 {
-	lock_guard<mutex> guard(g_map_mutex);
-
 	if (g_bInit)
 		return;
+
+	lock_guard<mutex> guard(g_map_mutex);
 
 	for (int iOne = 0; iOne < g_nOnes; ++iOne)
 		g_mapWordTo99[g_ones[iOne]] = g_nones[iOne];
@@ -466,7 +484,7 @@ int CNumber::Convert()
 	return iRet;
 }
 
-void CNumber::Split(const string& strInput, vector<string>& vstrTokens)
+void CNumber::Split(const string& strInput, vector<string>& vstrTokens, const char cFind)
 {
 	if (strInput.empty())
 		return;
@@ -475,7 +493,7 @@ void CNumber::Split(const string& strInput, vector<string>& vstrTokens)
 	size_t istart = 0, ipos;
 	do
 	{
-		ipos = strInput.find(' ', istart);
+		ipos = strInput.find(cFind, istart);
 		if (ipos == string::npos)
 			vstrTokens.push_back(strInput.substr(istart));
 		else
@@ -814,6 +832,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 {
 	if (Equal(Num2.m_strNumber, "0"))
 		return;
+
 	if (ABSGreater(Num1.m_strNumber, Num2.m_strNumber) == 0)
 	{
 		Out = !bNeg ? "1" : "-1";
@@ -891,25 +910,6 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	}
 
 	Out = N1;
-}
-
-int CNumber::BinarySearch(const string& strSearch, const vector<string> & vec, int nSize)
-{
-	int nLeft = 0;
-	int nRight = nSize - 1;
-	int nMiddle;
-
-	while (nLeft <= nRight)
-	{
-		nMiddle = nLeft + ((nRight - nLeft) / 2);
-		if (vec[nMiddle].compare(strSearch) < 0)
-			nLeft = nMiddle + 1;
-		else if (vec[nMiddle].compare(strSearch) > 0)
-			nRight = nMiddle - 1;
-		else
-			return nMiddle;
-	}
-	return -1;
 }
 
 bool Equal(const std::string& strLHS, const std::string& strRHS)
