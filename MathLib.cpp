@@ -122,9 +122,9 @@ int main()
 				const string& strPhrase = Number.GetPhrase();
 				const string& strBinary = Number.GetBinary();
 				string strBase10;
-				Number.ToBase10(strBinary, strBase10); // Promote to internal string m_strBase10
+				Number.ToBase10(strBinary, strBase10);
 				cout << strNumber << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
-				cout << "+ " << LastNumber.GetNumber() << endl;
+				cout << "+" << endl << LastNumber.GetNumber() << endl;
 				CNumber Sum = Number + LastNumber;
 				Sum.ToBase10(Sum.GetBinary(), strBase10);
 				cout << Sum.GetNumber() << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;

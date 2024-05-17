@@ -173,9 +173,12 @@ void CNumber::SetNumber(const string& strInput)
 	if (!strInput.empty())
 	{
 		m_bNegative = *(strInput.begin()) == '-';
-		if (!m_bNegative && !isdigit(*(strInput.begin())) ||
+		if ((!m_bNegative && !isdigit(*(strInput.begin()))) ||
 			!isdigit(*(strInput.end() - 1)))
-			Contract(strInput, m_strNumber);
+		{
+			if (Contract(strInput, m_strNumber) != 0)
+				throw(std::exception("Invalid Number"));
+		}
 		else
 			m_strNumber = strInput;
 	}
@@ -207,7 +210,7 @@ int CNumber::Expand(const string& strInput, string& strResult)
 
 	int iResult = 0;
 	m_bNegative = false;
-	int digs, ld, nd, nh;
+	int digs, nd, nh;
 
 	string strLhs;
 	size_t stP1 = strInput.find('.');
@@ -228,22 +231,7 @@ start:
 	nh = digs / 3;
 	if (nh <= g_nHuns)
 	{
-		ld = digs % 3;
-		switch (ld)
-		{
-		case 0:
-			nd = 1;
-			break;
-		case 1:
-			nd = 2;
-			break;
-		case 2:
-			nd = 3;
-			break;
-		default:
-			break;
-		}
-
+		nd = digs % 3 + 1;
 		string strLhs2 = strLhs.substr(0, nd);
 		int iLhs2, digs2, div, l;
 		try
