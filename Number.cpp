@@ -4,7 +4,6 @@
 
 using namespace std;
 
-static atomic<bool> g_bInit(false);
 mutex g_map_mutex;
 
 std::map<std::string, std::string, CILT> g_mapWordTo99;
@@ -426,6 +425,8 @@ int CNumber::Contract(const string& strInput, string& strResult)
 
 void CNumber::Init()
 {
+	static atomic<bool> g_bInit(false);
+
 	if (g_bInit)
 		return;
 
