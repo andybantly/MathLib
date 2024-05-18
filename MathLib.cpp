@@ -138,6 +138,28 @@ int main()
 			{
 				vector<string> vNumbers;
 				Split(strInput, vNumbers, ' ');
+				if (vNumbers.size() > 3)
+				{
+					vector<string> vNumbers2;
+					string strConcatNumber;
+					for (vector<string>::iterator it = vNumbers.begin(); it != vNumbers.end(); ++it)
+					{
+						if (*it == "+" || *it == "-" || *it == "*" || *it == "/" || *it == "%")
+						{
+							vNumbers2.push_back(strConcatNumber);
+							vNumbers2.push_back(*it);
+							strConcatNumber = "";
+						}
+						else
+						{
+							if (strConcatNumber.length() > 0)
+								strConcatNumber += " ";
+							strConcatNumber += *it;
+						}
+					}
+					vNumbers2.push_back(strConcatNumber);
+					vNumbers = vNumbers2;
+				}
 				if (vNumbers.size() == 1)
 				{
 					CNumber Number(strInput);
