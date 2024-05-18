@@ -75,7 +75,6 @@ static void test()
 {
 	CDuration Duration("Test Expansion/Contraction:");
 
-	vector<pair<unsigned long long, unsigned long long> > vtp;
 	unsigned long long numt = thread::hardware_concurrency();
 	unsigned long long dtpt = INT_MAX / numt;
 

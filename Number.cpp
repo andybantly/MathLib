@@ -4,7 +4,7 @@
 
 using namespace std;
 
-bool g_bInit = false;
+static atomic<bool> g_bInit(false);
 mutex g_map_mutex;
 
 std::map<std::string, std::string, CILT> g_mapWordTo99;
@@ -20,14 +20,12 @@ CNumber::CNumber()
 CNumber::CNumber(const string& strInput)
 {
 	Init();
-	
 	SetNumber(strInput);
 }
 
 CNumber::CNumber(const char* pInput)
 {
 	Init();
-
 	SetNumber(pInput);
 }
 
