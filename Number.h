@@ -177,6 +177,7 @@ protected:
     void Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void AddFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    void SubFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
