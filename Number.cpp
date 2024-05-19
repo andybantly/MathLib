@@ -486,24 +486,24 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 	deque<char> binary;
 
 	string strIn = strInput;
-	string::iterator it = strIn.begin();
+	string::const_iterator cit = strIn.begin();
 	if (m_bNegative)
-		it++;
+		cit++;
 	for (;;)
 	{
 		// Compute the denominator of the division
-		idnm = idnm * 10 + *it - g_cZero;
-		if (idnm < 2 && it + 1 != strIn.end())
+		idnm = idnm * 10 + *cit - g_cZero;
+		if (idnm < 2 && cit + 1 != strIn.end())
 		{
 			// Carry a 0
 			if (!strOut.empty())
 				strOut += g_cZero;
 
 			// The denominator has to be greater than 2 now
-			idnm = idnm * 10 + (*(it + 1) - g_cZero);
+			idnm = idnm * 10 + (*(cit + 1) - g_cZero);
 
 			// Move to the next character
-			it += 2;
+			cit += 2;
 		}
 		else
 		{
@@ -515,7 +515,7 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 			}
 
 			// Move to the next character
-			it++;
+			cit++;
 		}
 
 		// Append the digit to the output that becomes the new input from integer division by 2
@@ -523,7 +523,7 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 		idnm = idnm % 2;
 
 		// Has the input been processed
-		if (it == strIn.end())
+		if (cit == strIn.end())
 		{
 			// Add the remainder of 0 or 1 to the binary string
 			binary.push_front(g_cZero + idnm);
@@ -532,7 +532,7 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 			strIn = strOut;
 			strOut.clear();
 			idnm = 0;
-			it = strIn.begin();
+			cit = strIn.begin();
 		}
 	}
 	if (m_bNegative)
@@ -551,14 +551,15 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 	CNumber Out;
 	string strNum = g_one;
 	string::const_reverse_iterator crit = strInput.rbegin();
+	string::const_reverse_iterator crend = m_bNegative ? strInput.rend() - 1 : strInput.rend();
 	do
 	{
 		uint8_t iProd;
 		deque<char> mout;
 		bool bCarry = false;
-		for (string::reverse_iterator rit = strNum.rbegin(); rit != strNum.rend(); )
+		for (string::const_reverse_iterator crit2 = strNum.rbegin(); crit2 != strNum.rend(); )
 		{
-			uint8_t iMP = *rit++ - g_cZero;
+			uint8_t iMP = *crit2++ - g_cZero;
 			iProd = 2 * iMP;
 			if (bCarry)
 			{
@@ -578,11 +579,11 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 
 		if (*crit++ == g_cOne)
 		{
-			Add(CNumber(strNum), CNumber(strResult), false, Out);
+			Add(CNumber(strNum), CNumber(strResult), m_bNegative, Out);
 			strResult = Out.GetNumber();
 		}
 		strNum = string(mout.begin(), mout.end());
-	} while (crit != strInput.rend());
+	} while (crit != crend);
 }
 
 void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
@@ -855,7 +856,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	else
 		Out = "0";
 
-	CNumber NBIN(g_one);
+	CNumber NBIN(!bNeg ? g_one : g_none);
 	CNumber N2DB = Num2;
 	vector<pair<CNumber, CNumber> > vMultTableVec;
 	vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
@@ -912,7 +913,7 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 	CNumber N1 = Num1;
 	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
-	for (; vit != vMultTableMap.rend(); ++vit)
+	for (;vit != vMultTableMap.rend(); ++vit)
 	{
 		if (ABSGreater(N1, vit->second) >= 0)
 		{
@@ -922,7 +923,6 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 				break;
 		}
 	}
-
 	Out = N1;
 }
 
