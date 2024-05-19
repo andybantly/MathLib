@@ -122,11 +122,13 @@ void Split(const string& strInput, vector<string>& vstrTokens, const char cFind)
 
 int main()
 {
+	CNumber::Init();
+
 	string strInput, strResult;
 	bool bAgain = true;
 	do
 	{
-		cout << "Enter a number, set of numbers separated by arithmetic, or 'test' for verification or 'quit' to exit. " << endl << "Input: ";
+		cout << "Enter a number, set of numbers separated by arithmetic operations (+,-,*,/,%)" << endl << "Enter 'test' for verification or 'quit' to exit." << endl << "Examples: 12 * 11 + 12, three + four - two, 9 / 3 + 7 * 10, 10 % 3" << endl << "Input: ";
 
 		strInput.clear();
 		char c;
@@ -170,6 +172,7 @@ int main()
 					string strBase10;
 					Number.ToBase10(strBinary, strBase10);
 					cout << strNumber << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
+					cout << endl;
 				}
 				else if (vNumbers.size() >= 3)
 				{
@@ -177,6 +180,7 @@ int main()
 					{
 						CNumber Number(vNumbers[0]);
 						CNumber Number2(vNumbers[2]);
+						CNumber Sum;
 
 						string strBase10;
 						Number.ToBase10(Number.GetBinary(), strBase10);
@@ -184,7 +188,6 @@ int main()
 						cout << vNumbers[1] << endl;
 						Number2.ToBase10(Number2.GetBinary(), strBase10);
 						cout << Number2.GetNumber() << " = " << Number2.GetPhrase() << " = " << Number2.GetBinary() << " = " << strBase10 << endl;
-						CNumber Sum;
 						if (vNumbers[1] == "+")
 							Sum = Number + Number2;
 						else if (vNumbers[1] == "-")
@@ -203,6 +206,7 @@ int main()
 						for (std::vector<string>::iterator vit = vNumbers.begin() + 3; vit != vNumbers.end(); ++vit)
 							vNumbers2.push_back(*vit);
 						vNumbers = vNumbers2;
+						cout << endl;
 					} while (vNumbers.size() > 1);
 				}
 				else

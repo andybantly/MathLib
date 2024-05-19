@@ -169,12 +169,13 @@ public:
     const std::string& GetNumber();
     const std::string& GetPhrase();
     const std::string& GetBinary();
+    static void Init();
 
 protected:
-    void Init();
     int Convert();
     void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
     void Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    void AddFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);

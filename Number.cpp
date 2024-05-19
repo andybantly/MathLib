@@ -4,27 +4,25 @@
 
 using namespace std;
 
-mutex g_map_mutex;
-
 std::map<std::string, std::string, CILT> g_mapWordTo99;
 std::map<std::string, std::string, CILT> g_mapWordTo100;
 
+const string g_one("1");
+const string g_none("-1");
 const CNumber g_Two("2");
 
 CNumber::CNumber()
 {
-	Init();
+	SetNumber("");
 }
 
 CNumber::CNumber(const string& strInput)
 {
-	Init();
 	SetNumber(strInput);
 }
 
 CNumber::CNumber(const char* pInput)
 {
-	Init();
 	SetNumber(pInput);
 }
 
@@ -66,7 +64,12 @@ CNumber CNumber::operator + (const CNumber& rhs)
 {
 	CNumber Out;
 	if (m_bNegative == rhs.m_bNegative)
-		Add(*this, rhs, m_bNegative, Out);
+	{
+		if (m_iDecPos == 0 && rhs.m_iDecPos == 0)
+			Add(*this, rhs, m_bNegative, Out);
+		else
+			AddFP(*this, rhs, m_bNegative, Out);
+	}
 	else
 	{
 		int iGT = ABSGreater(*this, rhs);
@@ -171,25 +174,26 @@ void CNumber::SetNumber(const string& strInput)
 	{
 		m_bNegative = *(strInput.begin()) == '-';
 		if ((!m_bNegative && !isdigit(*(strInput.begin()))) ||
-			!isdigit(*(strInput.end() - 1)))
+			(*(strInput.end() - 1) != '.' && !isdigit(*(strInput.end() - 1))))
 		{
 			if (Contract(strInput, m_strNumber) != 0)
 				throw(std::exception("Invalid Number"));
 		}
 		else
 			m_strNumber = strInput;
+
+		size_t stPos = strInput.find('.'); // TODO - Not locale independent, make it so
+		if (stPos != string::npos)
+			m_iDecPos = (int)(strInput.length() - stPos);
+		else
+			m_iDecPos = 0;
 	}
 	else
 	{
 		m_strNumber.clear();
 		m_bNegative = false;
-	}
-
-	size_t stPos = strInput.find('.'); // TODO - Not locale independent, make it so
-	if (stPos != string::npos)
-		m_iDecPos = (int)(strInput.length() - stPos);
-	else
 		m_iDecPos = 0;
+	}
 
 	m_strPhrase.clear();
 	m_strBinary.clear();
@@ -423,41 +427,6 @@ int CNumber::Contract(const string& strInput, string& strResult)
 	return iResult;
 }
 
-void CNumber::Init()
-{
-	static atomic<bool> g_bInit(false);
-
-	if (g_bInit)
-		return;
-
-	lock_guard<mutex> guard(g_map_mutex);
-
-	for (int iOne = 0; iOne < g_nOnes; ++iOne)
-		g_mapWordTo99[g_ones[iOne]] = g_nones[iOne];
-
-	for (int iTen = 2; iTen < g_nTens; ++iTen)
-		g_mapWordTo99[g_tens[iTen]] = g_ntens[iTen];
-
-	for (int iTen = 2; iTen < g_nTens - 1; ++iTen)
-	{
-		for (int iOne = 1; iOne < 10; ++iOne)
-		{
-			string strWord = g_tens[iTen] + "-" + g_ones[iOne];
-			string strNum = to_string(iTen * 10 + iOne);
-			g_mapWordTo99[strWord] = strNum;
-		}
-	}
-
-	for (int iHun = 0, nZero = 3; iHun < g_nHuns; iHun++, nZero += 3)
-	{
-		string strHun(nZero, g_cZero);
-		strHun = "1" + strHun;
-		g_mapWordTo100[g_huns[iHun]] = strHun;
-	}
-
-	g_bInit = true;
-}
-
 int CNumber::Convert()
 {
 	int iRet = Expand(m_strNumber, m_strPhrase);
@@ -583,7 +552,7 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 		return;
 
 	CNumber Out;
-	string strNum = "1";
+	string strNum = g_one;
 	string::const_reverse_iterator crit = strInput.rbegin();
 	do
 	{
@@ -619,6 +588,7 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 	} while (crit != strInput.rend());
 }
 
+// Add without Floating Point
 void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
 	uint8_t iSum;
@@ -641,6 +611,83 @@ void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		uint8_t N2 = S2 - g_cZero;
 
 		iSum = N1 +	N2;
+
+		if (bCarry)
+		{
+			iSum++;
+			bCarry = false;
+		}
+
+		if (iSum >= 10)
+		{
+			iSum -= 10;
+			bCarry = true;
+		}
+
+		Sum.push_front(g_cZero + iSum);
+	}
+
+	if (bCarry)
+		Sum.push_front(g_cOne);
+
+	if (bNeg)
+		Sum.push_front('-');
+
+	Out.SetNumber(string(Sum.begin(), Sum.end()));
+}
+
+// Add with Floating Point
+void CNumber::AddFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
+{
+	uint8_t iSum;
+	deque<char> Sum;
+	bool bCarry = false;
+
+	const string& strS1 = Num1.m_strNumber;
+	const string& strS2 = Num2.m_strNumber;
+
+	int N1DP = Num1.m_iDecPos;
+	int N2DP = Num2.m_iDecPos;
+	int SDP = max(N1DP, N2DP);
+
+	string::const_reverse_iterator S1_crend = (Num1.m_bNegative ? strS1.rend() - 1 : strS1.rend());
+	string::const_reverse_iterator S2_crend = (Num2.m_bNegative ? strS2.rend() - 1 : strS2.rend());
+
+	for (string::const_reverse_iterator S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
+		S1_crit != S1_crend || S2_crit != S2_crend;)
+	{
+		uint8_t S1, S2;
+		if (N1DP != N2DP)
+		{
+			if (N1DP > N2DP)
+			{
+				S1 = S1_crit != S1_crend ? *S1_crit++ : g_cZero;
+				S2 = g_cZero;
+				N1DP--;
+			}
+			else
+			{
+				S1 = g_cZero;
+				S2 = S2_crit != S2_crend ? *S2_crit++ : g_cZero;
+				N2DP--;
+			}
+		}
+		else
+		{
+			S1 = S1_crit != S1_crend ? *S1_crit++ : g_cZero;
+			S2 = S2_crit != S2_crend ? *S2_crit++ : g_cZero;
+		}
+
+		if (S1 == '.' || S2 == '.')
+		{
+			Sum.push_front('.');
+			continue;
+		}
+
+		uint8_t N1 = S1 - g_cZero;
+		uint8_t N2 = S2 - g_cZero;
+
+		iSum = N1 + N2;
 
 		if (bCarry)
 		{
@@ -822,13 +869,13 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 	if (ABSGreater(Num1.m_strNumber, Num2.m_strNumber) == 0)
 	{
-		Out = !bNeg ? "1" : "-1";
+		Out = !bNeg ? g_one : g_none;
 		return;
 	}
 	else
 		Out = "0";
 
-	CNumber NBIN("1");
+	CNumber NBIN(g_one);
 	CNumber N2DB = Num2;
 	vector<pair<CNumber, CNumber> > vMultTableVec;
 	vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
@@ -869,7 +916,7 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 	Out = Num1;
 
-	CNumber NBIN(!bNeg ? "1" : "-1");
+	CNumber NBIN(!bNeg ? g_one : g_none);
 	CNumber N2DB = Num2;
 	vector<pair<CNumber, CNumber> > vMultTableMap;
 	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
@@ -993,4 +1040,30 @@ pair<int, int> CNumber::Greater(const CNumber& LHS, const CNumber& RHS)
 	}
 		
 	return GT;
+}
+
+void CNumber::Init()
+{
+	for (int iOne = 0; iOne < g_nOnes; ++iOne)
+		g_mapWordTo99[g_ones[iOne]] = g_nones[iOne];
+
+	for (int iTen = 2; iTen < g_nTens; ++iTen)
+		g_mapWordTo99[g_tens[iTen]] = g_ntens[iTen];
+
+	for (int iTen = 2; iTen < g_nTens - 1; ++iTen)
+	{
+		for (int iOne = 1; iOne < 10; ++iOne)
+		{
+			string strWord = g_tens[iTen] + "-" + g_ones[iOne];
+			string strNum = to_string(iTen * 10 + iOne);
+			g_mapWordTo99[strWord] = strNum;
+		}
+	}
+
+	for (int iHun = 0, nZero = 3; iHun < g_nHuns; iHun++, nZero += 3)
+	{
+		string strHun(nZero, g_cZero);
+		strHun = g_one + strHun;
+		g_mapWordTo100[g_huns[iHun]] = strHun;
+	}
 }

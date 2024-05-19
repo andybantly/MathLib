@@ -8,8 +8,22 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
 {
+	static mutex g_test_mutex;
+
 	TEST_CLASS(TestMathLib)
 	{
+		static bool Init()
+		{
+			static atomic<bool> bInit(false);
+			static lock_guard<mutex> guard(g_test_mutex);
+			if (!bInit)
+			{
+				CNumber::Init();
+				bInit = true;
+			}
+			return bInit;
+		}
+
 		static void Test(unsigned long long ullb, unsigned long long ulle)
 		{
 			CNumber MathLib;
@@ -35,6 +49,7 @@ namespace TestMathLib
 	public:
 		TEST_METHOD(Addition)
 		{
+			Init();
 			CNumber N1, N2, N3;
 
 			// 10 + 15 = 25
@@ -115,6 +130,7 @@ namespace TestMathLib
 
 		TEST_METHOD(Subtraction)
 		{
+			Init();
 			CNumber N1, N2, N3;
 
 			// 10 - 15 = -5
@@ -185,6 +201,7 @@ namespace TestMathLib
 
 		TEST_METHOD(Multiplication)
 		{
+			Init();
 			CNumber N1, N2, N3;
 
 			// 10 * 15 = 150
@@ -250,6 +267,7 @@ namespace TestMathLib
 
 		TEST_METHOD(Division)
 		{
+			Init();
 			CNumber N1, N2, N3;
 
 			// 150 / 10 = 15
@@ -316,6 +334,7 @@ namespace TestMathLib
 
 		TEST_METHOD(RandomMath)
 		{
+			Init();
 			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX * 5;
 			CNumber N1, N2, N3;
@@ -350,6 +369,7 @@ namespace TestMathLib
 
 		TEST_METHOD(RandomAdd)
 		{
+			Init();
 			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX;
 			CNumber N1, N2, N3;
@@ -367,6 +387,7 @@ namespace TestMathLib
 
 		TEST_METHOD(RandomSub)
 		{
+			Init();
 			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX;
 			CNumber N1, N2, N3;
@@ -401,6 +422,7 @@ namespace TestMathLib
 
 		TEST_METHOD(RandomDiv)
 		{
+			Init();
 			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX;
 			CNumber N1, N2, N3;
@@ -419,6 +441,7 @@ namespace TestMathLib
 
 		TEST_METHOD(RandomMod)
 		{
+			Init();
 			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX;
 			CNumber N1, N2, N3;
@@ -437,6 +460,7 @@ namespace TestMathLib
 
 		TEST_METHOD(TestLib)
 		{
+			Init();
 			vector<pair<unsigned long long, unsigned long long> > vtp;
 			unsigned long long numt = thread::hardware_concurrency();
 			unsigned long long dtpt = (RAND_MAX * 4) / numt;
