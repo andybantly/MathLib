@@ -63,77 +63,37 @@ CNumber& CNumber::operator = (const char* prhs)
 CNumber CNumber::operator + (const CNumber& rhs)
 {
 	CNumber Out;
-	if (m_iDecPos == 0 && rhs.m_iDecPos == 0)
-	{
-		if (m_bNegative == rhs.m_bNegative)
-			Add(*this, rhs, m_bNegative, Out);
-		else
-		{
-			int iGT = ABSGreater(*this, rhs);
-			if (!m_bNegative && rhs.m_bNegative) // LHS positive, RHS negative
-			{
-				switch (iGT)
-				{
-				case -1: // RHS > LHS
-					Sub(rhs, *this, true, Out);
-					break;
-				case 1: // LHS > RHS
-					Sub(*this, rhs, false, Out);
-					break;
-				default:
-					Out = "0";
-				}
-			}
-			else // LHS negative, RHS positive
-			{
-				switch (iGT)
-				{
-				case -1: // RHS > LHS
-					Sub(rhs, *this, false, Out);
-					break;
-				case 1: // LHS > RHS
-					Sub(*this, rhs, true, Out);
-					break;
-				default:
-					Out = "0";
-				}
-			}
-		}
-	}
+	if (m_bNegative == rhs.m_bNegative)
+		Add(*this, rhs, m_bNegative, Out);
 	else
 	{
-		if (m_bNegative == rhs.m_bNegative)
-			AddFP(*this, rhs, m_bNegative, Out);
-		else
+		int iGT = ABSGreater(*this, rhs);
+		if (!m_bNegative && rhs.m_bNegative) // LHS positive, RHS negative
 		{
-			int iGT = ABSGreater(*this, rhs);
-			if (!m_bNegative && rhs.m_bNegative) // LHS positive, RHS negative
+			switch (iGT)
 			{
-				switch (iGT)
-				{
-				case -1: // RHS > LHS
-					SubFP(rhs, *this, true, Out);
-					break;
-				case 1: // LHS > RHS
-					SubFP(*this, rhs, false, Out);
-					break;
-				default:
-					Out = "0";
-				}
+			case -1: // RHS > LHS
+				Sub(rhs, *this, true, Out);
+				break;
+			case 1: // LHS > RHS
+				Sub(*this, rhs, false, Out);
+				break;
+			default:
+				Out = "0";
 			}
-			else // LHS negative, RHS positive
+		}
+		else // LHS negative, RHS positive
+		{
+			switch (iGT)
 			{
-				switch (iGT)
-				{
-				case -1: // RHS > LHS
-					SubFP(rhs, *this, false, Out);
-					break;
-				case 1: // LHS > RHS
-					SubFP(*this, rhs, true, Out);
-					break;
-				default:
-					Out = "0";
-				}
+			case -1: // RHS > LHS
+				Sub(rhs, *this, false, Out);
+				break;
+			case 1: // LHS > RHS
+				Sub(*this, rhs, true, Out);
+				break;
+			default:
+				Out = "0";
 			}
 		}
 	}
@@ -143,79 +103,38 @@ CNumber CNumber::operator + (const CNumber& rhs)
 CNumber CNumber::operator - (const CNumber& rhs)
 {
 	CNumber Out;
-	if (m_iDecPos == 0 && rhs.m_iDecPos == 0)
-	{
-		if ((!m_bNegative && rhs.m_bNegative) || // LHS positive, RHS negative
-			(m_bNegative && !rhs.m_bNegative)) // LHS negative, RHS positive
-			Add(*this, rhs, m_bNegative, Out);
-		else
-		{
-			pair<int, int> GT = Greater(*this, rhs);
-			if (!m_bNegative) // Both positive
-			{
-				switch (GT.first)
-				{
-				case -1:
-					Sub(rhs, *this, true, Out);
-					break;
-				case 1:
-					Sub(*this, rhs, false, Out);
-					break;
-				default:
-					Out = "0";
-				}
-			}
-			else // Both negative
-			{
-				switch (GT.first)
-				{
-				case -1:
-					Sub(*this, rhs, true, Out);
-					break;
-				case 1:
-					Sub(rhs, *this, false, Out);
-					break;
-				default:
-					Out = "0";
-				}
-			}
-		}
-	}
+	if ((!m_bNegative && rhs.m_bNegative) || // LHS positive, RHS negative
+		(m_bNegative && !rhs.m_bNegative)) // LHS negative, RHS positive
+		Add(*this, rhs, m_bNegative, Out);
 	else
 	{
-		if ((!m_bNegative && rhs.m_bNegative) || // LHS positive, RHS negative
-			(m_bNegative && !rhs.m_bNegative)) // LHS negative, RHS positive
-			AddFP(*this, rhs, m_bNegative, Out);
-		else
+		pair<int, int> GT = Greater(*this, rhs);
+		if (!m_bNegative) // Both positive
 		{
-			pair<int, int> GT = Greater(*this, rhs);
-			if (!m_bNegative) // Both positive
+			switch (GT.first)
 			{
-				switch (GT.first)
-				{
-				case -1:
-					SubFP(rhs, *this, true, Out);
-					break;
-				case 1:
-					SubFP(*this, rhs, false, Out);
-					break;
-				default:
-					Out = "0";
-				}
+			case -1:
+				Sub(rhs, *this, true, Out);
+				break;
+			case 1:
+				Sub(*this, rhs, false, Out);
+				break;
+			default:
+				Out = "0";
 			}
-			else // Both negative
+		}
+		else // Both negative
+		{
+			switch (GT.first)
 			{
-				switch (GT.first)
-				{
-				case -1:
-					SubFP(*this, rhs, true, Out);
-					break;
-				case 1:
-					SubFP(rhs, *this, false, Out);
-					break;
-				default:
-					Out = "0";
-				}
+			case -1:
+				Sub(*this, rhs, true, Out);
+				break;
+			case 1:
+				Sub(rhs, *this, false, Out);
+				break;
+			default:
+				Out = "0";
 			}
 		}
 	}
@@ -666,56 +585,7 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 	} while (crit != strInput.rend());
 }
 
-// Add without Floating Point
 void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
-{
-	uint8_t iSum;
-	deque<char> Sum;
-	bool bCarry = false;
-
-	const string& strS1 = Num1.m_strNumber;
-	const string& strS2 = Num2.m_strNumber;
-
-	string::const_reverse_iterator S1_crend = (Num1.m_bNegative ? strS1.rend() - 1 : strS1.rend());
-	string::const_reverse_iterator S2_crend = (Num2.m_bNegative ? strS2.rend() - 1 : strS2.rend());
-
-	for (string::const_reverse_iterator S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
-		S1_crit != S1_crend	|| S2_crit != S2_crend;)
-	{
-		uint8_t S1 = S1_crit != S1_crend ? *S1_crit++ : g_cZero;
-		uint8_t S2 = S2_crit != S2_crend ? *S2_crit++ : g_cZero;
-
-		uint8_t N1 = S1 - g_cZero;
-		uint8_t N2 = S2 - g_cZero;
-
-		iSum = N1 +	N2;
-
-		if (bCarry)
-		{
-			iSum++;
-			bCarry = false;
-		}
-
-		if (iSum >= 10)
-		{
-			iSum -= 10;
-			bCarry = true;
-		}
-
-		Sum.push_front(g_cZero + iSum);
-	}
-
-	if (bCarry)
-		Sum.push_front(g_cOne);
-
-	if (bNeg)
-		Sum.push_front('-');
-
-	Out.SetNumber(string(Sum.begin(), Sum.end()));
-}
-
-// Add with Floating Point
-void CNumber::AddFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
 	uint8_t iSum;
 	deque<char> Sum;
@@ -791,63 +661,7 @@ void CNumber::AddFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber
 	Out.SetNumber(string(Sum.begin(), Sum.end()));
 }
 
-// Subtraction without floating point
 void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
-{
-	uint8_t iSum = 0, iSub = 0;
-	deque<char> Sum;
-	deque<char> LZ;
-
-	const string& strS1 = Num1.m_strNumber;
-	const string& strS2 = Num2.m_strNumber;
-
-	string::const_reverse_iterator S1_crend = (Num1.m_bNegative ? strS1.rend() - 1 : strS1.rend());
-	string::const_reverse_iterator S2_crend = (Num2.m_bNegative ? strS2.rend() - 1 : strS2.rend());
-
-	for (string::const_reverse_iterator S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
-		S1_crit != S1_crend || S2_crit != S2_crend;)
-	{
-		uint8_t S1 = S1_crit != S1_crend ? *S1_crit++ : g_cZero;
-		uint8_t S2 = S2_crit != S2_crend ? *S2_crit++ : g_cZero;
-
-		uint8_t N1 = S1 - g_cZero;
-		uint8_t N2 = S2 - g_cZero;
-
-		if (N1 >= N2 + iSub)
-		{
-			iSum = N1 - N2 - iSub;
-			iSub = 0;
-		}
-		else
-		{
-			iSum = N1 + 10 - N2 - iSub;
-			iSub = 1;
-		}
-
-		if (iSum)
-		{
-			if (!LZ.empty())
-			{
-				for (deque<char>::const_reverse_iterator crit = LZ.rbegin(); crit != LZ.rend(); ++crit)
-					Sum.push_front(*crit);
-				LZ.clear();
-			}
-			Sum.push_front(g_cZero + iSum);
-		}
-		else
-			LZ.push_front(g_cZero);
-	}
-
-	if (Sum.empty())
-		Sum.push_front(g_cZero);
-	else if (bNeg)
-		Sum.push_front('-');
-
-	Out.SetNumber(string(Sum.begin(), Sum.end()));
-}
-
-// Subtraction with floating point
-void CNumber::SubFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
 	uint8_t iSum = 0, iSub = 0;
 	deque<char> Sum;
