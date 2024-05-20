@@ -485,10 +485,13 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 	uint8_t idnm = 0;
 	deque<char> binary;
 
-	string strIn = strInput;
-	string::const_iterator cit = strIn.begin();
+	string strIn;
 	if (m_bNegative)
-		cit++;
+		strIn = strInput.substr(1);
+	else
+		strIn = strInput;
+
+	string::const_iterator cit = strIn.begin();
 	for (;;)
 	{
 		// Compute the denominator of the division
@@ -535,6 +538,7 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 			cit = strIn.begin();
 		}
 	}
+
 	if (m_bNegative)
 		binary.push_front('-');
 
@@ -1024,26 +1028,28 @@ pair<int, int> CNumber::Greater(const CNumber& LHS, const CNumber& RHS)
 
 void CNumber::Init()
 {
+	string strTen, strWord, strNum, strHun;
 	for (int iOne = 0; iOne < g_nOnes; ++iOne)
 		g_mapWordTo99[g_ones[iOne]] = g_nones[iOne];
 
 	for (int iTen = 2; iTen < g_nTens; ++iTen)
 		g_mapWordTo99[g_tens[iTen]] = g_ntens[iTen];
 
-	for (int iTen = 2; iTen < g_nTens - 1; ++iTen)
+	for (int iTen = 2, iTens; iTen < g_nTens - 1; ++iTen)
 	{
+		iTens = iTen * 10;
+		strTen = g_tens[iTen] + "-";
 		for (int iOne = 1; iOne < 10; ++iOne)
 		{
-			string strWord = g_tens[iTen] + "-" + g_ones[iOne];
-			string strNum = to_string(iTen * 10 + iOne);
+			strWord = strTen + g_ones[iOne];
+			strNum = to_string(iTens + iOne);
 			g_mapWordTo99[strWord] = strNum;
 		}
 	}
 
 	for (int iHun = 0, nZero = 3; iHun < g_nHuns; iHun++, nZero += 3)
 	{
-		string strHun(nZero, g_cZero);
-		strHun = g_one + strHun;
+		strHun = g_one + string(nZero, g_cZero);
 		g_mapWordTo100[g_huns[iHun]] = strHun;
 	}
 }
