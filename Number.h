@@ -163,8 +163,8 @@ public:
     void SetNumber(const std::string& strInput);
     int Contract(const std::string& strInput, std::string& strResult);
 	int Expand(const std::string& strInput, std::string& strResult);
-    void ToBase2(const std::string& strInput, std::string& strResult);
-    void ToBase10(const std::string& strInput, std::string& strResult);
+    int ToBase2(const std::string& strInput, std::string& strResult);
+    int ToBase10(const std::string& strInput, std::string& strResult);
     static std::string WB();
     const std::string& GetNumber();
     const std::string& GetPhrase();

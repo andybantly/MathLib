@@ -23,15 +23,14 @@ namespace TestMathLib
 			}
 			return bInit;
 		}
-
-		static void Test(unsigned long long ullb, unsigned long long ulle)
+		
+		static void Test(long long ullb, long long ulle)
 		{
 			CNumber MathLib;
 
 			int iResult;
-			string s, sr, sv;
-			unsigned long long ull = ullb;
-			double dp = 0.0, dt = double(ulle - ullb);
+			string s, sr, sv, sb2, sb10;
+			long long ull = ullb;
 
 			do
 			{
@@ -43,6 +42,14 @@ namespace TestMathLib
 				Assert::AreEqual(iResult, 0);
 
 				Assert::AreEqual(sv, s);
+
+				iResult = MathLib.ToBase2(sv, sb2);
+				Assert::AreEqual(iResult, 0);
+
+				iResult = MathLib.ToBase10(sb2, sb10);
+				Assert::AreEqual(iResult, 0);
+
+				Assert::AreEqual(sv, sb10);
 			} while (ull <= ulle && ull != 0);
 		}
 
@@ -461,13 +468,12 @@ namespace TestMathLib
 		TEST_METHOD(TestLib)
 		{
 			Init();
-			vector<pair<unsigned long long, unsigned long long> > vtp;
-			unsigned long long numt = thread::hardware_concurrency();
-			unsigned long long dtpt = (RAND_MAX * 4) / numt;
+			long long numt = thread::hardware_concurrency();
+			long long dtpt = (RAND_MAX * 4) / numt;
 
 			vector<thread*> vptp;
-			unsigned long long ullb, ulle;
-			for (unsigned long long it = 0; it < numt; it++)
+			long long ullb, ulle;
+			for (long long it = 0; it < numt; it++)
 			{
 				ullb = it * dtpt;
 				if (it + 1 != numt)

@@ -203,6 +203,7 @@ int CNumber::Expand(const string& strInput, string& strResult)
 {
 	if (strInput.empty())
 		return -1;
+	strResult.clear();
 
 	int iResult = 0;
 	m_bNegative = false;
@@ -477,10 +478,12 @@ const string& CNumber::GetBinary()
 	return m_strBinary;
 }
 
-void CNumber::ToBase2(const string& strInput, string& strResult)
+int CNumber::ToBase2(const string& strInput, string& strResult)
 {
 	if (strInput.empty())
-		return;
+		return -1;
+	strResult.clear();
+
 	string strOut;
 	uint8_t idnm = 0;
 	deque<char> binary;
@@ -544,13 +547,14 @@ void CNumber::ToBase2(const string& strInput, string& strResult)
 
 	// Append the binary string
 	strResult.append(binary.begin(), binary.end());
+	return 0;
 }
 
-void CNumber::ToBase10(const string& strInput, string& strResult)
+int CNumber::ToBase10(const string& strInput, string& strResult)
 {
+	if (strInput.empty())
+		return -1;
 	strResult = "0";
-	if (strInput == "0")
-		return;
 
 	CNumber Out;
 	string strNum = g_one;
@@ -588,6 +592,7 @@ void CNumber::ToBase10(const string& strInput, string& strResult)
 		}
 		strNum = string(mout.begin(), mout.end());
 	} while (crit != crend);
+	return 0;
 }
 
 void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
