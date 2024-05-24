@@ -30,8 +30,8 @@ namespace TestMathLib
 			{
 				m_iNum2 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
 			} while (m_iOp > 3 && m_iNum2 == 0); // Don't allow division by 0
-			m_strNum1 = std::to_string(m_iNum1);
-			m_strNum2 = std::to_string(m_iNum2);
+			m_strNum1 = to_string(m_iNum1);
+			m_strNum2 = to_string(m_iNum2);
 
 			switch (m_iOp)
 			{
@@ -51,23 +51,23 @@ namespace TestMathLib
 				m_iSum = m_iNum1 % m_iNum2;
 			}
 
-			m_strSum = std::to_string(m_iSum);
+			m_strSum = to_string(m_iSum);
 		}
 
 	public:
 		const int& OP() const { return m_iOp; }
-		const std::string& Num1() { return m_strNum1; }
-		const std::string& Num2() { return m_strNum2; }
-		const std::string& Sum() { return m_strSum; }
+		const string& Num1() { return m_strNum1; }
+		const string& Num2() { return m_strNum2; }
+		const string& Sum() { return m_strSum; }
 
 	private:
 		int m_iOp;
 		int m_iNum1;
 		int m_iNum2;
 		int m_iSum;
-		std::string m_strNum1;
-		std::string m_strNum2;
-		std::string m_strSum;
+		string m_strNum1;
+		string m_strNum2;
+		string m_strSum;
 	};
 
 	class CRndPairFP
@@ -127,23 +127,98 @@ namespace TestMathLib
 				break;
 			}
 
-			m_strSum = std::to_string(m_dSum);
+			m_strSum = to_string(m_dSum);
 		}
 
 	public:
 		const int& OP() const { return m_iOp; }
-		const std::string& Num1() { return m_strNum1; }
-		const std::string& Num2() { return m_strNum2; }
-		const std::string& Sum() { return m_strSum; }
+		const string& Num1() { return m_strNum1; }
+		const string& Num2() { return m_strNum2; }
+		const string& Sum() { return m_strSum; }
 
 	private:
 		int m_iOp;
 		long double m_dNum1;
 		long double m_dNum2;
 		long double m_dSum;
-		std::string m_strNum1;
-		std::string m_strNum2;
-		std::string m_strSum;
+		string m_strNum1;
+		string m_strNum2;
+		string m_strSum;
+	};
+
+	class CRndPairCMP
+	{
+	public:
+		CRndPairCMP()
+		{
+			m_iOp = rand() % 5 + 1;
+			Calc();
+		}
+
+		CRndPairCMP(int iOp) : m_iOp(iOp)
+		{
+			Calc();
+		}
+	protected:
+
+		double Random()
+		{
+			double dLO = 1;
+			double dHI = RAND_MAX;
+			double dNum = dLO + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) / (dHI - dLO));
+			if (rand() > (RAND_MAX / 2))
+				dNum = -dNum;
+			return dNum;
+		}
+
+		void Calc()
+		{
+			double d1, d2;
+
+			d1 = Random();
+			d2 = Random();
+
+			m_strNum1 = to_string(d1);
+			m_strNum2 = to_string(d2);
+
+			m_dNum1 = stod(m_strNum1);
+			m_dNum2 = stod(m_strNum2);
+
+			switch (m_iOp)
+			{
+			case 1: // LT
+				m_bResult = m_dNum1 < m_dNum2;
+				break;
+			case 2: // LTE
+				m_bResult = m_dNum1 <= m_dNum2;
+				break;
+			case 3: // GT
+				m_bResult = m_dNum1 > m_dNum2;
+				break;
+			case 4: // GTE
+				m_bResult = m_dNum1 >= m_dNum2;
+				break;
+			case 5: // EQ
+			default:
+				m_bResult = m_dNum1 == m_dNum2;
+				break;
+			}
+
+		}
+
+	public:
+		const int& OP() const { return m_iOp; }
+		const string& Num1() { return m_strNum1; }
+		const string& Num2() { return m_strNum2; }
+		const bool Result() { return m_bResult; }
+
+	private:
+		int m_iOp;
+		long double m_dNum1;
+		long double m_dNum2;
+		bool m_bResult;
+		string m_strNum1;
+		string m_strNum2;
 	};
 
 	TEST_CLASS(TestMathLib)
@@ -638,7 +713,7 @@ namespace TestMathLib
 					N3 = N1 % N2;
 				}
 
-				const std::string& strSUM = Rnd.Sum();
+				const string& strSUM = Rnd.Sum();
 				Assert::AreEqual(strSUM, N3.GetNumber());
 			}
 		}
@@ -671,11 +746,45 @@ namespace TestMathLib
 					N3 = N1 % N2;
 				}
 
-				const std::string& strSUM = Rnd.Sum();
+				const string& strSUM = Rnd.Sum();
 				Assert::AreEqual(strSUM, N3.GetNumber());
 			}
 		}
 
+		TEST_METHOD(RandomCMP)
+		{
+			int nRM = RAND_MAX * 5;
+			bool bCMP;
+			CNumber N1, N2;
+			for (int i = 0; i < nRM; ++i)
+			{
+				CRndPairCMP Rnd;
+				N1 = Rnd.Num1();
+				N2 = Rnd.Num2();
+
+				switch (Rnd.OP())
+				{
+				case 1:
+					bCMP = N1 < N2;
+					break;
+				case 2:
+					bCMP = N1 <= N2;
+					break;
+				case 3:
+					bCMP = N1 > N2;
+					break;
+				case 4:
+					bCMP = N1 >= N2;
+					break;
+				case 5:
+				default:
+					bCMP = N1 == N2;
+				}
+
+				bool bRes = Rnd.Result();
+				Assert::AreEqual(bRes, bCMP);
+			}
+		}
 		TEST_METHOD(RandomAdd)
 		{
 			int nRM = RAND_MAX;
@@ -687,7 +796,7 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 + N2;
 
-				const std::string& strSUM = Rnd.Sum();
+				const string& strSUM = Rnd.Sum();
 				Assert::AreEqual(strSUM, N3.GetNumber());
 			}
 		}
@@ -703,7 +812,7 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 - N2;
 
-				const std::string& strSUM = Rnd.Sum();
+				const string& strSUM = Rnd.Sum();
 				Assert::AreEqual(strSUM, N3.GetNumber());
 			}
 		}
@@ -719,7 +828,7 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 * N2;
 
-				const std::string& strSUM = Rnd.Sum();
+				const string& strSUM = Rnd.Sum();
 				Assert::AreEqual(strSUM, N3.GetNumber());
 			}
 		}
@@ -735,7 +844,7 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 / N2;
 
-				const std::string& strSUM = Rnd.Sum();
+				const string& strSUM = Rnd.Sum();
 				if (strSUM != N3.GetNumber())
 					Assert::AreEqual(strSUM, N3.GetNumber());
 			}
@@ -752,7 +861,7 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 % N2;
 
-				const std::string& strSUM = Rnd.Sum();
+				const string& strSUM = Rnd.Sum();
 				if (strSUM != N3.GetNumber())
 					Assert::AreEqual(strSUM, N3.GetNumber());
 			}
