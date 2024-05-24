@@ -30,6 +30,9 @@ std::map<std::string, std::string, CILT> g_mapWordTo100;
 
 const string g_one("1");
 const string g_none("-1");
+
+const CNumber g_Zero("0");
+const CNumber g_One("1");
 const CNumber g_Two("2");
 
 CNumber::CNumber()
@@ -229,6 +232,9 @@ bool CNumber::operator == (const CNumber& rhs)
 
 void CNumber::SetNumber(const string& strInput)
 {
+	m_strPhrase.clear();
+	m_strBinary.clear();
+	
 	if (!strInput.empty())
 	{
 		m_bZero = false;
@@ -247,20 +253,7 @@ void CNumber::SetNumber(const string& strInput)
 			m_iDecPos = (int)(strInput.length() - stPos);
 		else
 			m_iDecPos = 0;
-
-		if (strInput.length() <= 2)
-		{
-			if (!m_bNegative)
-			{
-				if (*(strInput.begin()) == '0')
-					m_bZero = true;
-			}
-			else
-			{
-				if (*(strInput.begin() + 1) == '0')
-					m_bZero = true;
-			}
-		}
+		m_bZero = *this == g_Zero;
 	}
 	else
 	{
@@ -269,9 +262,6 @@ void CNumber::SetNumber(const string& strInput)
 		m_bZero = false;
 		m_iDecPos = 0;
 	}
-
-	m_strPhrase.clear();
-	m_strBinary.clear();
 }
 
 string CNumber::WB()
@@ -520,6 +510,7 @@ int CNumber::Convert()
 
 void CNumber::Split(const string& strInput, vector<string>& vstrTokens, const char cFind)
 {
+	vstrTokens.clear();
 	if (strInput.empty())
 		return;
 
@@ -564,15 +555,18 @@ int CNumber::ToBase2(const string& strInput, string& strResult)
 		return -1;
 	strResult.clear();
 
+	vector<string> vstrBinary;
+	Split(strInput, vstrBinary, '.');
+
 	string strOut;
 	uint8_t idnm = 0;
 	deque<char> binary;
 
 	string strIn;
 	if (m_bNegative)
-		strIn = strInput.substr(1);
+		strIn = vstrBinary[0].substr(1);
 	else
-		strIn = strInput;
+		strIn = vstrBinary[0];
 
 	string::const_iterator cit = strIn.begin();
 	for (;;)
@@ -619,6 +613,25 @@ int CNumber::ToBase2(const string& strInput, string& strResult)
 			strOut.clear();
 			idnm = 0;
 			cit = strIn.begin();
+		}
+	}
+
+	// Now handle the fractional part
+	if (vstrBinary.size() != 1)
+	{
+		binary.push_back('.');
+		CNumber Fraction("0." + vstrBinary[1]);
+		for (int nDigs = 0;nDigs < 64 && !Fraction.m_bZero; ++nDigs)
+		{
+			Fraction = Fraction + Fraction;
+			if (Fraction >= g_One)
+			{
+				binary.push_back(g_cOne);
+				Split(Fraction.GetNumber(), vstrBinary, '.');
+				Fraction.SetNumber("0." + vstrBinary[1]);
+			}
+			else
+				binary.push_back(g_cZero);
 		}
 	}
 
