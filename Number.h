@@ -55,7 +55,7 @@ public:
     const std::string& GetPhrase();
     const std::string& GetBinary();
     static void Init();
-
+    friend std::ostream& operator<<(std::ostream& out, const CNumber& Number);
 protected:
     int Convert();
     void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');

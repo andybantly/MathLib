@@ -1167,3 +1167,9 @@ void CNumber::Init()
 		g_mapWordTo100[g_huns[iHun]] = strHun;
 	}
 }
+
+std::ostream& operator<<(std::ostream& out, const CNumber& Number)
+{
+	out << Number.m_strNumber;
+	return out;
+}
