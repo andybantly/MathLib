@@ -75,6 +75,34 @@ protected:
     std::string m_strBinary;
 };
 
+const CNumber g_Zero("0");
+const CNumber g_One("1");
+const CNumber g_Two("2");
+
+struct CILT
+{
+    struct Compare
+    {
+        bool operator() (const unsigned char& c1, const unsigned char& c2) const
+        {
+            return tolower(c1) < tolower(c2);
+        }
+    };
+
+    bool operator() (const std::string& strLhs, const std::string& strRhs) const
+    {
+        return std::lexicographical_compare
+        (
+            strLhs.begin(), strLhs.end(),
+            strRhs.begin(), strRhs.end(),
+            Compare()
+        );
+    }
+};
+
+const std::string g_one("1");
+const std::string g_none("-1");
+
 class CDuration
 {
 	std::string m_str;

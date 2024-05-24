@@ -4,36 +4,8 @@
 
 using namespace std;
 
-struct CILT
-{
-	struct Compare
-	{
-		bool operator() (const unsigned char& c1, const unsigned char& c2) const
-		{
-			return tolower(c1) < tolower(c2);
-		}
-	};
-
-	bool operator() (const std::string& strLhs, const std::string& strRhs) const
-	{
-		return std::lexicographical_compare
-		(
-			strLhs.begin(), strLhs.end(),
-			strRhs.begin(), strRhs.end(),
-			Compare()
-		);
-	}
-};
-
 std::map<std::string, std::string, CILT> g_mapWordTo99;
-std::map<std::string, std::string, CILT> g_mapWordTo100;
-
-const string g_one("1");
-const string g_none("-1");
-
-const CNumber g_Zero("0");
-const CNumber g_One("1");
-const CNumber g_Two("2");
+std::map<std::string, std::string, CILT> g_mapWordTo100; 
 
 CNumber::CNumber()
 {
