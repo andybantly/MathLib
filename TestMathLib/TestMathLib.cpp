@@ -85,16 +85,28 @@ namespace TestMathLib
 		}
 	protected:
 
+		double Random()
+		{
+			double dLO = 1;
+			double dHI = RAND_MAX;
+			double dNum = dLO + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) / (dHI - dLO));
+			if (rand() > (RAND_MAX / 2))
+				dNum = -dNum;
+			return dNum;
+		}
+
 		void Calc()
 		{
-			m_dNum1 = ((long double)rand() + (long double)1.0 / (long double)rand()) * (rand() > RAND_MAX / 2 ? (long double)1.0 : (long double)-1.0);
-			do
-			{
-				m_dNum2 = ((long double)rand() + (long double)1.0 / (long double)rand()) * (rand() > RAND_MAX / 2 ? (long double)1.0 : (long double)-1.0);
-			} while (m_iOp > 3 && m_dNum2 == 0); // Don't allow division by 0
+			double d1, d2;
 
-			m_strNum1 = std::to_string(m_dNum1);
-			m_strNum2 = std::to_string(m_dNum2);
+			d1 = Random();
+			d2 = Random();
+
+			m_strNum1 = to_string(d1);
+			m_strNum2 = to_string(d2);
+
+			m_dNum1 = stod(m_strNum1);
+			m_dNum2 = stod(m_strNum2);
 
 			switch (m_iOp)
 			{
@@ -916,6 +928,10 @@ namespace TestMathLib
 			Assert::AreEqual(false, b);
 
 			N1 = "-6.005"; N2 = "-6.0050";
+			b = N1 == N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "-6.3450"; N2 = "-6.345";
 			b = N1 == N2;
 			Assert::AreEqual(true, b);
 		}
