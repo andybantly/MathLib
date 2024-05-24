@@ -53,12 +53,11 @@ int main()
 				if (vNumbers.size() == 1)
 				{
 					CNumber Number(strInput);
-					const string& strNumber = Number.GetNumber();
 					const string& strPhrase = Number.GetPhrase();
 					const string& strBinary = Number.GetBinary();
 					string strBase10;
 					Number.ToBase10(strBinary, strBase10);
-					cout << strNumber << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
+					cout << Number << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
 					cout << endl;
 				}
 				else if (vNumbers.size() >= 3)
@@ -71,10 +70,10 @@ int main()
 
 						string strBase10;
 						Number.ToBase10(Number.GetBinary(), strBase10);
-						cout << Number.GetNumber() << " = " << Number.GetPhrase() << " = " << Number.GetBinary() << " = " << strBase10 << endl;
+						cout << Number << " = " << Number.GetPhrase() << " = " << Number.GetBinary() << " = " << strBase10 << endl;
 						cout << vNumbers[1] << endl;
 						Number2.ToBase10(Number2.GetBinary(), strBase10);
-						cout << Number2.GetNumber() << " = " << Number2.GetPhrase() << " = " << Number2.GetBinary() << " = " << strBase10 << endl;
+						cout << Number2 << " = " << Number2.GetPhrase() << " = " << Number2.GetBinary() << " = " << strBase10 << endl;
 						if (vNumbers[1] == "+")
 							Sum = Number + Number2;
 						else if (vNumbers[1] == "-")
@@ -86,7 +85,7 @@ int main()
 						else if (vNumbers[1] == "%")
 							Sum = Number % Number2;
 						Sum.ToBase10(Sum.GetBinary(), strBase10);
-						cout << Sum.GetNumber() << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
+						cout << Sum << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
 
 						vNumbers2.clear();
 						vNumbers2.push_back(Sum);
