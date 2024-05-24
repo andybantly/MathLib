@@ -6,31 +6,167 @@
 #include <stack>
 #include <ctime>
 #include <thread>
-#include <mutex>
 #include <functional>
 
-struct CILT
-{
-    struct Compare
-    {
-        bool operator() (const unsigned char& c1, const unsigned char& c2) const
-        {
-            return tolower(c1) < tolower(c2);
-        }
-    };
+bool Equal(const std::string& strLHS, const std::string& strRHS);
 
-    bool operator() (const std::string& strLhs, const std::string& strRhs) const
-    {
-        return std::lexicographical_compare
-        (
-            strLhs.begin(), strLhs.end(),
-            strRhs.begin(), strRhs.end(),
-            Compare()
-        );
-    }
+class CNumber
+{
+public:
+    // Constructor and copy constructors
+    CNumber();
+    CNumber(const char* pInput);
+    CNumber(const std::string& strInput);
+    CNumber(const CNumber& rhs);
+
+    // Destructor
+    ~CNumber();
+
+public:
+    // Assignment operators
+    CNumber& operator = (const CNumber& rhs);
+    CNumber& operator = (const std::string& rhs);
+    CNumber& operator = (const char* prhs);
+
+    // Arithmetic operators
+    CNumber operator + (const CNumber& rhs);
+    CNumber operator - (const CNumber& rhs);
+    CNumber operator * (const CNumber& rhs);
+    CNumber operator / (const CNumber& rhs);
+    CNumber operator % (const CNumber& rhs);
+
+    // Equality operators
+    bool operator < (const CNumber& rhs);
+    bool operator <= (const CNumber& rhs);
+    bool operator > (const CNumber& rhs);
+    bool operator >= (const CNumber& rhs);
+    bool operator == (const CNumber& rhs);
+    operator std::string& () { return m_strNumber; }
+    operator const char* () { return m_strNumber.c_str(); }
+
+public:
+    void SetNumber(const std::string& strInput);
+    int Contract(const std::string& strInput, std::string& strResult);
+	int Expand(const std::string& strInput, std::string& strResult);
+    int ToBase2(const std::string& strInput, std::string& strResult);
+    int ToBase10(const std::string& strInput, std::string& strResult);
+    static std::string WB();
+    const std::string& GetNumber();
+    const std::string& GetPhrase();
+    const std::string& GetBinary();
+    static void Init();
+
+protected:
+    int Convert();
+    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
+    void Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    void Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    void Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    void Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    int ABSGreater(const CNumber& LHS, const CNumber& RHS);
+    int Greater(const CNumber& LHS, const CNumber& RHS);
+
+    bool m_bNegative;
+    bool m_bZero;
+    size_t m_iDecPos; // 0 = Integer, Not 0 = Floating Point
+    std::string m_strNumber;
+    std::string m_strPhrase;
+    std::string m_strBinary;
 };
 
-bool Equal(const std::string& strLHS, const std::string& strRHS);
+class CDuration
+{
+	std::string m_str;
+	clock_t start;
+	clock_t finish;
+
+public:
+	CDuration(std::string str) : m_str(str), start(clock()), finish(start) {	}
+
+	~CDuration()
+	{
+		finish = clock();
+		double d = (double)(finish - start) / CLOCKS_PER_SEC;
+		std::cout << m_str << " " << d << " seconds" << std::endl;
+	}
+};
+
+class CStatistics
+{
+public:
+    CStatistics() : m_nobs(0), m_dmean(0.0), m_s(0.0), m_dvar(0.0), m_dstddev(0.0) {};
+    ~CStatistics() {};
+
+protected:
+    unsigned long m_nobs;
+    long double m_dmean;
+    long double m_s;
+    long double m_dvar;
+    long double m_dstddev;
+
+    void update()
+    {
+        if (m_nobs > 1)
+        {
+            m_dvar = m_s / (m_nobs - 1);
+            m_dstddev = sqrt(m_dvar);
+        }
+        else if (m_nobs == 0)
+        {
+            m_dmean = 0;
+            m_dvar = 0;
+            m_dstddev = 0;
+        }
+        else
+        {
+            m_dstddev = 0;
+            m_dvar = 0;
+        }
+    }
+
+public:
+    bool RemObs(unsigned long iwght, long double dval, unsigned long nobs)
+    {
+        long double dlmean = (m_dmean * m_nobs - dval * iwght) / (m_nobs - iwght);
+        if (m_nobs > nobs)
+        {
+            long double dls = m_s - iwght * (dval - dlmean) * (dval - (dlmean + iwght * (dval - dlmean) / m_nobs));
+            if (dls > 0)
+            {
+                m_s = dls;
+                m_dvar = m_s / (m_nobs - iwght - 1);
+                m_dstddev = sqrt(m_dvar);
+                m_dmean = dlmean;
+                m_nobs -= iwght;
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void AddObs(unsigned long iwght, double dv)
+    {
+        unsigned long uin = m_nobs + iwght;
+        long double dx = iwght * (dv - m_dmean);
+        long double dmean = m_dmean + dx / uin;
+        long double ds = m_s + dx * (dv - dmean);
+
+        if (_finite(ds))
+        {
+            m_nobs = uin;
+            m_dmean = dmean;
+            m_s = ds;
+            update();
+        }
+    }
+
+    void print() const
+    {
+        std::cout << "mean=" << m_dmean << " variance=" << m_dvar << " stddev=" << m_dstddev << std::endl;
+    }
+};
 
 class CByte
 {
@@ -136,210 +272,4 @@ public:
 protected:
     BYTE m_b;
     CARRY m_c;
-};
-
-class CNumber
-{
-public:
-    CNumber();
-    CNumber(const char* pInput);
-    CNumber(const std::string& strInput);
-    CNumber(const CNumber& rhs);
-    ~CNumber();
-
-public:
-    CNumber& operator = (const CNumber& rhs);
-    CNumber& operator = (const std::string& rhs);
-    CNumber& operator = (const char* prhs);
-    CNumber operator + (const CNumber& rhs);
-    CNumber operator - (const CNumber& rhs);
-    CNumber operator * (const CNumber& rhs);
-    CNumber operator / (const CNumber& rhs);
-    CNumber operator % (const CNumber& rhs);
-    operator std::string& () { return m_strNumber; }
-    operator const char* () { return m_strNumber.c_str(); }
-
-public:
-    void SetNumber(const std::string& strInput);
-    int Contract(const std::string& strInput, std::string& strResult);
-	int Expand(const std::string& strInput, std::string& strResult);
-    int ToBase2(const std::string& strInput, std::string& strResult);
-    int ToBase10(const std::string& strInput, std::string& strResult);
-    static std::string WB();
-    const std::string& GetNumber();
-    const std::string& GetPhrase();
-    const std::string& GetBinary();
-    static void Init();
-
-protected:
-    int Convert();
-    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
-    void Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    int ABSGreater(const CNumber& LHS, const CNumber& RHS);
-    std::pair<int, int> Greater(const CNumber& LHS, const CNumber& RHS);
-
-    bool m_bNegative;
-    int m_iDecPos; // 0 = Integer, Not 0 = Floating Point
-    std::string m_strNumber;
-    std::string m_strPhrase;
-    std::string m_strBinary;
-};
-
-class CDuration
-{
-	std::string m_str;
-	clock_t start;
-	clock_t finish;
-
-public:
-	CDuration(std::string str) : m_str(str), start(clock()), finish(start) {	}
-
-	~CDuration()
-	{
-		finish = clock();
-		double d = (double)(finish - start) / CLOCKS_PER_SEC;
-		std::cout << m_str << " " << d << " seconds" << std::endl;
-	}
-};
-
-class CStatistics
-{
-public:
-    CStatistics() : m_nobs(0), m_dmean(0.0), m_s(0.0), m_dvar(0.0), m_dstddev(0.0) {};
-    ~CStatistics() {};
-
-protected:
-    unsigned long m_nobs;
-    long double m_dmean;
-    long double m_s;
-    long double m_dvar;
-    long double m_dstddev;
-
-    void update()
-    {
-        if (m_nobs > 1)
-        {
-            m_dvar = m_s / (m_nobs - 1);
-            m_dstddev = sqrt(m_dvar);
-        }
-        else if (m_nobs == 0)
-        {
-            m_dmean = 0;
-            m_dvar = 0;
-            m_dstddev = 0;
-        }
-        else
-        {
-            m_dstddev = 0;
-            m_dvar = 0;
-        }
-    }
-
-public:
-    bool RemObs(unsigned long iwght, long double dval, unsigned long nobs)
-    {
-        long double dlmean = (m_dmean * m_nobs - dval * iwght) / (m_nobs - iwght);
-        if (m_nobs > nobs)
-        {
-            long double dls = m_s - iwght * (dval - dlmean) * (dval - (dlmean + iwght * (dval - dlmean) / m_nobs));
-            if (dls > 0)
-            {
-                m_s = dls;
-                m_dvar = m_s / (m_nobs - iwght - 1);
-                m_dstddev = sqrt(m_dvar);
-                m_dmean = dlmean;
-                m_nobs -= iwght;
-
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void AddObs(unsigned long iwght, double dv)
-    {
-        unsigned long uin = m_nobs + iwght;
-        long double dx = iwght * (dv - m_dmean);
-        long double dmean = m_dmean + dx / uin;
-        long double ds = m_s + dx * (dv - dmean);
-
-        if (_finite(ds))
-        {
-            m_nobs = uin;
-            m_dmean = dmean;
-            m_s = ds;
-            update();
-        }
-    }
-
-    void print() const
-    {
-        std::cout << "mean=" << m_dmean << " variance=" << m_dvar << " stddev=" << m_dstddev << std::endl;
-    }
-};
-
-class CRndPair
-{
-public:
-    CRndPair()
-    {
-        m_iOp = rand() % 5 + 1;
-        Calc();
-    }
-
-    CRndPair(int iOp) : m_iOp(iOp)
-    {
-        Calc();
-    }
-protected:
-
-    void Calc()
-    {
-        m_iNum1 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
-        do
-        {
-            m_iNum2 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
-        } while (m_iOp > 3 && m_iNum2 == 0); // Don't allow division by 0
-        m_strNum1 = std::to_string(m_iNum1);
-        m_strNum2 = std::to_string(m_iNum2);
-
-        switch (m_iOp)
-        {
-        case 1:
-            m_iSum = m_iNum1 + m_iNum2;
-            break;
-        case 2:
-            m_iSum = m_iNum1 - m_iNum2;
-            break;
-        case 3:
-            m_iSum = m_iNum1 * m_iNum2;
-            break;
-        case 4:
-            m_iSum = m_iNum1 / m_iNum2;
-            break;
-        default:
-            m_iSum = m_iNum1 % m_iNum2;
-        }
-
-        m_strSum = std::to_string(m_iSum);
-    }
-
-public:
-    const int& OP() const { return m_iOp; }
-    const std::string& Num1() { return m_strNum1; }
-    const std::string& Num2() { return m_strNum2; }
-    const std::string& Sum() { return m_strSum; }
-
-private:
-    int m_iOp;
-    int m_iNum1;
-    int m_iNum2;
-    int m_iSum;
-    std::string m_strNum1;
-    std::string m_strNum2;
-    std::string m_strSum;
 };

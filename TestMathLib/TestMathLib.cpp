@@ -8,22 +8,134 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
 {
-	static mutex g_test_mutex;
+	class CRndPair
+	{
+	public:
+		CRndPair()
+		{
+			m_iOp = rand() % 5 + 1;
+			Calc();
+		}
+
+		CRndPair(int iOp) : m_iOp(iOp)
+		{
+			Calc();
+		}
+	protected:
+
+		void Calc()
+		{
+			m_iNum1 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
+			do
+			{
+				m_iNum2 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
+			} while (m_iOp > 3 && m_iNum2 == 0); // Don't allow division by 0
+			m_strNum1 = std::to_string(m_iNum1);
+			m_strNum2 = std::to_string(m_iNum2);
+
+			switch (m_iOp)
+			{
+			case 1:
+				m_iSum = m_iNum1 + m_iNum2;
+				break;
+			case 2:
+				m_iSum = m_iNum1 - m_iNum2;
+				break;
+			case 3:
+				m_iSum = m_iNum1 * m_iNum2;
+				break;
+			case 4:
+				m_iSum = m_iNum1 / m_iNum2;
+				break;
+			default:
+				m_iSum = m_iNum1 % m_iNum2;
+			}
+
+			m_strSum = std::to_string(m_iSum);
+		}
+
+	public:
+		const int& OP() const { return m_iOp; }
+		const std::string& Num1() { return m_strNum1; }
+		const std::string& Num2() { return m_strNum2; }
+		const std::string& Sum() { return m_strSum; }
+
+	private:
+		int m_iOp;
+		int m_iNum1;
+		int m_iNum2;
+		int m_iSum;
+		std::string m_strNum1;
+		std::string m_strNum2;
+		std::string m_strSum;
+	};
+
+	class CRndPairFP
+	{
+	public:
+		CRndPairFP()
+		{
+			m_iOp = rand() % 2 + 1;
+			Calc();
+		}
+
+		CRndPairFP(int iOp) : m_iOp(iOp)
+		{
+			Calc();
+		}
+	protected:
+
+		void Calc()
+		{
+			m_dNum1 = ((long double)rand() + (long double)1.0 / (long double)rand()) * (rand() > RAND_MAX / 2 ? (long double)1.0 : (long double)-1.0);
+			do
+			{
+				m_dNum2 = ((long double)rand() + (long double)1.0 / (long double)rand()) * (rand() > RAND_MAX / 2 ? (long double)1.0 : (long double)-1.0);
+			} while (m_iOp > 3 && m_dNum2 == 0); // Don't allow division by 0
+
+			m_strNum1 = std::to_string(m_dNum1);
+			m_strNum2 = std::to_string(m_dNum2);
+
+			switch (m_iOp)
+			{
+			case 1:
+				m_dSum = m_dNum1 + m_dNum2;
+				break;
+			case 2:
+				m_dSum = m_dNum1 - m_dNum2;
+				break;
+			case 3:
+				m_dSum = m_dNum1 * m_dNum2;
+				break;
+			case 4:
+				m_dSum = m_dNum1 / m_dNum2;
+				break;
+			default:
+				// No modulus
+				break;
+			}
+
+			m_strSum = std::to_string(m_dSum);
+		}
+
+	public:
+		const int& OP() const { return m_iOp; }
+		const std::string& Num1() { return m_strNum1; }
+		const std::string& Num2() { return m_strNum2; }
+		const std::string& Sum() { return m_strSum; }
+
+	private:
+		int m_iOp;
+		long double m_dNum1;
+		long double m_dNum2;
+		long double m_dSum;
+		std::string m_strNum1;
+		std::string m_strNum2;
+		std::string m_strSum;
+	};
 
 	TEST_CLASS(TestMathLib)
 	{
-		static bool Init()
-		{
-			static atomic<bool> bInit(false);
-			static lock_guard<mutex> guard(g_test_mutex);
-			if (!bInit)
-			{
-				CNumber::Init();
-				bInit = true;
-			}
-			return bInit;
-		}
-		
 		static void Test(long long ullb, long long ulle)
 		{
 			CNumber MathLib;
@@ -54,9 +166,15 @@ namespace TestMathLib
 		}
 
 	public:
+
+		TEST_CLASS_INITIALIZE(TestInitialize)
+		{
+			srand((unsigned)time(NULL));
+			CNumber::Init();
+		}
+
 		TEST_METHOD(Addition)
 		{
-			Init();
 			CNumber N1, N2, N3;
 
 			// 10 + 15 = 25
@@ -119,6 +237,46 @@ namespace TestMathLib
 			N3 = N1 + N2;
 			Assert::AreEqual("-20", N3);
 
+			// -10.025 + -10.0025 = 
+			N1 = "-10.025"; N2 = "-10.0025";
+			N3 = N1 + N2;
+			Assert::AreEqual("-20.0275", N3);
+
+			// -10.025 + 10.0025 = -0.0225
+			N1 = "-10.025"; N2 = "10.0025";
+			N3 = N1 + N2;
+			Assert::AreEqual("-0.0225", N3);
+
+			// 10.025 + -10.0025 = 0.0225
+			N1 = "10.025"; N2 = "-10.0025";
+			N3 = N1 + N2;
+			Assert::AreEqual("0.0225", N3);
+
+			// 10.025 + 10.0025 = 20.0275
+			N1 = "10.025"; N2 = "10.0025";
+			N3 = N1 + N2;
+			Assert::AreEqual("20.0275", N3);
+
+			// -10.025 + -10.000025 = -20.025025
+			N1 = "-10.025"; N2 = "-10.000025";
+			N3 = N1 + N2;
+			Assert::AreEqual("-20.025025", N3);
+
+			// -10.025 + 10.000025 = -0.024975
+			N1 = "-10.025"; N2 = "10.000025";
+			N3 = N1 + N2;
+			Assert::AreEqual("-0.024975", N3);
+
+			// 10.025 + -10.000025 = 0.024975
+			N1 = "10.025"; N2 = "-10.000025";
+			N3 = N1 + N2;
+			Assert::AreEqual("0.024975", N3);
+
+			// 10.025 + 10.000025 = 20.025025
+			N1 = "10.025"; N2 = "10.000025";
+			N3 = N1 + N2;
+			Assert::AreEqual("20.025025", N3);
+
 			// -2005 + -1004 = -3009
 			N1 = "-2005"; N2 = "-1004";
 			N3 = N1 + N2;
@@ -137,7 +295,6 @@ namespace TestMathLib
 
 		TEST_METHOD(Subtraction)
 		{
-			Init();
 			CNumber N1, N2, N3;
 
 			// 10 - 15 = -5
@@ -200,6 +357,46 @@ namespace TestMathLib
 			N3 = N1 - N2;
 			Assert::AreEqual("0", N3);
 
+			// -10.025 - -10.0025 = -0.0225
+			N1 = "-10.025"; N2 = "-10.0025";
+			N3 = N1 - N2;
+			Assert::AreEqual("-0.0225", N3);
+
+			// -10.025 - 10.0025 = -20.0275
+			N1 = "-10.025"; N2 = "10.0025";
+			N3 = N1 - N2;
+			Assert::AreEqual("-20.0275", N3);
+
+			// 10.025 - -10.0025 = 20.0275
+			N1 = "10.025"; N2 = "-10.0025";
+			N3 = N1 - N2;
+			Assert::AreEqual("20.0275", N3);
+
+			// 10.025 - 10.0025 = 20.0275
+			N1 = "10.025"; N2 = "10.0025";
+			N3 = N1 - N2;
+			Assert::AreEqual("0.0225", N3);
+
+			// -10.025 - -10.000025 = -0.024975
+			N1 = "-10.025"; N2 = "-10.000025";
+			N3 = N1 - N2;
+			Assert::AreEqual("-0.024975", N3);
+
+			// -10.025 - 10.000025 = -20.025025
+			N1 = "-10.025"; N2 = "10.000025";
+			N3 = N1 - N2;
+			Assert::AreEqual("-20.025025", N3);
+
+			// 10.025 - -10.000025 = 20.025025
+			N1 = "10.025"; N2 = "-10.000025";
+			N3 = N1 - N2;
+			Assert::AreEqual("20.025025", N3);
+
+			// 10.025 - 10.000025 = 0.024975
+			N1 = "10.025"; N2 = "10.000025";
+			N3 = N1 - N2;
+			Assert::AreEqual("0.024975", N3);
+
 			// -2005 - -1004 = -1001
 			N1 = "-2005"; N2 = "-1004";
 			N3 = N1 - N2;
@@ -208,7 +405,6 @@ namespace TestMathLib
 
 		TEST_METHOD(Multiplication)
 		{
-			Init();
 			CNumber N1, N2, N3;
 
 			// 10 * 15 = 150
@@ -274,7 +470,6 @@ namespace TestMathLib
 
 		TEST_METHOD(Division)
 		{
-			Init();
 			CNumber N1, N2, N3;
 
 			// 150 / 10 = 15
@@ -335,14 +530,76 @@ namespace TestMathLib
 			// -10 / 0 = Division by Zero
 			N1 = "-10"; N2 = "0";
 			N3 = N1 / N2;
-			N3 = N1 / N2;
+			Assert::AreEqual("", N3);
+		}
+
+		TEST_METHOD(Modulus)
+		{
+			CNumber N1, N2, N3;
+
+			// 150 % 10 = 0
+			N1 = "150"; N2 = "10";
+			N3 = N1 % N2;
+			Assert::AreEqual("0", N3);
+
+			// -150 % 10 = 0
+			N1 = "-150"; N2 = "10";
+			N3 = N1 % N2;
+			Assert::AreEqual("0", N3);
+
+			// -150 % -10 = 0
+			N1 = "-150"; N2 = "-10";
+			N3 = N1 % N2;
+			Assert::AreEqual("0", N3);
+
+			// 150 % -10 = 0
+			N1 = "150"; N2 = "-10";
+			N3 = N1 % N2;
+			Assert::AreEqual("0", N3);
+
+			// 150 % 14 = 10
+			N1 = "150"; N2 = "14";
+			N3 = N1 % N2;
+			Assert::AreEqual("10", N3);
+
+			// -150 % 14 = -10
+			N1 = "-150"; N2 = "14";
+			N3 = N1 % N2;
+			Assert::AreEqual("-10", N3);
+
+			// -150 % -14 = -10
+			N1 = "-150"; N2 = "-14";
+			N3 = N1 % N2;
+			Assert::AreEqual("-10", N3);
+
+			// 150 % -14 = 10
+			N1 = "150"; N2 = "-14";
+			N3 = N1 % N2;
+			Assert::AreEqual("10", N3);
+
+			// 0 % 10 = 0
+			N1 = "0"; N2 = "10";
+			N3 = N1 % N2;
+			Assert::AreEqual("0", N3);
+
+			// 0 % -10 = 0
+			N1 = "0"; N2 = "-10";
+			N3 = N1 % N2;
+			Assert::AreEqual("0", N3);
+
+			// 0 % 0 = Division by Zero
+			N1 = "0"; N2 = "0";
+			N3 = N1 % N2;
+			Assert::AreEqual("", N3);
+
+			// -10 % 0 = Division by Zero
+			N1 = "-10"; N2 = "0";
+			N3 = N1 % N2;
 			Assert::AreEqual("", N3);
 		}
 
 		TEST_METHOD(RandomMath)
 		{
-			Init();
-			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX * 5;
 			CNumber N1, N2, N3;
 			for (int i = 0; i < nRM; ++i)
@@ -374,10 +631,41 @@ namespace TestMathLib
 			}
 		}
 
+		TEST_METHOD(RandomMathFP)
+		{
+			int nRM = RAND_MAX * 5;
+			CNumber N1, N2, N3;
+			for (int i = 0; i < nRM; ++i)
+			{
+				CRndPairFP Rnd;
+				N1 = Rnd.Num1();
+				N2 = Rnd.Num2();
+
+				switch (Rnd.OP())
+				{
+				case 1:
+					N3 = N1 + N2;
+					break;
+				case 2:
+					N3 = N1 - N2;
+					break;
+				case 3:
+					N3 = N1 * N2;
+					break;
+				case 4:
+					N3 = N1 / N2;
+					break;
+				default:
+					N3 = N1 % N2;
+				}
+
+				const std::string& strSUM = Rnd.Sum();
+				Assert::AreEqual(strSUM, N3.GetNumber());
+			}
+		}
+
 		TEST_METHOD(RandomAdd)
 		{
-			Init();
-			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX;
 			CNumber N1, N2, N3;
 			for (int i = 0; i < nRM; ++i)
@@ -394,8 +682,6 @@ namespace TestMathLib
 
 		TEST_METHOD(RandomSub)
 		{
-			Init();
-			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX;
 			CNumber N1, N2, N3;
 			for (int i = 0; i < nRM; ++i)
@@ -412,7 +698,6 @@ namespace TestMathLib
 
 		TEST_METHOD(RandomMul)
 		{
-			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX;
 			CNumber N1, N2, N3;
 			for (int i = 0; i < nRM; ++i)
@@ -429,8 +714,6 @@ namespace TestMathLib
 
 		TEST_METHOD(RandomDiv)
 		{
-			Init();
-			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX;
 			CNumber N1, N2, N3;
 			for (int i = 0; i < nRM; ++i)
@@ -448,8 +731,6 @@ namespace TestMathLib
 
 		TEST_METHOD(RandomMod)
 		{
-			Init();
-			srand((unsigned)time(NULL));
 			int nRM = RAND_MAX;
 			CNumber N1, N2, N3;
 			for (int i = 0; i < nRM; ++i)
@@ -465,9 +746,182 @@ namespace TestMathLib
 			}
 		}
 
+		TEST_METHOD(LessThan)
+		{
+			CNumber N1, N2;
+			bool b;
+
+			N1 = "5"; N2 = "5";
+			b = N1 < N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "4"; N2 = "5";
+			b = N1 < N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "6"; N2 = "5";
+			b = N1 < N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "5.5"; N2 = "5.5";
+			b = N1 < N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "4.5"; N2 = "5";
+			b = N1 < N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "6.5"; N2 = "5";
+			b = N1 < N2;
+			Assert::AreEqual(false, b);
+		}
+
+		TEST_METHOD(LessThanEqual)
+		{
+			CNumber N1, N2;
+			bool b;
+
+			N1 = "5"; N2 = "5";
+			b = N1 <= N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "4"; N2 = "5";
+			b = N1 <= N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "6"; N2 = "5";
+			b = N1 <= N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "5.5"; N2 = "5.5";
+			b = N1 <= N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "4.5"; N2 = "5";
+			b = N1 <= N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "6.5"; N2 = "5";
+			b = N1 <= N2;
+			Assert::AreEqual(false, b);
+		}
+
+		TEST_METHOD(GreaterThan)
+		{
+			CNumber N1, N2;
+			bool b;
+
+			N1 = "5"; N2 = "5";
+			b = N1 > N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "4"; N2 = "5";
+			b = N1 > N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "6"; N2 = "5";
+			b = N1 > N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "5.5"; N2 = "5.5";
+			b = N1 > N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "4.5"; N2 = "5";
+			b = N1 > N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "6.5"; N2 = "5";
+			b = N1 > N2;
+			Assert::AreEqual(true, b);
+		}
+
+		TEST_METHOD(GreaterThanEqual)
+		{
+			CNumber N1, N2;
+			bool b;
+
+			N1 = "5"; N2 = "5";
+			b = N1 >= N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "4"; N2 = "5";
+			b = N1 >= N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "6"; N2 = "5";
+			b = N1 >= N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "5.5"; N2 = "5.5";
+			b = N1 >= N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "4.5"; N2 = "5";
+			b = N1 >= N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "6.5"; N2 = "5";
+			b = N1 >= N2;
+			Assert::AreEqual(true, b);
+		}
+
+		TEST_METHOD(Equal)
+		{
+			CNumber N1, N2;
+			bool b;
+
+			N1 = "5"; N2 = "5";
+			b = N1 == N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "4"; N2 = "5";
+			b = N1 == N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "6"; N2 = "5";
+			b = N1 == N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "5.5"; N2 = "5.5";
+			b = N1 == N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "4.5"; N2 = "5";
+			b = N1 == N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "6.5"; N2 = "5";
+			b = N1 == N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "-5"; N2 = "5";
+			b = N1 == N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "-4"; N2 = "5";
+			b = N1 == N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "-6"; N2 = "5";
+			b = N1 == N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "-5.5"; N2 = "-5.5";
+			b = N1 == N2;
+			Assert::AreEqual(true, b);
+
+			N1 = "-4.5"; N2 = "5.005";
+			b = N1 == N2;
+			Assert::AreEqual(false, b);
+
+			N1 = "-6.005"; N2 = "-6.0050";
+			b = N1 == N2;
+			Assert::AreEqual(true, b);
+		}
+
 		TEST_METHOD(TestLib)
 		{
-			Init();
 			long long numt = thread::hardware_concurrency();
 			long long dtpt = (RAND_MAX * 4) / numt;
 

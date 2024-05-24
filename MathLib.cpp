@@ -3,11 +3,117 @@
 
 #include "MathLib.h"
 #include "Number.h"
+
 #pragma warning(disable:6385)
 
 using namespace std;
 
-mutex g_io_mutex;
+int main()
+{
+	CNumber::Init();
+	string strInput, strResult;
+	bool bAgain = true;
+	do
+	{
+		cout << "Enter a number, set of numbers separated by arithmetic operations (+,-,*,/,%)" << endl << "Enter 'test' for verification or 'quit' to exit." << endl << "Examples: 12 * 11 + 12, three + four - two, 9 / 3 + 7 * 10, 10 % 3" << endl << "Input: ";
+
+		strInput.clear();
+		char c;
+		while ((c = getchar()) != '\n')
+			strInput += c;
+		if (strInput != "quit" && strInput != "test")
+		{
+			try
+			{
+				vector<string> vNumbers;
+				vector<string> vNumbers2;
+				Split(strInput, vNumbers, ' ');
+				if (vNumbers.size() > 3)
+				{
+					string strConcatNumber;
+					for (vector<string>::iterator it = vNumbers.begin(); it != vNumbers.end(); ++it)
+					{
+						if (*it == "+" || *it == "-" || *it == "*" || *it == "/" || *it == "%")
+						{
+							vNumbers2.push_back(strConcatNumber);
+							vNumbers2.push_back(*it);
+							strConcatNumber = "";
+						}
+						else
+						{
+							if (strConcatNumber.length() > 0)
+								strConcatNumber += " ";
+							strConcatNumber += *it;
+						}
+					}
+					vNumbers2.push_back(strConcatNumber);
+					vNumbers = vNumbers2;
+				}
+
+				if (vNumbers.size() == 1)
+				{
+					CNumber Number(strInput);
+					const string& strNumber = Number.GetNumber();
+					const string& strPhrase = Number.GetPhrase();
+					const string& strBinary = Number.GetBinary();
+					string strBase10;
+					Number.ToBase10(strBinary, strBase10);
+					cout << strNumber << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
+					cout << endl;
+				}
+				else if (vNumbers.size() >= 3)
+				{
+					do
+					{
+						CNumber Number(vNumbers[0]);
+						CNumber Number2(vNumbers[2]);
+						CNumber Sum;
+
+						string strBase10;
+						Number.ToBase10(Number.GetBinary(), strBase10);
+						cout << Number.GetNumber() << " = " << Number.GetPhrase() << " = " << Number.GetBinary() << " = " << strBase10 << endl;
+						cout << vNumbers[1] << endl;
+						Number2.ToBase10(Number2.GetBinary(), strBase10);
+						cout << Number2.GetNumber() << " = " << Number2.GetPhrase() << " = " << Number2.GetBinary() << " = " << strBase10 << endl;
+						if (vNumbers[1] == "+")
+							Sum = Number + Number2;
+						else if (vNumbers[1] == "-")
+							Sum = Number - Number2;
+						else if (vNumbers[1] == "*")
+							Sum = Number * Number2;
+						else if (vNumbers[1] == "/")
+							Sum = Number / Number2;
+						else if (vNumbers[1] == "%")
+							Sum = Number % Number2;
+						Sum.ToBase10(Sum.GetBinary(), strBase10);
+						cout << Sum.GetNumber() << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
+
+						vNumbers2.clear();
+						vNumbers2.push_back(Sum);
+						for (std::vector<string>::iterator vit = vNumbers.begin() + 3; vit != vNumbers.end(); ++vit)
+							vNumbers2.push_back(*vit);
+						vNumbers = vNumbers2;
+						cout << endl;
+					} while (vNumbers.size() > 1);
+				}
+				else
+					cout << "Invalid input." << endl;
+			}
+			catch (std::exception& e)
+			{
+				cout << e.what() << endl;
+			}
+		}
+		else
+		{
+			if (strInput == "quit")
+				bAgain = false;
+			else
+				test(); // Manual testing, automatic testing in TestMathLib project
+		}
+	} while (bAgain);
+	return 0;
+}
 
 static void ttest(unsigned long long ullb, unsigned long long ulle)
 {
@@ -120,110 +226,3 @@ void Split(const string& strInput, vector<string>& vstrTokens, const char cFind)
 	} while (ipos != string::npos);
 }
 
-int main()
-{
-	CNumber::Init();
-
-	string strInput, strResult;
-	bool bAgain = true;
-	do
-	{
-		cout << "Enter a number, set of numbers separated by arithmetic operations (+,-,*,/,%)" << endl << "Enter 'test' for verification or 'quit' to exit." << endl << "Examples: 12 * 11 + 12, three + four - two, 9 / 3 + 7 * 10, 10 % 3" << endl << "Input: ";
-
-		strInput.clear();
-		char c;
-		while ((c = getchar()) != '\n')
-			strInput += c;
-		if (strInput != "quit" && strInput != "test")
-		{
-			try
-			{
-				vector<string> vNumbers;
-				vector<string> vNumbers2;
-				Split(strInput, vNumbers, ' ');
-				if (vNumbers.size() > 3)
-				{
-					string strConcatNumber;
-					for (vector<string>::iterator it = vNumbers.begin(); it != vNumbers.end(); ++it)
-					{
-						if (*it == "+" || *it == "-" || *it == "*" || *it == "/" || *it == "%")
-						{
-							vNumbers2.push_back(strConcatNumber);
-							vNumbers2.push_back(*it);
-							strConcatNumber = "";
-						}
-						else
-						{
-							if (strConcatNumber.length() > 0)
-								strConcatNumber += " ";
-							strConcatNumber += *it;
-						}
-					}
-					vNumbers2.push_back(strConcatNumber);
-					vNumbers = vNumbers2;
-				}
-
-				if (vNumbers.size() == 1)
-				{
-					CNumber Number(strInput);
-					const string& strNumber = Number.GetNumber();
-					const string& strPhrase = Number.GetPhrase();
-					const string& strBinary = Number.GetBinary();
-					string strBase10;
-					Number.ToBase10(strBinary, strBase10);
-					cout << strNumber << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
-					cout << endl;
-				}
-				else if (vNumbers.size() >= 3)
-				{
-					do
-					{
-						CNumber Number(vNumbers[0]);
-						CNumber Number2(vNumbers[2]);
-						CNumber Sum;
-
-						string strBase10;
-						Number.ToBase10(Number.GetBinary(), strBase10);
-						cout << Number.GetNumber() << " = " << Number.GetPhrase() << " = " << Number.GetBinary() << " = " << strBase10 << endl;
-						cout << vNumbers[1] << endl;
-						Number2.ToBase10(Number2.GetBinary(), strBase10);
-						cout << Number2.GetNumber() << " = " << Number2.GetPhrase() << " = " << Number2.GetBinary() << " = " << strBase10 << endl;
-						if (vNumbers[1] == "+")
-							Sum = Number + Number2;
-						else if (vNumbers[1] == "-")
-							Sum = Number - Number2;
-						else if (vNumbers[1] == "*")
-							Sum = Number * Number2;
-						else if (vNumbers[1] == "/")
-							Sum = Number / Number2;
-						else if (vNumbers[1] == "%")
-							Sum = Number % Number2;
-						Sum.ToBase10(Sum.GetBinary(), strBase10);
-						cout << Sum.GetNumber() << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
-
-						vNumbers2.clear();
-						vNumbers2.push_back(Sum);
-						for (std::vector<string>::iterator vit = vNumbers.begin() + 3; vit != vNumbers.end(); ++vit)
-							vNumbers2.push_back(*vit);
-						vNumbers = vNumbers2;
-						cout << endl;
-					} while (vNumbers.size() > 1);
-				}
-				else
-					cout << "Invalid input." << endl;
-			}
-			catch (std::exception& e)
-			{
-				cout << e.what() << endl;
-			}
-		}
-		else
-		{
-			if (strInput == "quit")
-				bAgain = false;
-			else
-				test(); // Manual testing, automatic testing in TestMathLib project
-		}
-	} while (bAgain);
-	return 0;
-}
