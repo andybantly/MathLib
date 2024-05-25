@@ -853,6 +853,11 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		uint8_t iCarry = 0;
 		for (string::const_reverse_iterator S1_crit = strS1.rbegin(); S1_crit != S1_crend; ++S1_crit)
 		{
+			if (*S1_crit == '.')
+				S1_crit++;
+			if (*S2_crit == '.')
+				S2_crit++;
+
 			uint8_t N1 = (S1_crit != S1_crend ? *S1_crit : g_cZero) - g_cZero;
 			uint8_t N2 = (S2_crit != S2_crend ? *S2_crit : g_cZero) - g_cZero;
 
@@ -924,6 +929,17 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		Out.SetNumber(*vcit++);
 		for (; vcit != vSum.end(); ++vcit)
 			Out = Out + *vcit;
+		size_t iDP = 0;
+		if (Num1.m_iDecPos)
+			iDP += Num1.m_iDecPos - 1;
+		if (Num2.m_iDecPos)
+			iDP += Num2.m_iDecPos - 1;
+		if (iDP)
+		{
+			string & strNumber = Out.m_strNumber;
+			strNumber.insert(strNumber.begin() + strNumber.length() - iDP, '.');
+			Out.SetNumber(strNumber);
+		}
 	}
 	else
 		Out = "0";
