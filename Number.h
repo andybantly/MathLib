@@ -35,12 +35,13 @@ public:
     CNumber operator / (const CNumber& rhs);
     CNumber operator % (const CNumber& rhs);
 
-    // Equality operators
+    // Comparison operators
     bool operator < (const CNumber& rhs);
     bool operator <= (const CNumber& rhs);
     bool operator > (const CNumber& rhs);
     bool operator >= (const CNumber& rhs);
     bool operator == (const CNumber& rhs);
+    bool operator != (const CNumber& rhs);
     operator std::string& () { return m_strNumber; }
     operator const char* () { return m_strNumber.c_str(); }
 

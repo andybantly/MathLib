@@ -202,6 +202,12 @@ bool CNumber::operator == (const CNumber& rhs)
 	return iGT == 0;
 }
 
+bool CNumber::operator != (const CNumber& rhs)
+{
+	int iGT = Greater(*this, rhs);
+	return iGT != 0;
+}
+
 void CNumber::SetNumber(const string& strInput)
 {
 	m_strPhrase.clear();
@@ -599,6 +605,8 @@ int CNumber::ToBase2(const string& strInput, string& strResult)
 			if (Fraction >= g_One)
 			{
 				binary.push_back(g_cOne);
+				if (Fraction == g_One)
+					break;
 				Split(Fraction.GetNumber(), vstrBinary, '.');
 				Fraction.SetNumber("0." + vstrBinary[1]);
 			}
@@ -834,8 +842,7 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
-	deque<char> Mult;
-	deque<char> LZ;
+	deque<char> Mult, LZ;
 	vector<string> vSum;
 	uint8_t nZero = 0, iProd = 0, iRem = 0;
 
@@ -938,6 +945,18 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		{
 			string & strNumber = Out.m_strNumber;
 			strNumber.insert(strNumber.begin() + strNumber.length() - iDP, '.');
+			if (*(strNumber.begin()) == '.')
+				strNumber.insert(strNumber.begin(), '0');
+			size_t nSize = strNumber.length();
+			string::const_reverse_iterator rbeg = strNumber.rbegin();
+			while (*rbeg == '0')
+			{
+				rbeg++;
+				nSize--;
+			}
+			if (*rbeg == '.')
+				nSize--;
+			strNumber.resize(nSize);
 			Out.SetNumber(strNumber);
 		}
 	}

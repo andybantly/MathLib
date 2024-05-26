@@ -75,7 +75,7 @@ namespace TestMathLib
 	public:
 		CRndPairFP()
 		{
-			m_iOp = rand() % 2 + 1;
+			m_iOp = rand() % 3 + 1;
 			Calc();
 		}
 
@@ -90,21 +90,20 @@ namespace TestMathLib
 			double dLO = 1;
 			double dHI = RAND_MAX;
 			double dNum = dLO + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) / (dHI - dLO));
-			if (rand() > (RAND_MAX / 2))
+			if (rand() > (100 / 2))
 				dNum = -dNum;
 			return dNum;
 		}
 
 		void Calc()
 		{
-			double d1, d2;
-
-			d1 = Random();
-			d2 = Random();
-
-			m_strNum1 = to_string(d1);
-			m_strNum2 = to_string(d2);
-
+			m_dNum1 = Random();
+			m_dNum2 = Random();
+			char buf[80];
+			sprintf_s(buf, "%.2Lf", m_dNum1);
+			m_strNum1 = buf;
+			sprintf_s(buf, "%.2Lf", m_dNum2);
+			m_strNum2 = buf;
 			m_dNum1 = stod(m_strNum1);
 			m_dNum2 = stod(m_strNum2);
 
@@ -746,8 +745,9 @@ namespace TestMathLib
 					N3 = N1 % N2;
 				}
 
-				const string& strSUM = Rnd.Sum();
-				Assert::AreEqual(strSUM, N3.GetNumber());
+				CNumber N4(Rnd.Sum());
+				if (N3 != N4)
+					Assert::AreEqual(N3.GetNumber(), N4.GetNumber());
 			}
 		}
 
@@ -785,6 +785,7 @@ namespace TestMathLib
 				Assert::AreEqual(bRes, bCMP);
 			}
 		}
+
 		TEST_METHOD(RandomAdd)
 		{
 			int nRM = RAND_MAX;
@@ -1043,6 +1044,32 @@ namespace TestMathLib
 			N1 = "-6.3450"; N2 = "-6.345";
 			b = N1 == N2;
 			Assert::AreEqual(true, b);
+		}
+
+		TEST_METHOD(RandomAddDouble)
+		{
+			CNumber N1, N2, N3, N4;
+			N4 = "6.28318";
+			for (int i = 0; i < 100000; ++i)
+			{
+				N1 = "3.14159";
+				N2 = "3.14159";
+				N3 = N1 + N2;
+				Assert::AreEqual(N4.GetNumber(), N3.GetNumber());
+			}
+		}
+
+		TEST_METHOD(RandomMulDouble)
+		{
+			CNumber N1, N2, N3, N4;
+			N4 = "6.28318";
+			for (int i = 0; i < 100000; ++i)
+			{
+				N1 = "3.14159";
+				N2 = "2";
+				N3 = N1 * N2;
+				Assert::AreEqual(N4.GetNumber(), N3.GetNumber());
+			}
 		}
 
 		TEST_METHOD(TestLib)
