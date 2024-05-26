@@ -76,10 +76,7 @@ CNumber CNumber::operator + (const CNumber& rhs)
 				Sub(*this, rhs, false, Out);
 				break;
 			default:
-				if (m_iDecPos == 0)
-					Out = "0";
-				else
-					Out = "0." + string(max(this->m_iDecPos, rhs.m_iDecPos) - 1, '0');
+				Out = "0";
 			}
 		}
 		else // LHS negative, RHS positive
@@ -93,10 +90,7 @@ CNumber CNumber::operator + (const CNumber& rhs)
 				Sub(*this, rhs, true, Out);
 				break;
 			default:
-				if (m_iDecPos == 0)
-					Out = "0";
-				else
-					Out = "0." + string(max(this->m_iDecPos, rhs.m_iDecPos) - 1, '0');
+				Out = "0";
 			}
 		}
 	}
@@ -123,10 +117,7 @@ CNumber CNumber::operator - (const CNumber& rhs)
 				Sub(*this, rhs, false, Out);
 				break;
 			default:
-				if (m_iDecPos == 0)
-					Out = "0";
-				else
-					Out = "0." + string(max(this->m_iDecPos, rhs.m_iDecPos) - 1, '0');
+				Out = "0";
 			}
 		}
 		else
@@ -140,10 +131,7 @@ CNumber CNumber::operator - (const CNumber& rhs)
 				Sub(rhs, *this, false, Out);
 				break;
 			default:
-				if (m_iDecPos == 0)
-					Out = "0";
-				else
-					Out = "0." + string(max(this->m_iDecPos, rhs.m_iDecPos) - 1, '0');
+				Out = "0";
 			}
 		}
 	}
@@ -740,6 +728,12 @@ void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 	if (*Sum.begin() == '.')
 		Sum.push_front(g_cZero);
+
+	while (*(Sum.end() - 1) == '0')
+		Sum.pop_back();
+	if (*(Sum.end() - 1) == '.')
+		Sum.pop_back();
+
 	if (bNeg)
 		Sum.push_front('-');
 
@@ -813,7 +807,7 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 			iSub = 1;
 		}
 
-		if (iSum) // or idecimal
+		if (iSum)
 		{
 			if (!LZ.empty())
 			{
@@ -833,6 +827,12 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	{
 		if (*Sum.begin() == '.')
 			Sum.push_front(g_cZero);
+
+		while (*(Sum.end() - 1) == '0')
+			Sum.pop_back();
+		if (*(Sum.end() - 1) == '.')
+			Sum.pop_back();
+
 		if (bNeg)
 			Sum.push_front('-');
 	}
