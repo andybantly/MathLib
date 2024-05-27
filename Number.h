@@ -74,7 +74,7 @@ protected:
 
     bool m_bNegative;
     bool m_bZero;
-    size_t m_iDecPos; // 0 = Integer, Not 0 = Floating Point
+    size_t m_iDecPos; // 0 = Integer, > 0 = Floating Point
     std::string m_strNumber;
     std::string m_strPhrase;
     std::string m_strBinary;

@@ -15,13 +15,13 @@ int main()
 	bool bAgain = true;
 	do
 	{
-		cout << "Enter a number, set of numbers separated by arithmetic operations (+,-,*,/,%)" << endl << "Enter 'test' for verification or 'quit' to exit." << endl << "Examples: 12 * 11 + 12, three + four - two, 9 / 3 + 7 * 10, 10 % 3" << endl << "Input: ";
+		std::cout << "Enter a number, set of numbers separated by arithmetic operations (+,-,*,/,%)" << endl << "Enter 'test' for verification or 'quit' to exit." << endl << "Examples: 12 * 11 + 12, three + four - two, 9 / 3 + 7 * 10, 10 % 3" << endl << "Input: ";
 
 		strInput.clear();
 		char c;
 		while ((c = getchar()) != '\n')
 			strInput += c;
-		if (strInput != "quit" && strInput != "test")
+		if (!Equal(strInput, "quit") && !Equal(strInput, "test"))
 		{
 			try
 			{
@@ -57,8 +57,8 @@ int main()
 					const string& strBinary = Number.GetBinary();
 					string strBase10;
 					Number.ToBase10(strBinary, strBase10);
-					cout << Number << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
-					cout << endl;
+					std::cout << Number << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
+					std::cout << endl;
 				}
 				else if (vNumbers.size() >= 3)
 				{
@@ -70,10 +70,10 @@ int main()
 
 						string strBase10;
 						Number.ToBase10(Number.GetBinary(), strBase10);
-						cout << Number << " = " << Number.GetPhrase() << " = " << Number.GetBinary() << " = " << strBase10 << endl;
-						cout << vNumbers[1] << endl;
+						std::cout << Number << " = " << Number.GetPhrase() << " = " << Number.GetBinary() << " = " << strBase10 << endl;
+						std::cout << vNumbers[1] << endl;
 						Number2.ToBase10(Number2.GetBinary(), strBase10);
-						cout << Number2 << " = " << Number2.GetPhrase() << " = " << Number2.GetBinary() << " = " << strBase10 << endl;
+						std::cout << Number2 << " = " << Number2.GetPhrase() << " = " << Number2.GetBinary() << " = " << strBase10 << endl;
 						if (vNumbers[1] == "+")
 							Sum = Number + Number2;
 						else if (vNumbers[1] == "-")
@@ -85,27 +85,27 @@ int main()
 						else if (vNumbers[1] == "%")
 							Sum = Number % Number2;
 						Sum.ToBase10(Sum.GetBinary(), strBase10);
-						cout << Sum << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
+						std::cout << Sum.GetNumber() << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
 
 						vNumbers2.clear();
 						vNumbers2.push_back(Sum.GetNumber());
 						for (std::vector<string>::iterator vit = vNumbers.begin() + 3; vit != vNumbers.end(); ++vit)
 							vNumbers2.push_back(*vit);
 						vNumbers = vNumbers2;
-						cout << endl;
+						std::cout << endl;
 					} while (vNumbers.size() > 1);
 				}
 				else
-					cout << "Invalid input." << endl;
+					std::cout << "Invalid input." << endl;
 			}
 			catch (std::exception& e)
 			{
-				cout << e.what() << endl;
+				std::cout << e.what() << endl;
 			}
 		}
 		else
 		{
-			if (strInput == "quit")
+			if (Equal(strInput, "quit"))
 				bAgain = false;
 			else
 				test(); // Manual testing, automatic testing in TestMathLib project
@@ -127,7 +127,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 
 	{
 		lock_guard<mutex> guard(g_io_mutex);
-		cout << "thread from: " << ullb << " to " << ulle << endl;
+		std::cout << "thread from: " << ullb << " to " << ulle << endl;
 	}
 
 	do
@@ -136,7 +136,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 		if (Number.Expand(s, sr) != 0)
 		{
 			lock_guard<mutex> guard(g_io_mutex);
-			cout << s << " did not expand" << endl;
+			std::cout << s << " did not expand" << endl;
 			break;
 		}
 		else
@@ -144,7 +144,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 			if (Number.Contract(sr, sv) != 0)
 			{
 				lock_guard<mutex> guard(g_io_mutex);
-				cout << sr << " did not contract" << endl;
+				std::cout << sr << " did not contract" << endl;
 				break;
 			}
 			else
@@ -152,7 +152,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 				if (sv != s)
 				{
 					lock_guard<mutex> guard(g_io_mutex);
-					cout << s << " did not expand and contract" << endl;
+					std::cout << s << " did not expand and contract" << endl;
 					break;
 				}
 			}
@@ -166,14 +166,14 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 			if (d > 60.0)
 			{
 				dp = (double(ull - ullb) / dt) * 100.0;
-				cout << "Expanded/Contracted " << (ull - ullb) << " out of " << (ulle - ullb) << ", value " << s << " at " << dp << "%" << endl;
+				std::cout << "Expanded/Contracted " << (ull - ullb) << " out of " << (ulle - ullb) << ", value " << s << " at " << dp << "%" << endl;
 				start = clock();
 			}
 		}
 	} while (ull <= ulle && ull != 0);
 
 	lock_guard<mutex> guard(g_io_mutex);
-	cout << "thread finished" << endl;
+	std::cout << "thread finished" << endl;
 }
 
 static void test()

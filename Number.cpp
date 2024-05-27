@@ -106,7 +106,7 @@ CNumber CNumber::operator - (const CNumber& rhs)
 		Add(*this, rhs, m_bNegative, Out);
 	else
 	{
-		int iGT = Greater(*this, rhs);
+		const int iGT = Greater(*this, rhs);
 		if (!m_bNegative)
 		{
 			switch (iGT)
