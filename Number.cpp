@@ -5,12 +5,21 @@
 
 using namespace std;
 
-map<string, string, CILT> g_mapWordTo99;
-map<string, string, CILT> g_mapWordTo100; 
+static map<string, string, CILT> g_mapWordTo99;
+static map<string, string, CILT> g_mapWordTo100; 
 
-CNumber::CNumber()
+static const CNumber g_Zero("0");
+static const CNumber g_One("1");
+static const CNumber g_Two("2");
+
+static const std::string g_one("1");
+static const std::string g_none("-1");
+
+CNumber::CNumber() : m_bNegative(false), m_bZero(false), m_iDecPos(0)
 {
-	SetNumber("");
+	m_strNumber.clear();
+	m_strPhrase.clear();
+	m_strBinary.clear();
 }
 
 CNumber::CNumber(const string& strInput)
@@ -204,13 +213,17 @@ void CNumber::SetNumber(const string& strInput)
 	
 	if (!strInput.empty())
 	{
-		m_bZero = false;
 		m_bNegative = *(strInput.begin()) == '-';
 		if ((*(strInput.begin() + (m_bNegative ? 1 : 0)) != '.') &&
 			(!isdigit(*(strInput.begin() + (m_bNegative ? 1 : 0)))))
 		{
 			if (Contract(strInput, m_strNumber) != 0)
 				throw(exception("Invalid Number"));
+		}
+		else if (*(strInput.begin() + (m_bNegative ? 1 : 0)) == '.')
+		{
+			m_strNumber = strInput;
+			m_strNumber.insert(strInput.begin() + (m_bNegative ? 1 : 0), '0');
 		}
 		else
 			m_strNumber = strInput;
@@ -220,7 +233,14 @@ void CNumber::SetNumber(const string& strInput)
 			m_iDecPos = (int)(strInput.length() - stPos);
 		else
 			m_iDecPos = 0;
-		m_bZero = *this == g_Zero;
+
+		m_bZero = true;
+		for (string::const_iterator it = m_strNumber.begin(); m_bZero && it != m_strNumber.end(); ++it)
+		{
+			if (*it == '0' || *it == '-' || *it == '.')
+				continue;
+			m_bZero = false;
+		}
 	}
 	else
 	{
@@ -404,9 +424,9 @@ int CNumber::Contract(const string& strInput, string& strResult)
 
 		if (!bFound)
 		{
-			if (Equal(strToken, "Negative"))
+			if (TextEqual(strToken, "Negative"))
 				m_bNegative = true;
-			else if (Equal(strToken, "Point"))
+			else if (TextEqual(strToken, "Point"))
 				bPoint = true;
 			if (!m_bNegative && !bPoint)
 			{
@@ -534,6 +554,8 @@ int CNumber::ToBase2(const string& strInput, string& strResult)
 		strIn = vstrBinary[0].substr(1);
 	else
 		strIn = vstrBinary[0];
+	if (strIn.empty())
+		strIn = "0";
 
 	string::const_iterator cit = strIn.begin();
 	for (;;)
@@ -849,6 +871,12 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
+	if (Num1.m_bZero || Num2.m_bZero)
+	{
+		Out.SetNumber("0");
+		return;
+	}
+
 	deque<char> Mult, LZ;
 	vector<string> vSum;
 	uint8_t nZero = 0, iProd = 0, iRem = 0;
@@ -968,13 +996,18 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		}
 	}
 	else
-		Out = "0";
+		Out.SetNumber("0");
 }
 
 void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
-	if (Equal(Num2.m_strNumber, "0"))
+	if (Num2.m_bZero)
 		return;
+	if (Num1.m_bZero)
+	{
+		Out.SetNumber("0");
+		return;
+	}
 
 	if (ABSGreater(Num1.m_strNumber, Num2.m_strNumber) == 0)
 	{
@@ -982,7 +1015,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		return;
 	}
 	else
-		Out = "0";
+		Out.SetNumber("0");
 
 	CNumber NBIN(!bNeg ? g_one : g_none);
 	CNumber N2DB = Num2;
@@ -1014,12 +1047,12 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
-	if (Equal(Num2.m_strNumber, "0"))
+	if (Num2.m_bZero)
 		return;
 
-	if (ABSGreater(Num1.m_strNumber, Num2.m_strNumber) == 0)
+	if (Num1.m_bZero || ABSGreater(Num1.m_strNumber, Num2.m_strNumber) == 0)
 	{
-		Out = "0";
+		Out.SetNumber("0");
 		return;
 	}
 
@@ -1054,7 +1087,7 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	Out = N1;
 }
 
-bool Equal(const string& strLHS, const string& strRHS)
+bool TextEqual(const string& strLHS, const string& strRHS)
 {
 	bool bEqual = true;
 	if (strLHS.length() != strRHS.length())

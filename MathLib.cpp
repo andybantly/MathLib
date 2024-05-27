@@ -21,7 +21,7 @@ int main()
 		char c;
 		while ((c = getchar()) != '\n')
 			strInput += c;
-		if (!Equal(strInput, "quit") && !Equal(strInput, "test"))
+		if (!TextEqual(strInput, "quit") && !TextEqual(strInput, "test"))
 		{
 			try
 			{
@@ -105,7 +105,7 @@ int main()
 		}
 		else
 		{
-			if (Equal(strInput, "quit"))
+			if (TextEqual(strInput, "quit"))
 				bAgain = false;
 			else
 				test(); // Manual testing, automatic testing in TestMathLib project
@@ -201,7 +201,7 @@ static void test()
 		(*it)->join();
 
 	for (vector<thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
-		delete* it;
+		delete *it;
 }
 
 void Split(const string& strInput, vector<string>& vstrTokens, const char cFind)

@@ -311,12 +311,12 @@ namespace TestMathLib
 			// 10 + -10 = 0
 			N1 = "10"; N2 = "-10";
 			N3 = N1 + N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// -10 + 10 = 0
 			N1 = "-10"; N2 = "10";
 			N3 = N1 + N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// -10 + -10 = -20
 			N1 = "-10"; N2 = "-10";
@@ -426,7 +426,7 @@ namespace TestMathLib
 			// 10 - 10 = 0
 			N1 = "10"; N2 = "10";
 			N3 = N1 - N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// 10 - -10 = 20
 			N1 = "10"; N2 = "-10";
@@ -441,7 +441,7 @@ namespace TestMathLib
 			// -10 - -10 = 0
 			N1 = "-10"; N2 = "-10";
 			N3 = N1 - N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// -10.025 - -10.0025 = -0.0225
 			N1 = "-10.025"; N2 = "-10.0025";
@@ -536,22 +536,22 @@ namespace TestMathLib
 			// 10 * 0 = 0
 			N1 = "10"; N2 = "0";
 			N3 = N1 * N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// -10 * 0 = 0
 			N1 = "-10"; N2 = "0";
 			N3 = N1 * N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// 0 * 10 = 0
 			N1 = "0"; N2 = "10";
 			N3 = N1 * N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// 0 * -10 = 0
 			N1 = "0"; N2 = "-10";
 			N3 = N1 * N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 		}
 
 		TEST_METHOD(Division)
@@ -601,12 +601,12 @@ namespace TestMathLib
 			// 0 / 10 = 0
 			N1 = "0"; N2 = "10";
 			N3 = N1 / N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// 0 / -10 = 0
 			N1 = "0"; N2 = "-10";
 			N3 = N1 / N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// 0 / 0 = Division by Zero
 			N1 = "0"; N2 = "0";
@@ -626,22 +626,22 @@ namespace TestMathLib
 			// 150 % 10 = 0
 			N1 = "150"; N2 = "10";
 			N3 = N1 % N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// -150 % 10 = 0
 			N1 = "-150"; N2 = "10";
 			N3 = N1 % N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// -150 % -10 = 0
 			N1 = "-150"; N2 = "-10";
 			N3 = N1 % N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// 150 % -10 = 0
 			N1 = "150"; N2 = "-10";
 			N3 = N1 % N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// 150 % 14 = 10
 			N1 = "150"; N2 = "14";
@@ -671,7 +671,7 @@ namespace TestMathLib
 			// 0 % -10 = 0
 			N1 = "0"; N2 = "-10";
 			N3 = N1 % N2;
-			Assert::AreEqual(g_Zero, N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// 0 % 0 = Division by Zero
 			N1 = "0"; N2 = "0";

@@ -8,7 +8,7 @@
 #include <thread>
 #include <functional>
 
-bool Equal(const std::string& strLHS, const std::string& strRHS);
+bool TextEqual(const std::string& strLHS, const std::string& strRHS);
 
 class CNumber
 {
@@ -80,10 +80,6 @@ protected:
     std::string m_strBinary;
 };
 
-const CNumber g_Zero("0");
-const CNumber g_One("1");
-const CNumber g_Two("2");
-
 struct CILT
 {
     struct Compare
@@ -104,9 +100,6 @@ struct CILT
         );
     }
 };
-
-const std::string g_one("1");
-const std::string g_none("-1");
 
 class CDuration
 {
