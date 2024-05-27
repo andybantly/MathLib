@@ -55,6 +55,12 @@ public:
     const std::string& GetBinary();
     static void Init();
     friend std::ostream& operator<<(std::ostream& out, const CNumber& Number);
+
+    // error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
+    // for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
+    // __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
+    static std::wstring ToString(const CNumber& Number);
+
 protected:
     int Convert();
     void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
@@ -69,7 +75,6 @@ protected:
     bool m_bNegative;
     bool m_bZero;
     size_t m_iDecPos; // 0 = Integer, Not 0 = Floating Point
-public:
     std::string m_strNumber;
     std::string m_strPhrase;
     std::string m_strBinary;

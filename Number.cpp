@@ -1200,3 +1200,14 @@ ostream& operator<<(ostream& out, const CNumber& Number)
 	out << Number.m_strNumber;
 	return out;
 }
+
+// error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
+// for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
+// __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
+wstring CNumber::ToString(const CNumber& rhs)
+{
+	string strNumber = rhs.m_strNumber;
+	std::wstringstream wstrStream;
+	wstrStream << strNumber.c_str();
+	return wstrStream.str();
+}

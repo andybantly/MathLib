@@ -1097,19 +1097,18 @@ namespace TestMathLib
 	};
 }
 
-// error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
+// error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
+// for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
+// __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
 namespace Microsoft
 {
 	namespace VisualStudio
 	{
 		namespace CppUnitTestFramework
 		{
-			template<> static wstring ToString<CNumber>(const CNumber& rhs)
+			template<> wstring static ToString<CNumber>(const CNumber& Number)
 			{
-				string str = rhs.m_strNumber;
-				std::wstringstream wstr;
-				wstr << str.c_str();
-				return wstr.str();
+				return CNumber::ToString(Number);
 			}
 		}
 	}
