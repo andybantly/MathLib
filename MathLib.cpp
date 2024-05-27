@@ -88,7 +88,7 @@ int main()
 						cout << Sum << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
 
 						vNumbers2.clear();
-						vNumbers2.push_back(Sum);
+						vNumbers2.push_back(Sum.GetNumber());
 						for (std::vector<string>::iterator vit = vNumbers.begin() + 3; vit != vNumbers.end(); ++vit)
 							vNumbers2.push_back(*vit);
 						vNumbers = vNumbers2;

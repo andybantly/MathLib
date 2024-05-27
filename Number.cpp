@@ -1,11 +1,12 @@
 #include "Number.h"
 #include "Constants.h"
+#include <sstream>
 #pragma warning(disable:6385)
 
 using namespace std;
 
-std::map<std::string, std::string, CILT> g_mapWordTo99;
-std::map<std::string, std::string, CILT> g_mapWordTo100; 
+map<string, string, CILT> g_mapWordTo99;
+map<string, string, CILT> g_mapWordTo100; 
 
 CNumber::CNumber()
 {
@@ -64,7 +65,7 @@ CNumber CNumber::operator + (const CNumber& rhs)
 		Add(*this, rhs, m_bNegative, Out);
 	else
 	{
-		int iGT = ABSGreater(*this, rhs);
+		const int iGT = ABSGreater(*this, rhs);
 		if (!m_bNegative && rhs.m_bNegative) // LHS positive, RHS negative
 		{
 			switch (iGT)
@@ -160,39 +161,39 @@ CNumber CNumber::operator % (const CNumber& rhs)
 	return Out;
 }
 
-bool CNumber::operator < (const CNumber& rhs)
+const bool CNumber::operator < (const CNumber& rhs) const
 {
-	int iGT = Greater(*this, rhs);
+	const int iGT = Greater(*this, rhs);
 	return iGT < 0;
 }
 
-bool CNumber::operator <= (const CNumber& rhs)
+const bool CNumber::operator <= (const CNumber& rhs) const
 {
-	int iGT = Greater(*this, rhs);
+	const int iGT = Greater(*this, rhs);
 	return iGT <= 0;
 }
 
-bool CNumber::operator > (const CNumber& rhs)
+const bool CNumber::operator > (const CNumber& rhs) const
 {
-	int iGT = Greater(*this, rhs);
+	const int iGT = Greater(*this, rhs);
 	return iGT > 0;
 }
 
-bool CNumber::operator >= (const CNumber& rhs)
+const bool CNumber::operator >= (const CNumber& rhs) const
 {
-	int iGT = Greater(*this, rhs);
+	const int iGT = Greater(*this, rhs);
 	return iGT >= 0;
 }
 
-bool CNumber::operator == (const CNumber& rhs)
+const bool CNumber::operator == (const CNumber& rhs) const
 {
-	int iGT = Greater(*this, rhs);
+	const int iGT = Greater(*this, rhs);
 	return iGT == 0;
 }
 
-bool CNumber::operator != (const CNumber& rhs)
+const bool CNumber::operator != (const CNumber& rhs) const
 {
-	int iGT = Greater(*this, rhs);
+	const int iGT = Greater(*this, rhs);
 	return iGT != 0;
 }
 
@@ -209,7 +210,7 @@ void CNumber::SetNumber(const string& strInput)
 			(!isdigit(*(strInput.begin() + (m_bNegative ? 1 : 0)))))
 		{
 			if (Contract(strInput, m_strNumber) != 0)
-				throw(std::exception("Invalid Number"));
+				throw(exception("Invalid Number"));
 		}
 		else
 			m_strNumber = strInput;
@@ -469,7 +470,7 @@ int CNumber::Convert()
 		m_strPhrase = m_strNumber;
 		iRet = Contract(m_strPhrase, m_strNumber);
 		if (iRet != 0)
-			throw(std::exception("Invalid Number"));
+			throw(exception("Invalid Number"));
 	}
 	return iRet;
 }
@@ -480,7 +481,7 @@ void CNumber::Split(const string& strInput, vector<string>& vstrTokens, const ch
 	if (strInput.empty())
 		return;
 
-	std::string strToken;
+	string strToken;
 	size_t istart = 0, ipos;
 	do
 	{
@@ -729,10 +730,13 @@ void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	if (*Sum.begin() == '.')
 		Sum.push_front(g_cZero);
 
-	while (*(Sum.end() - 1) == '0')
-		Sum.pop_back();
-	if (*(Sum.end() - 1) == '.')
-		Sum.pop_back();
+	if (m_iDecPos > 0)
+	{
+		while (*(Sum.end() - 1) == '0')
+			Sum.pop_back();
+		if (*(Sum.end() - 1) == '.')
+			Sum.pop_back();
+	}
 
 	if (bNeg)
 		Sum.push_front('-');
@@ -828,10 +832,13 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		if (*Sum.begin() == '.')
 			Sum.push_front(g_cZero);
 
-		while (*(Sum.end() - 1) == '0')
-			Sum.pop_back();
-		if (*(Sum.end() - 1) == '.')
-			Sum.pop_back();
+		if (m_iDecPos > 0)
+		{
+			while (*(Sum.end() - 1) == '0')
+				Sum.pop_back();
+			if (*(Sum.end() - 1) == '.')
+				Sum.pop_back();
+		}
 
 		if (bNeg)
 			Sum.push_front('-');
@@ -1047,7 +1054,7 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	Out = N1;
 }
 
-bool Equal(const std::string& strLHS, const std::string& strRHS)
+bool Equal(const string& strLHS, const string& strRHS)
 {
 	bool bEqual = true;
 	if (strLHS.length() != strRHS.length())
@@ -1065,7 +1072,7 @@ bool Equal(const std::string& strLHS, const std::string& strRHS)
 }
 
 // ABS greater than
-int CNumber::ABSGreater(const CNumber& LHS, const CNumber& RHS)
+const int CNumber::ABSGreater(const CNumber& LHS, const CNumber& RHS) const
 {
 	int iGT = 0;
 
@@ -1108,7 +1115,7 @@ int CNumber::ABSGreater(const CNumber& LHS, const CNumber& RHS)
 	return iGT;
 }
 
-int CNumber::Greater(const CNumber& LHS, const CNumber& RHS)
+const int CNumber::Greater(const CNumber& LHS, const CNumber& RHS) const
 {
 	int iGT = 0;
 	if (LHS.m_bZero && RHS.m_bZero)
@@ -1188,7 +1195,7 @@ void CNumber::Init()
 	}
 }
 
-std::ostream& operator<<(std::ostream& out, const CNumber& Number)
+ostream& operator<<(ostream& out, const CNumber& Number)
 {
 	out << Number.m_strNumber;
 	return out;

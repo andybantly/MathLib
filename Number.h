@@ -36,14 +36,12 @@ public:
     CNumber operator % (const CNumber& rhs);
 
     // Comparison operators
-    bool operator < (const CNumber& rhs);
-    bool operator <= (const CNumber& rhs);
-    bool operator > (const CNumber& rhs);
-    bool operator >= (const CNumber& rhs);
-    bool operator == (const CNumber& rhs);
-    bool operator != (const CNumber& rhs);
-    operator std::string& () { return m_strNumber; }
-    operator const char* () { return m_strNumber.c_str(); }
+    const bool operator < (const CNumber& rhs) const;
+    const bool operator <= (const CNumber& rhs) const;
+    const bool operator > (const CNumber& rhs) const;
+    const bool operator >= (const CNumber& rhs) const;
+    const bool operator == (const CNumber& rhs) const;
+    const bool operator != (const CNumber& rhs) const;
 
 public:
     void SetNumber(const std::string& strInput);
@@ -65,12 +63,13 @@ protected:
     void Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    int ABSGreater(const CNumber& LHS, const CNumber& RHS);
-    int Greater(const CNumber& LHS, const CNumber& RHS);
+    const int ABSGreater(const CNumber& LHS, const CNumber& RHS) const;
+    const int Greater(const CNumber& LHS, const CNumber& RHS) const;
 
     bool m_bNegative;
     bool m_bZero;
     size_t m_iDecPos; // 0 = Integer, Not 0 = Floating Point
+public:
     std::string m_strNumber;
     std::string m_strPhrase;
     std::string m_strBinary;

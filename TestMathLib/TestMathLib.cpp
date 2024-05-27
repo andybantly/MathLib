@@ -266,117 +266,117 @@ namespace TestMathLib
 			// 10 + 15 = 25
 			N1 = "10"; N2 = "15";
 			N3 = N1 + N2;
-			Assert::AreEqual("25", N3);
+			Assert::AreEqual(CNumber("25"), N3);
 
 			// 10 + -15 = -5
 			N1 = "10"; N2 = "-15";
 			N3 = N1 + N2;
-			Assert::AreEqual("-5", N3);
+			Assert::AreEqual(CNumber("-5"), N3);
 
 			// -10 + 15 = 5
 			N1 = "-10"; N2 = "15";
 			N3 = N1 + N2;
-			Assert::AreEqual("5", N3);
+			Assert::AreEqual(CNumber("5"), N3);
 
 			// -10 + -15 = -25
 			N1 = "-10"; N2 = "-15";
 			N3 = N1 + N2;
-			Assert::AreEqual("-25", N3);
+			Assert::AreEqual(CNumber("-25"), N3);
 
 			// 15 + 10 = 25
 			N1 = "15"; N2 = "10";
 			N3 = N1 + N2;
-			Assert::AreEqual("25", N3);
+			Assert::AreEqual(CNumber("25"), N3);
 
 			// 15 + -10 = 5
 			N1 = "15"; N2 = "-10";
 			N3 = N1 + N2;
-			Assert::AreEqual("5", N3);
+			Assert::AreEqual(CNumber("5"), N3);
 
 			// -15 + 10 = -5
 			N1 = "-15"; N2 = "10";
 			N3 = N1 + N2;
-			Assert::AreEqual("-5", N3);
+			Assert::AreEqual(CNumber("-5"), N3);
 
 			// -15 + -10 = -25
 			N1 = "-15"; N2 = "-10";
 			N3 = N1 + N2;
-			Assert::AreEqual("-25", N3);
+			Assert::AreEqual(CNumber("-25"), N3);
 
 			// 10 + 10 = 20
 			N1 = "10"; N2 = "10";
 			N3 = N1 + N2;
-			Assert::AreEqual("20", N3);
+			Assert::AreEqual(CNumber("20"), N3);
 
 			// 10 + -10 = 0
 			N1 = "10"; N2 = "-10";
 			N3 = N1 + N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// -10 + 10 = 0
 			N1 = "-10"; N2 = "10";
 			N3 = N1 + N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// -10 + -10 = -20
 			N1 = "-10"; N2 = "-10";
 			N3 = N1 + N2;
-			Assert::AreEqual("-20", N3);
+			Assert::AreEqual(CNumber("-20"), N3);
 
 			// -10.025 + -10.0025 = 
 			N1 = "-10.025"; N2 = "-10.0025";
 			N3 = N1 + N2;
-			Assert::AreEqual("-20.0275", N3);
+			Assert::AreEqual(CNumber("-20.0275"), N3);
 
 			// -10.025 + 10.0025 = -0.0225
 			N1 = "-10.025"; N2 = "10.0025";
 			N3 = N1 + N2;
-			Assert::AreEqual("-0.0225", N3);
+			Assert::AreEqual(CNumber("-0.0225"), N3);
 
 			// 10.025 + -10.0025 = 0.0225
 			N1 = "10.025"; N2 = "-10.0025";
 			N3 = N1 + N2;
-			Assert::AreEqual("0.0225", N3);
+			Assert::AreEqual(CNumber("0.0225"), N3);
 
 			// 10.025 + 10.0025 = 20.0275
 			N1 = "10.025"; N2 = "10.0025";
 			N3 = N1 + N2;
-			Assert::AreEqual("20.0275", N3);
+			Assert::AreEqual(CNumber("20.0275"), N3);
 
 			// -10.025 + -10.000025 = -20.025025
 			N1 = "-10.025"; N2 = "-10.000025";
 			N3 = N1 + N2;
-			Assert::AreEqual("-20.025025", N3);
+			Assert::AreEqual(CNumber("-20.025025"), N3);
 
 			// -10.025 + 10.000025 = -0.024975
 			N1 = "-10.025"; N2 = "10.000025";
 			N3 = N1 + N2;
-			Assert::AreEqual("-0.024975", N3);
+			Assert::AreEqual(CNumber("-0.024975"), N3);
 
 			// 10.025 + -10.000025 = 0.024975
 			N1 = "10.025"; N2 = "-10.000025";
 			N3 = N1 + N2;
-			Assert::AreEqual("0.024975", N3);
+			Assert::AreEqual(CNumber("0.024975"), N3);
 
 			// 10.025 + 10.000025 = 20.025025
 			N1 = "10.025"; N2 = "10.000025";
 			N3 = N1 + N2;
-			Assert::AreEqual("20.025025", N3);
+			Assert::AreEqual(CNumber("20.025025"), N3);
 
 			// -2005 + -1004 = -3009
 			N1 = "-2005"; N2 = "-1004";
 			N3 = N1 + N2;
-			Assert::AreEqual("-3009", N3);
+			Assert::AreEqual(CNumber("-3009"), N3);
 
 			// Corner case 25466 + -24367 = 1099
 			N1 = "25466"; N2 = "-24367";
 			N3 = N1 + N2;
-			Assert::AreEqual("1099", N3);
+			Assert::AreEqual(CNumber("1099"), N3);
 
 			// Corner case 21902 + -4703
 			N1 = "21902"; N2 = "-4703";
 			N3 = N1 + N2;
-			Assert::AreEqual("17199", N3);
+			Assert::AreEqual(CNumber("17199"), N3);
 		}
 
 		TEST_METHOD(Subtraction)
@@ -386,107 +386,107 @@ namespace TestMathLib
 			// 10 - 15 = -5
 			N1 = "10"; N2 = "15";
 			N3 = N1 - N2;
-			Assert::AreEqual("-5", N3);
+			Assert::AreEqual(CNumber("-5"), N3);
 
 			// 10 - -15 = 25
 			N1 = "10"; N2 = "-15";
 			N3 = N1 - N2;
-			Assert::AreEqual("25", N3);
+			Assert::AreEqual(CNumber("25"), N3);
 
 			// -10 - 15 = -25
 			N1 = "-10"; N2 = "15";
 			N3 = N1 - N2;
-			Assert::AreEqual("-25", N3);
+			Assert::AreEqual(CNumber("-25"), N3);
 
 			// -10 - -15 = 5
 			N1 = "-10"; N2 = "-15";
 			N3 = N1 - N2;
-			Assert::AreEqual("5", N3);
+			Assert::AreEqual(CNumber("5"), N3);
 
 			// 15 - 10 = 5
 			N1 = "15"; N2 = "10";
 			N3 = N1 - N2;
-			Assert::AreEqual("5", N3);
+			Assert::AreEqual(CNumber("5"), N3);
 
 			// 15 - -10 = 25
 			N1 = "15"; N2 = "-10";
 			N3 = N1 - N2;
-			Assert::AreEqual("25", N3);
+			Assert::AreEqual(CNumber("25"), N3);
 
 			// -15 - 10 = -25
 			N1 = "-15"; N2 = "10";
 			N3 = N1 - N2;
-			Assert::AreEqual("-25", N3);
+			Assert::AreEqual(CNumber("-25"), N3);
 
 			// -15 - -10 = -5
 			N1 = "-15"; N2 = "-10";
 			N3 = N1 - N2;
-			Assert::AreEqual("-5", N3);
+			Assert::AreEqual(CNumber("-5"), N3);
 
 			// 10 - 10 = 0
 			N1 = "10"; N2 = "10";
 			N3 = N1 - N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// 10 - -10 = 20
 			N1 = "10"; N2 = "-10";
 			N3 = N1 - N2;
-			Assert::AreEqual("20", N3);
+			Assert::AreEqual(CNumber("20"), N3);
 
 			// -10 - 10 = -20
 			N1 = "-10"; N2 = "10";
 			N3 = N1 - N2;
-			Assert::AreEqual("-20", N3);
+			Assert::AreEqual(CNumber("-20"), N3);
 
 			// -10 - -10 = 0
 			N1 = "-10"; N2 = "-10";
 			N3 = N1 - N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// -10.025 - -10.0025 = -0.0225
 			N1 = "-10.025"; N2 = "-10.0025";
 			N3 = N1 - N2;
-			Assert::AreEqual("-0.0225", N3);
+			Assert::AreEqual(CNumber("-0.0225"), N3);
 
 			// -10.025 - 10.0025 = -20.0275
 			N1 = "-10.025"; N2 = "10.0025";
 			N3 = N1 - N2;
-			Assert::AreEqual("-20.0275", N3);
+			Assert::AreEqual(CNumber("-20.0275"), N3);
 
 			// 10.025 - -10.0025 = 20.0275
 			N1 = "10.025"; N2 = "-10.0025";
 			N3 = N1 - N2;
-			Assert::AreEqual("20.0275", N3);
+			Assert::AreEqual(CNumber("20.0275"), N3);
 
 			// 10.025 - 10.0025 = 20.0275
 			N1 = "10.025"; N2 = "10.0025";
 			N3 = N1 - N2;
-			Assert::AreEqual("0.0225", N3);
+			Assert::AreEqual(CNumber("0.0225"), N3);
 
 			// -10.025 - -10.000025 = -0.024975
 			N1 = "-10.025"; N2 = "-10.000025";
 			N3 = N1 - N2;
-			Assert::AreEqual("-0.024975", N3);
+			Assert::AreEqual(CNumber("-0.024975"), N3);
 
 			// -10.025 - 10.000025 = -20.025025
 			N1 = "-10.025"; N2 = "10.000025";
 			N3 = N1 - N2;
-			Assert::AreEqual("-20.025025", N3);
+			Assert::AreEqual(CNumber("-20.025025"), N3);
 
 			// 10.025 - -10.000025 = 20.025025
 			N1 = "10.025"; N2 = "-10.000025";
 			N3 = N1 - N2;
-			Assert::AreEqual("20.025025", N3);
+			Assert::AreEqual(CNumber("20.025025"), N3);
 
 			// 10.025 - 10.000025 = 0.024975
 			N1 = "10.025"; N2 = "10.000025";
 			N3 = N1 - N2;
-			Assert::AreEqual("0.024975", N3);
+			Assert::AreEqual(CNumber("0.024975"), N3);
 
 			// -2005 - -1004 = -1001
 			N1 = "-2005"; N2 = "-1004";
 			N3 = N1 - N2;
-			Assert::AreEqual("-1001", N3);
+			Assert::AreEqual(CNumber("-1001"), N3);
 		}
 
 		TEST_METHOD(Multiplication)
@@ -496,62 +496,62 @@ namespace TestMathLib
 			// 10 * 15 = 150
 			N1 = "10"; N2 = "15";
 			N3 = N1 * N2;
-			Assert::AreEqual("150", N3);
+			Assert::AreEqual(CNumber("150"), N3);
 
 			// 10 * -15 = -150
 			N1 = "10"; N2 = "-15";
 			N3 = N1 * N2;
-			Assert::AreEqual("-150", N3);
+			Assert::AreEqual(CNumber("-150"), N3);
 
 			// -10 * 15 = -150
 			N1 = "-10"; N2 = "15";
 			N3 = N1 * N2;
-			Assert::AreEqual("-150", N3);
+			Assert::AreEqual(CNumber("-150"), N3);
 
 			// -10 * -15 = 150
 			N1 = "-10"; N2 = "-15";
 			N3 = N1 * N2;
-			Assert::AreEqual("150", N3);
+			Assert::AreEqual(CNumber("150"), N3);
 
 			// 15 * 10 = 150
 			N1 = "15"; N2 = "10";
 			N3 = N1 * N2;
-			Assert::AreEqual("150", N3);
+			Assert::AreEqual(CNumber("150"), N3);
 
 			// 15 * -10 = -150
 			N1 = "15"; N2 = "-10";
 			N3 = N1 * N2;
-			Assert::AreEqual("-150", N3);
+			Assert::AreEqual(CNumber("-150"), N3);
 
 			// -15 * 10 = -150
 			N1 = "-15"; N2 = "10";
 			N3 = N1 * N2;
-			Assert::AreEqual("-150", N3);
+			Assert::AreEqual(CNumber("-150"), N3);
 
 			// -15 * -10 = 150
 			N1 = "-15"; N2 = "-10";
 			N3 = N1 * N2;
-			Assert::AreEqual("150", N3);
+			Assert::AreEqual(CNumber("150"), N3);
 
 			// 10 * 0 = 0
 			N1 = "10"; N2 = "0";
 			N3 = N1 * N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// -10 * 0 = 0
 			N1 = "-10"; N2 = "0";
 			N3 = N1 * N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// 0 * 10 = 0
 			N1 = "0"; N2 = "10";
 			N3 = N1 * N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// 0 * -10 = 0
 			N1 = "0"; N2 = "-10";
 			N3 = N1 * N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 		}
 
 		TEST_METHOD(Division)
@@ -561,62 +561,62 @@ namespace TestMathLib
 			// 150 / 10 = 15
 			N1 = "150"; N2 = "10";
 			N3 = N1 / N2;
-			Assert::AreEqual("15", N3);
+			Assert::AreEqual(CNumber("15"), N3);
 
 			// -150 / 10 = -15
 			N1 = "-150"; N2 = "10";
 			N3 = N1 / N2;
-			Assert::AreEqual("-15", N3);
+			Assert::AreEqual(CNumber("-15"), N3);
 
 			// -150 / -10 = 15
 			N1 = "-150"; N2 = "-10";
 			N3 = N1 / N2;
-			Assert::AreEqual("15", N3);
+			Assert::AreEqual(CNumber("15"), N3);
 
 			// 150 / -10 = -15
 			N1 = "150"; N2 = "-10";
 			N3 = N1 / N2;
-			Assert::AreEqual("-15", N3);
+			Assert::AreEqual(CNumber("-15"), N3);
 
 			// 150 / 15 = 10
 			N1 = "150"; N2 = "15";
 			N3 = N1 / N2;
-			Assert::AreEqual("10", N3);
+			Assert::AreEqual(CNumber("10"), N3);
 
 			// -150 / 15 = -10
 			N1 = "-150"; N2 = "15";
 			N3 = N1 / N2;
-			Assert::AreEqual("-10", N3);
+			Assert::AreEqual(CNumber("-10"), N3);
 
 			// -150 / -15 = 10
 			N1 = "-150"; N2 = "-15";
 			N3 = N1 / N2;
-			Assert::AreEqual("10", N3);
+			Assert::AreEqual(CNumber("10"), N3);
 
 			// 150 / -15 = -10
 			N1 = "150"; N2 = "-15";
 			N3 = N1 / N2;
-			Assert::AreEqual("-10", N3);
+			Assert::AreEqual(CNumber("-10"), N3);
 
 			// 0 / 10 = 0
 			N1 = "0"; N2 = "10";
 			N3 = N1 / N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// 0 / -10 = 0
 			N1 = "0"; N2 = "-10";
 			N3 = N1 / N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// 0 / 0 = Division by Zero
 			N1 = "0"; N2 = "0";
 			N3 = N1 / N2;
-			Assert::AreEqual("", N3);
+			Assert::AreEqual(CNumber(""), N3);
 
 			// -10 / 0 = Division by Zero
 			N1 = "-10"; N2 = "0";
 			N3 = N1 / N2;
-			Assert::AreEqual("", N3);
+			Assert::AreEqual(CNumber(""), N3);
 		}
 
 		TEST_METHOD(Modulus)
@@ -626,62 +626,62 @@ namespace TestMathLib
 			// 150 % 10 = 0
 			N1 = "150"; N2 = "10";
 			N3 = N1 % N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// -150 % 10 = 0
 			N1 = "-150"; N2 = "10";
 			N3 = N1 % N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// -150 % -10 = 0
 			N1 = "-150"; N2 = "-10";
 			N3 = N1 % N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// 150 % -10 = 0
 			N1 = "150"; N2 = "-10";
 			N3 = N1 % N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// 150 % 14 = 10
 			N1 = "150"; N2 = "14";
 			N3 = N1 % N2;
-			Assert::AreEqual("10", N3);
+			Assert::AreEqual(CNumber("10"), N3);
 
 			// -150 % 14 = -10
 			N1 = "-150"; N2 = "14";
 			N3 = N1 % N2;
-			Assert::AreEqual("-10", N3);
+			Assert::AreEqual(CNumber("-10"), N3);
 
 			// -150 % -14 = -10
 			N1 = "-150"; N2 = "-14";
 			N3 = N1 % N2;
-			Assert::AreEqual("-10", N3);
+			Assert::AreEqual(CNumber("-10"), N3);
 
 			// 150 % -14 = 10
 			N1 = "150"; N2 = "-14";
 			N3 = N1 % N2;
-			Assert::AreEqual("10", N3);
+			Assert::AreEqual(CNumber("10"), N3);
 
 			// 0 % 10 = 0
 			N1 = "0"; N2 = "10";
 			N3 = N1 % N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// 0 % -10 = 0
 			N1 = "0"; N2 = "-10";
 			N3 = N1 % N2;
-			Assert::AreEqual("0", N3);
+			Assert::AreEqual(g_Zero, N3);
 
 			// 0 % 0 = Division by Zero
 			N1 = "0"; N2 = "0";
 			N3 = N1 % N2;
-			Assert::AreEqual("", N3);
+			Assert::AreEqual(CNumber(""), N3);
 
 			// -10 % 0 = Division by Zero
 			N1 = "-10"; N2 = "0";
 			N3 = N1 % N2;
-			Assert::AreEqual("", N3);
+			Assert::AreEqual(CNumber(""), N3);
 		}
 
 		TEST_METHOD(RandomMath)
@@ -712,8 +712,8 @@ namespace TestMathLib
 					N3 = N1 % N2;
 				}
 
-				const string& strSUM = Rnd.Sum();
-				Assert::AreEqual(strSUM, N3.GetNumber());
+				CNumber SUM(Rnd.Sum());
+				Assert::AreEqual(SUM, N3);
 			}
 		}
 
@@ -746,8 +746,7 @@ namespace TestMathLib
 				}
 
 				CNumber N4(Rnd.Sum());
-				if (N3 != N4)
-					Assert::AreEqual(N3.GetNumber(), N4.GetNumber());
+				Assert::AreEqual(N3, N4);
 			}
 		}
 
@@ -797,8 +796,8 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 + N2;
 
-				const string& strSUM = Rnd.Sum();
-				Assert::AreEqual(strSUM, N3.GetNumber());
+				CNumber SUM(Rnd.Sum());
+				Assert::AreEqual(SUM, N3);
 			}
 		}
 
@@ -813,8 +812,8 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 - N2;
 
-				const string& strSUM = Rnd.Sum();
-				Assert::AreEqual(strSUM, N3.GetNumber());
+				CNumber SUM(Rnd.Sum());
+				Assert::AreEqual(SUM, N3);
 			}
 		}
 
@@ -829,8 +828,8 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 * N2;
 
-				const string& strSUM = Rnd.Sum();
-				Assert::AreEqual(strSUM, N3.GetNumber());
+				CNumber SUM(Rnd.Sum());
+				Assert::AreEqual(SUM, N3);
 			}
 		}
 
@@ -845,9 +844,8 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 / N2;
 
-				const string& strSUM = Rnd.Sum();
-				if (strSUM != N3.GetNumber())
-					Assert::AreEqual(strSUM, N3.GetNumber());
+				CNumber SUM(Rnd.Sum());
+				Assert::AreEqual(SUM, N3);
 			}
 		}
 
@@ -862,9 +860,8 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 % N2;
 
-				const string& strSUM = Rnd.Sum();
-				if (strSUM != N3.GetNumber())
-					Assert::AreEqual(strSUM, N3.GetNumber());
+				CNumber SUM(Rnd.Sum());
+				Assert::AreEqual(SUM, N3);
 			}
 		}
 
@@ -1055,7 +1052,7 @@ namespace TestMathLib
 				N1 = "3.14159";
 				N2 = "3.14159";
 				N3 = N1 + N2;
-				Assert::AreEqual(N4.GetNumber(), N3.GetNumber());
+				Assert::AreEqual(N4, N3);
 			}
 		}
 
@@ -1068,7 +1065,7 @@ namespace TestMathLib
 				N1 = "3.14159";
 				N2 = "2";
 				N3 = N1 * N2;
-				Assert::AreEqual(N4.GetNumber(), N3.GetNumber());
+				Assert::AreEqual(N4, N3);
 			}
 		}
 
@@ -1098,4 +1095,22 @@ namespace TestMathLib
 				delete* it;
 		}
 	};
+}
+
+// error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
+namespace Microsoft
+{
+	namespace VisualStudio
+	{
+		namespace CppUnitTestFramework
+		{
+			template<> static wstring ToString<CNumber>(const CNumber& rhs)
+			{
+				string str = rhs.m_strNumber;
+				std::wstringstream wstr;
+				wstr << str.c_str();
+				return wstr.str();
+			}
+		}
+	}
 }
