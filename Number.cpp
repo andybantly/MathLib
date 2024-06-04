@@ -208,9 +208,6 @@ const bool CNumber::operator != (const CNumber& rhs) const
 
 void CNumber::SetNumber(const string& strInput)
 {
-	m_strPhrase.clear();
-	m_strBinary.clear();
-	
 	if (!strInput.empty())
 	{
 		m_bZero = true;
@@ -244,16 +241,16 @@ void CNumber::SetNumber(const string& strInput)
 				continue;
 			}
 
-			if (*cit == '0')
-			{
-				if (dqInput.size() == 0)
-					continue;
-				if (m_bNegative && dqInput.size() == 1)
-					continue;
-			}
-
 			if (isdigit(*cit))
 			{
+				if (*cit == '0')
+				{
+					if (dqInput.size() == 0)
+						continue;
+					if (m_bNegative && dqInput.size() == 1)
+						continue;
+				}
+
 				if (m_bZero && *cit != '0')
 					m_bZero = false;
 				dqInput.push_back(*cit);
@@ -281,6 +278,8 @@ void CNumber::SetNumber(const string& strInput)
 		m_bZero = false;
 		m_iDecPos = 0;
 	}
+	m_strPhrase.clear();
+	m_strBinary.clear();
 }
 
 string CNumber::WB()
