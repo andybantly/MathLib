@@ -23,13 +23,20 @@ namespace TestMathLib
 		}
 	protected:
 
+		int Random()
+		{
+			int iLO = 1;
+			int iHI = RAND_MAX;
+			int iNum = iLO + static_cast<int>(rand()) / (static_cast<int>(RAND_MAX) / (iHI - iLO));
+			if (rand() > (RAND_MAX / 2))
+				iNum = -iNum;
+			return iNum;
+		}
+
 		void Calc()
 		{
-			m_iNum1 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
-			do
-			{
-				m_iNum2 = (rand() * (rand() > RAND_MAX / 2 ? 1 : -1));
-			} while (m_iOp > 3 && m_iNum2 == 0); // Don't allow division by 0
+			m_iNum1 = Random();
+			m_iNum2 = Random();
 			m_strNum1 = to_string(m_iNum1);
 			m_strNum2 = to_string(m_iNum2);
 
@@ -90,7 +97,7 @@ namespace TestMathLib
 			double dLO = 1;
 			double dHI = RAND_MAX;
 			double dNum = dLO + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) / (dHI - dLO));
-			if (rand() > (100 / 2))
+			if (rand() > (RAND_MAX / 2))
 				dNum = -dNum;
 			return dNum;
 		}
@@ -100,9 +107,9 @@ namespace TestMathLib
 			m_dNum1 = Random();
 			m_dNum2 = Random();
 			char buf[80];
-			sprintf_s(buf, "%.2Lf", m_dNum1);
+			sprintf_s(buf, "%.3Lf", m_dNum1);
 			m_strNum1 = buf;
-			sprintf_s(buf, "%.2Lf", m_dNum2);
+			sprintf_s(buf, "%.3Lf", m_dNum2);
 			m_strNum2 = buf;
 			m_dNum1 = stod(m_strNum1);
 			m_dNum2 = stod(m_strNum2);
@@ -172,14 +179,13 @@ namespace TestMathLib
 
 		void Calc()
 		{
-			double d1, d2;
-
-			d1 = Random();
-			d2 = Random();
-
-			m_strNum1 = to_string(d1);
-			m_strNum2 = to_string(d2);
-
+			m_dNum1 = Random();
+			m_dNum2 = Random();
+			char buf[80];
+			sprintf_s(buf, "%.4Lf", m_dNum1);
+			m_strNum1 = buf;
+			sprintf_s(buf, "%.4Lf", m_dNum2);
+			m_strNum2 = buf;
 			m_dNum1 = stod(m_strNum1);
 			m_dNum2 = stod(m_strNum2);
 
@@ -233,6 +239,23 @@ namespace TestMathLib
 			do
 			{
 				s = to_string(ull++);
+				iResult = MathLib.Expand(s, sr);
+				Assert::AreEqual(iResult, 0);
+
+				iResult = MathLib.Contract(sr, sv);
+				Assert::AreEqual(iResult, 0);
+
+				Assert::AreEqual(sv, s);
+
+				iResult = MathLib.ToBase2(sv, sb2);
+				Assert::AreEqual(iResult, 0);
+
+				iResult = MathLib.ToBase10(sb2, sb10);
+				Assert::AreEqual(iResult, 0);
+
+				Assert::AreEqual(sv, sb10);
+
+				s = to_string(-ull - 1);
 				iResult = MathLib.Expand(s, sr);
 				Assert::AreEqual(iResult, 0);
 
@@ -374,9 +397,9 @@ namespace TestMathLib
 			Assert::AreEqual(CNumber("1099"), N3);
 
 			// Corner case 21902 + -4703
-			N1 = "21902"; N2 = "-4703";
+			N1 = "00021902.2500"; N2 = "-4703.1";
 			N3 = N1 + N2;
-			Assert::AreEqual(CNumber("17199"), N3);
+			Assert::AreEqual(CNumber("17199.15"), N3);
 		}
 
 		TEST_METHOD(Subtraction)
@@ -870,7 +893,17 @@ namespace TestMathLib
 			CNumber N1, N2;
 			bool b;
 
-			N1 = "5"; N2 = "5";
+			double d1 = -5, d2 = -5.2;
+			b = d1 < d2;
+			
+			N1 = "-0005"; N2 = "-5.2";
+			b = N1 < N2;
+			Assert::AreEqual(false, b);
+
+			d1 = -5.01, d2 = -5.2;
+			b = d1 < d2;
+
+			N1 = "-0005.01"; N2 = "-5.2";
 			b = N1 < N2;
 			Assert::AreEqual(false, b);
 

@@ -74,7 +74,7 @@ CNumber CNumber::operator + (const CNumber& rhs)
 		Add(*this, rhs, m_bNegative, Out);
 	else
 	{
-		const int iGT = ABSGreater(*this, rhs);
+		const int iGT = Greater(*this, rhs, GT::Absolute);
 		if (!m_bNegative && rhs.m_bNegative) // LHS positive, RHS negative
 		{
 			switch (iGT)
@@ -213,34 +213,66 @@ void CNumber::SetNumber(const string& strInput)
 	
 	if (!strInput.empty())
 	{
-		m_bNegative = *(strInput.begin()) == '-';
-		if ((*(strInput.begin() + (m_bNegative ? 1 : 0)) != '.') &&
-			(!isdigit(*(strInput.begin() + (m_bNegative ? 1 : 0)))))
-		{
-			if (Contract(strInput, m_strNumber) != 0)
-				throw(exception("Invalid Number"));
-		}
-		else if (*(strInput.begin() + (m_bNegative ? 1 : 0)) == '.')
-		{
-			m_strNumber = strInput;
-			m_strNumber.insert(strInput.begin() + (m_bNegative ? 1 : 0), '0');
-		}
-		else
-			m_strNumber = strInput;
-
-		size_t stPos = strInput.find('.'); // TODO - Not locale independent, make it so
-		if (stPos != string::npos)
-			m_iDecPos = (int)(strInput.length() - stPos);
-		else
-			m_iDecPos = 0;
-
 		m_bZero = true;
-		for (string::const_iterator it = m_strNumber.begin(); m_bZero && it != m_strNumber.end(); ++it)
+		m_bNegative = false;
+		bool bDigit = false;
+		bool bDec = false;
+		deque<char> dqInput;
+		std::string::const_iterator cit;
+		for (std::string::const_iterator cit = strInput.begin(); cit != strInput.end(); ++cit)
 		{
-			if (*it == '0' || *it == '-' || *it == '.')
+			if (*cit == ' ')
 				continue;
-			m_bZero = false;
+
+			if (*cit == '0')
+			{
+				if (dqInput.size() == 0)
+					continue;
+				if (m_bNegative && dqInput.size() == 1)
+					continue;
+			}
+
+			if (isdigit(*cit))
+			{
+				if (m_bZero && *cit != '0')
+					m_bZero = false;
+				dqInput.push_back(*cit);
+				bDigit = true;
+				continue;
+			}
+
+			if (*cit == '-')
+			{
+				if (bDigit || bDec || m_bNegative)
+					throw(exception("Invalid Number"));
+				dqInput.push_front('-');
+				m_bNegative = true;
+				continue;
+			}
+
+			if (*cit == '.')
+			{
+				if (bDec)
+					throw(exception("Invalid Number"));
+				bDec = true;
+				if (dqInput.size() == 0)
+					dqInput.push_back('0');
+				dqInput.push_back('.');
+				continue;
+			}
 		}
+
+		while (bDec && dqInput.size() > 0 && *(dqInput.end() - 1) == '0')
+			dqInput.pop_back();
+		if (dqInput.size() > 0 && *(dqInput.end() - 1) == '.')
+			dqInput.pop_back();
+		if (dqInput.size() > 0)
+			m_strNumber = string(dqInput.begin(), dqInput.end());
+		else
+			m_strNumber = "0";
+
+		size_t stPos = m_strNumber.find('.'); // TODO - Not locale independent, make it so
+		m_iDecPos = stPos != string::npos ? m_strNumber.length() - stPos : 0;
 	}
 	else
 	{
@@ -363,11 +395,11 @@ start:
 	if (iResult == 0 && stP1 != string::npos)
 	{
 		strResult += " Point";
-		for (string::const_iterator it = strInput.begin() + stP1 + 1; iResult == 0 && it != strInput.end(); ++it)
+		for (string::const_iterator cit = strInput.begin() + stP1 + 1; iResult == 0 && cit != strInput.end(); ++cit)
 		{
 			try
 			{
-				strResult += " " + g_ones[*it - g_cZero];
+				strResult += " " + g_ones[*cit - g_cZero];
 			}
 			catch (invalid_argument)
 			{
@@ -1009,7 +1041,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		return;
 	}
 
-	if (ABSGreater(Num1.m_strNumber, Num2.m_strNumber) == 0)
+	if (Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
 	{
 		Out = !bNeg ? g_one : g_none;
 		return;
@@ -1021,7 +1053,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	CNumber N2DB = Num2;
 	vector<pair<CNumber, CNumber> > vMultTableVec;
 	vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (ABSGreater(Num1, N2DB) >= 0)
+	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
 	{
 		Mul(N2DB, g_Two, bNeg, N2DB);
 		Mul(NBIN, g_Two, bNeg, NBIN);
@@ -1035,11 +1067,11 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableVec.rbegin() + 1;
 	for (; vit != vMultTableVec.rend(); ++vit)
 	{
-		if (ABSGreater(N1, vit->second) >= 0)
+		if (Greater(N1, vit->second, GT::Absolute) >= 0)
 		{
 			Sub(N1, vit->second, bNeg, N1);
 			Add(vit->first, Out, bNeg, Out);
-			if (ABSGreater(N1, Num2) < 0)
+			if (Greater(N1, Num2, GT::Absolute) < 0)
 				break;
 		}
 	}
@@ -1050,7 +1082,7 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	if (Num2.m_bZero)
 		return;
 
-	if (Num1.m_bZero || ABSGreater(Num1.m_strNumber, Num2.m_strNumber) == 0)
+	if (Num1.m_bZero || Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
 	{
 		Out.SetNumber("0");
 		return;
@@ -1062,7 +1094,7 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	CNumber N2DB = Num2;
 	vector<pair<CNumber, CNumber> > vMultTableMap;
 	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (ABSGreater(Num1, N2DB) >= 0)
+	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
 	{
 		Mul(N2DB, g_Two, bNeg, N2DB);
 		Mul(NBIN, g_Two, bNeg, NBIN);
@@ -1076,11 +1108,11 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
 	for (;vit != vMultTableMap.rend(); ++vit)
 	{
-		if (ABSGreater(N1, vit->second) >= 0)
+		if (Greater(N1, vit->second, GT::Absolute) >= 0)
 		{
 			Sub(N1, vit->second, bNeg, N1);
 			Add(vit->first, Out, bNeg, Out);
-			if (ABSGreater(N1, Num2) < 0)
+			if (Greater(N1, Num2, GT::Absolute) < 0)
 				break;
 		}
 	}
@@ -1104,11 +1136,19 @@ bool TextEqual(const string& strLHS, const string& strRHS)
 	return bEqual;
 }
 
-// ABS greater than
-const int CNumber::ABSGreater(const CNumber& LHS, const CNumber& RHS) const
+const int CNumber::Greater(const CNumber& LHS, const CNumber& RHS, const GT Type) const
 {
-	int iGT = 0;
+	if (LHS.m_bZero && RHS.m_bZero)
+		return 0;
 
+	if (Type == GT::Regular)
+	{
+		if (LHS.m_bNegative && !RHS.m_bNegative)
+			return -1;
+		else if (!LHS.m_bNegative && RHS.m_bNegative)
+			return 1;
+	}
+	const bool bPositive = !LHS.m_bNegative;
 	const string& strLHS = LHS.m_strNumber;
 	const string& strRHS = RHS.m_strNumber;
 
@@ -1118,86 +1158,60 @@ const int CNumber::ABSGreater(const CNumber& LHS, const CNumber& RHS) const
 	size_t nLHS = strLHS.length() - iOff1 - LHS.m_iDecPos;
 	size_t nRHS = strRHS.length() - iOff2 - RHS.m_iDecPos;
 
-	if (nLHS != nRHS)
-		iGT = nLHS > nRHS ? 1 : -1;
-	else
+	uint8_t iLHS, iRHS;
+	while (nLHS != nRHS)
 	{
-		string::const_iterator LHS_cbeg = strLHS.begin() + iOff1;
-		string::const_iterator RHS_cbeg = strRHS.begin() + iOff2;
-
-		string::const_iterator LHS_cend = strLHS.end();
-		string::const_iterator RHS_cend = strRHS.end();
-
-		for (string::const_iterator LHS_cit = LHS_cbeg, RHS_cit = RHS_cbeg;
-			iGT == 0 && (LHS_cit != LHS_cend || RHS_cit != RHS_cend);)
+		if (nLHS > nRHS)
 		{
-			if (LHS_cit != LHS_cend && *LHS_cit == '.')
-				LHS_cit++;
-			if (RHS_cit != RHS_cend && *RHS_cit == '.')
-				RHS_cit++;
-
-			uint8_t iLHS = (LHS_cit != LHS_cend ? *LHS_cit++ : g_cZero) - g_cZero;
-			uint8_t iRHS = (RHS_cit != RHS_cend ? *RHS_cit++ : g_cZero) - g_cZero;
-
-			if (iLHS < iRHS)
-				iGT = -1;
-			else if (iLHS > iRHS)
-				iGT = 1;
+			if (Type == GT::Regular)
+				return bPositive ? 1 : -1;
+			else
+				return 1;
+		}
+		else if (nLHS < nRHS)
+		{
+			if (Type == GT::Regular)
+				return bPositive ? -1 : 1;
+			else
+				return -1;
 		}
 	}
-	return iGT;
-}
 
-const int CNumber::Greater(const CNumber& LHS, const CNumber& RHS) const
-{
-	int iGT = 0;
-	if (LHS.m_bZero && RHS.m_bZero)
-		return iGT;
+	string::const_iterator LHS_cit = strLHS.begin() + iOff1;
+	string::const_iterator RHS_cit = strRHS.begin() + iOff2;
 
-	if (LHS.m_bNegative && !RHS.m_bNegative)
-		iGT = -1;
-	else if (!LHS.m_bNegative && RHS.m_bNegative)
-		iGT = 1;
+	string::const_iterator LHS_cend = strLHS.end();
+	string::const_iterator RHS_cend = strRHS.end();
 
-	if (iGT == 0)
+	while (LHS_cit != LHS_cend || RHS_cit != RHS_cend)
 	{
-		const string& strLHS = LHS.m_strNumber;
-		const string& strRHS = RHS.m_strNumber;
+		if (LHS_cit != LHS_cend && *LHS_cit == '.')
+			LHS_cit++;
+		if (RHS_cit != RHS_cend && *RHS_cit == '.')
+			RHS_cit++;
 
-		size_t iOff1 = LHS.m_bNegative ? 1 : 0;
-		size_t iOff2 = RHS.m_bNegative ? 1 : 0;
+		iLHS = (LHS_cit != LHS_cend ? *LHS_cit++ : g_cZero) - g_cZero;
+		iRHS = (RHS_cit != RHS_cend ? *RHS_cit++ : g_cZero) - g_cZero;
 
-		size_t nLHS = strLHS.length() - iOff1 - LHS.m_iDecPos;
-		size_t nRHS = strRHS.length() - iOff2 - RHS.m_iDecPos;
-
-		if (nLHS != nRHS)
-			iGT = nLHS > nRHS ? (LHS.m_bNegative ? -1 : 1) : (LHS.m_bNegative ? 1 : -1);
-		else
+		if (iLHS != iRHS)
 		{
-			string::const_iterator LHS_cbeg = strLHS.begin() + iOff1;
-			string::const_iterator RHS_cbeg = strRHS.begin() + iOff2;
-
-			string::const_iterator LHS_cend = strLHS.end();
-			string::const_iterator RHS_cend = strRHS.end();
-
-			for (string::const_iterator LHS_cit = LHS_cbeg, RHS_cit = RHS_cbeg;
-				iGT == 0 && (LHS_cit != LHS_cend || RHS_cit != RHS_cend);)
+			if (iLHS > iRHS)
 			{
-				if (LHS_cit != LHS_cend && *LHS_cit == '.')
-					LHS_cit++;
-				if (RHS_cit != RHS_cend && *RHS_cit == '.')
-					RHS_cit++;
-
-				nLHS = (LHS_cit != LHS_cend ? *LHS_cit++ : g_cZero) - g_cZero;
-				nRHS = (RHS_cit != RHS_cend ? *RHS_cit++ : g_cZero) - g_cZero;
-
-				if (nLHS != nRHS)
-					iGT = nLHS > nRHS ? (LHS.m_bNegative ? -1 : 1) : (LHS.m_bNegative ? 1 : -1);
+				if (Type == GT::Regular)
+					return bPositive ? 1 : -1;
+				else
+					return 1;
+			}
+			else if (iLHS < iRHS)
+			{
+				if (Type == GT::Regular)
+					return bPositive ? -1 : 1;
+				else
+					return -1;
 			}
 		}
 	}
-
-	return iGT;
+	return 0;
 }
 
 void CNumber::Init()
