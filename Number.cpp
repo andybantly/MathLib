@@ -224,24 +224,7 @@ void CNumber::SetNumber(const string& strInput)
 			if (*cit == ' ')
 				continue;
 
-			if (*cit == '0')
-			{
-				if (dqInput.size() == 0)
-					continue;
-				if (m_bNegative && dqInput.size() == 1)
-					continue;
-			}
-
-			if (isdigit(*cit))
-			{
-				if (m_bZero && *cit != '0')
-					m_bZero = false;
-				dqInput.push_back(*cit);
-				bDigit = true;
-				continue;
-			}
-
-			if (*cit == '-')
+			if (!m_bNegative && *cit == '-')
 			{
 				if (bDigit || bDec || m_bNegative)
 					throw(exception("Invalid Number"));
@@ -258,6 +241,23 @@ void CNumber::SetNumber(const string& strInput)
 				if (dqInput.size() == 0)
 					dqInput.push_back('0');
 				dqInput.push_back('.');
+				continue;
+			}
+
+			if (*cit == '0')
+			{
+				if (dqInput.size() == 0)
+					continue;
+				if (m_bNegative && dqInput.size() == 1)
+					continue;
+			}
+
+			if (isdigit(*cit))
+			{
+				if (m_bZero && *cit != '0')
+					m_bZero = false;
+				dqInput.push_back(*cit);
+				bDigit = true;
 				continue;
 			}
 		}
