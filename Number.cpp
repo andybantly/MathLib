@@ -12,8 +12,8 @@ static const CNumber g_Zero("0");
 static const CNumber g_One("1");
 static const CNumber g_Two("2");
 
-static const std::string g_one("1");
-static const std::string g_none("-1");
+static const string g_one("1");
+static const string g_none("-1");
 
 CNumber::CNumber() : m_bNegative(false), m_bZero(false), m_iDecPos(0)
 {
@@ -172,38 +172,32 @@ CNumber CNumber::operator % (const CNumber& rhs)
 
 const bool CNumber::operator < (const CNumber& rhs) const
 {
-	const int iGT = Greater(*this, rhs);
-	return iGT < 0;
+	return Greater(*this, rhs) < 0;
 }
 
 const bool CNumber::operator <= (const CNumber& rhs) const
 {
-	const int iGT = Greater(*this, rhs);
-	return iGT <= 0;
+	return Greater(*this, rhs) <= 0;
 }
 
 const bool CNumber::operator > (const CNumber& rhs) const
 {
-	const int iGT = Greater(*this, rhs);
-	return iGT > 0;
+	return Greater(*this, rhs) > 0;
 }
 
 const bool CNumber::operator >= (const CNumber& rhs) const
 {
-	const int iGT = Greater(*this, rhs);
-	return iGT >= 0;
+	return Greater(*this, rhs) >= 0;
 }
 
 const bool CNumber::operator == (const CNumber& rhs) const
 {
-	const int iGT = Greater(*this, rhs);
-	return iGT == 0;
+	return Greater(*this, rhs) == 0;
 }
 
 const bool CNumber::operator != (const CNumber& rhs) const
 {
-	const int iGT = Greater(*this, rhs);
-	return iGT != 0;
+	return Greater(*this, rhs) != 0;
 }
 
 void CNumber::SetNumber(const string& strInput)
@@ -215,8 +209,8 @@ void CNumber::SetNumber(const string& strInput)
 		bool bDigit = false;
 		bool bDec = false;
 		deque<char> dqInput;
-		std::string::const_iterator cit;
-		for (std::string::const_iterator cit = strInput.begin(); cit != strInput.end(); ++cit)
+		string::const_iterator cit;
+		for (string::const_iterator cit = strInput.begin(); cit != strInput.end(); ++cit)
 		{
 			if (*cit == ' ')
 				continue;
@@ -278,6 +272,7 @@ void CNumber::SetNumber(const string& strInput)
 		m_bZero = false;
 		m_iDecPos = 0;
 	}
+
 	m_strPhrase.clear();
 	m_strBinary.clear();
 }
@@ -1253,7 +1248,7 @@ ostream& operator<<(ostream& out, const CNumber& Number)
 wstring CNumber::ToString(const CNumber& rhs)
 {
 	string strNumber = rhs.m_strNumber;
-	std::wstringstream wstrStream;
+	wstringstream wstrStream;
 	wstrStream << strNumber.c_str();
 	return wstrStream.str();
 }
