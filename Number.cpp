@@ -254,6 +254,14 @@ void CNumber::SetNumber(const string& strInput)
 				bDigit = true;
 				continue;
 			}
+			
+			if (!isdigit(*cit))
+			{
+				string strResult;
+				if (Contract(strInput, strResult) == 0)
+					SetNumber(strResult); // Sometimes recursion is good
+				return;
+			}
 		}
 
 		while (bDec && dqInput.size() > 0 && *(dqInput.end() - 1) == g_cZero)
