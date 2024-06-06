@@ -227,14 +227,14 @@ void CNumber::SetNumber(const string& strInput)
 				continue;
 			}
 
-			if (*cit == '.')
+			if (*cit == g_cDecSep)
 			{
 				if (bDec)
 					throw(exception("Invalid Number"));
 				bDec = true;
 				if (dqInput.size() == 0)
 					dqInput.push_back(g_cZero);
-				dqInput.push_back('.');
+				dqInput.push_back(g_cDecSep);
 				continue;
 			}
 
@@ -258,14 +258,14 @@ void CNumber::SetNumber(const string& strInput)
 
 		while (bDec && dqInput.size() > 0 && *(dqInput.end() - 1) == g_cZero)
 			dqInput.pop_back();
-		if (dqInput.size() > 0 && *(dqInput.end() - 1) == '.')
+		if (dqInput.size() > 0 && *(dqInput.end() - 1) == g_cDecSep)
 			dqInput.pop_back();
 		if (dqInput.size() > 0)
 			m_strNumber = string(dqInput.begin(), dqInput.end());
 		else
 			m_strNumber = "0";
 
-		size_t stPos = m_strNumber.find('.'); // TODO - Not locale independent, make it so
+		size_t stPos = m_strNumber.find(g_cDecSep);
 		m_iDecPos = stPos != string::npos ? m_strNumber.length() - stPos : 0;
 	}
 	else
@@ -296,7 +296,7 @@ int CNumber::Expand(const string& strInput, string& strResult)
 	int digs, nd, nh;
 
 	string strLhs;
-	size_t stP1 = strInput.find('.');
+	size_t stP1 = strInput.find(g_cDecSep);
 	if (stP1 == string::npos)
 		strLhs = strInput;
 	else
@@ -572,7 +572,7 @@ int CNumber::ToBase2(const string& strInput, string& strResult)
 	strResult.clear();
 
 	vector<string> vstrBinary;
-	Split(strInput, vstrBinary, '.');
+	Split(strInput, vstrBinary, g_cDecSep);
 
 	string strOut;
 	uint8_t idnm = 0;
@@ -637,7 +637,7 @@ int CNumber::ToBase2(const string& strInput, string& strResult)
 	// Now handle the fractional part
 	if (vstrBinary.size() != 1)
 	{
-		binary.push_back('.');
+		binary.push_back(g_cDecSep);
 		CNumber Fraction("0." + vstrBinary[1]);
 		for (int nDigs = 0;nDigs < 64 && !Fraction.m_bZero; ++nDigs)
 		{
@@ -647,7 +647,7 @@ int CNumber::ToBase2(const string& strInput, string& strResult)
 				binary.push_back(g_cOne);
 				if (Fraction == g_One)
 					break;
-				Split(Fraction.GetNumber(), vstrBinary, '.');
+				Split(Fraction.GetNumber(), vstrBinary, g_cDecSep);
 				Fraction.SetNumber("0." + vstrBinary[1]);
 			}
 			else
@@ -749,9 +749,9 @@ void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 			S2 = S2_crit != S2_crend ? *S2_crit++ : g_cZero;
 		}
 
-		if (S1 == '.' || S2 == '.')
+		if (S1 == g_cDecSep || S2 == g_cDecSep)
 		{
-			Sum.push_front('.');
+			Sum.push_front(g_cDecSep);
 			continue;
 		}
 
@@ -778,14 +778,14 @@ void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	if (bCarry)
 		Sum.push_front(g_cOne);
 
-	if (*Sum.begin() == '.')
+	if (*Sum.begin() == g_cDecSep)
 		Sum.push_front(g_cZero);
 
 	if (m_iDecPos > 0)
 	{
-		while (*(Sum.end() - 1) == '0')
+		while (*(Sum.end() - 1) == g_cZero)
 			Sum.pop_back();
-		if (*(Sum.end() - 1) == '.')
+		if (*(Sum.end() - 1) == g_cDecSep)
 			Sum.pop_back();
 	}
 
@@ -836,7 +836,7 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 			S2 = S2_crit != S2_crend ? *S2_crit++ : g_cZero;
 		}
 
-		if (S1 == '.' || S2 == '.')
+		if (S1 == g_cDecSep || S2 == g_cDecSep)
 		{
 			if (!LZ.empty())
 			{
@@ -844,7 +844,7 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 					Sum.push_front(*crit);
 				LZ.clear();
 			}
-			Sum.push_front('.');
+			Sum.push_front(g_cDecSep);
 			continue;
 		}
 
@@ -880,14 +880,14 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		Sum.push_front(g_cZero);
 	else
 	{
-		if (*Sum.begin() == '.')
+		if (*Sum.begin() == g_cDecSep)
 			Sum.push_front(g_cZero);
 
 		if (m_iDecPos > 0)
 		{
-			while (*(Sum.end() - 1) == '0')
+			while (*(Sum.end() - 1) == g_cZero)
 				Sum.pop_back();
-			if (*(Sum.end() - 1) == '.')
+			if (*(Sum.end() - 1) == g_cDecSep)
 				Sum.pop_back();
 		}
 
@@ -924,9 +924,9 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		uint8_t iCarry = 0;
 		for (string::const_reverse_iterator S1_crit = strS1.rbegin(); S1_crit != S1_crend; ++S1_crit)
 		{
-			if (*S1_crit == '.')
+			if (*S1_crit == g_cDecSep)
 				S1_crit++;
-			if (*S2_crit == '.')
+			if (*S2_crit == g_cDecSep)
 				S2_crit++;
 
 			uint8_t N1 = (S1_crit != S1_crend ? *S1_crit : g_cZero) - g_cZero;
@@ -976,7 +976,7 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 		if (!Mult.empty())
 		{
-			if (*(Mult.begin()) == '.')
+			if (*(Mult.begin()) == g_cDecSep)
 				Mult.push_front(g_cZero);
 			if (bNeg)
 				Mult.push_front('-');
@@ -1008,17 +1008,17 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		if (iDP)
 		{
 			string & strNumber = Out.m_strNumber;
-			strNumber.insert(strNumber.begin() + strNumber.length() - iDP, '.');
-			if (*(strNumber.begin()) == '.')
-				strNumber.insert(strNumber.begin(), '0');
+			strNumber.insert(strNumber.begin() + strNumber.length() - iDP, g_cDecSep);
+			if (*(strNumber.begin()) == g_cDecSep)
+				strNumber.insert(strNumber.begin(), g_cZero);
 			size_t nSize = strNumber.length();
 			string::const_reverse_iterator rbeg = strNumber.rbegin();
-			while (*rbeg == '0')
+			while (*rbeg == g_cZero)
 			{
 				rbeg++;
 				nSize--;
 			}
-			if (*rbeg == '.')
+			if (*rbeg == g_cDecSep)
 				nSize--;
 			strNumber.resize(nSize);
 			Out.SetNumber(strNumber);
@@ -1182,9 +1182,9 @@ const int CNumber::Greater(const CNumber& LHS, const CNumber& RHS, const GT Type
 
 	while (LHS_cit != LHS_cend || RHS_cit != RHS_cend)
 	{
-		if (LHS_cit != LHS_cend && *LHS_cit == '.')
+		if (LHS_cit != LHS_cend && *LHS_cit == g_cDecSep)
 			LHS_cit++;
-		if (RHS_cit != RHS_cend && *RHS_cit == '.')
+		if (RHS_cit != RHS_cend && *RHS_cit == g_cDecSep)
 			RHS_cit++;
 
 		iLHS = (LHS_cit != LHS_cend ? *LHS_cit++ : g_cZero) - g_cZero;

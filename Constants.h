@@ -494,3 +494,4 @@ const int g_nHuns = (sizeof(g_huns) / sizeof(g_huns[0]));
 
 const int8_t g_cZero = '0';
 const int8_t g_cOne = '1';
+const int8_t g_cDecSep = '.'; // TODO - Not locale independent, make it so
