@@ -107,9 +107,9 @@ namespace TestMathLib
 			m_dNum1 = Random();
 			m_dNum2 = Random();
 			char buf[80];
-			sprintf_s(buf, "%.3Lf", m_dNum1);
+			sprintf_s(buf, "%.2Lf", m_dNum1);
 			m_strNum1 = buf;
-			sprintf_s(buf, "%.3Lf", m_dNum2);
+			sprintf_s(buf, "%.2Lf", m_dNum2);
 			m_strNum2 = buf;
 			m_dNum1 = stod(m_strNum1);
 			m_dNum2 = stod(m_strNum2);

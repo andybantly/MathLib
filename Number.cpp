@@ -210,11 +210,14 @@ void CNumber::SetNumber(const string& strInput)
 		bool bDec = false;
 		deque<char> dqInput;
 		string::const_iterator cit;
-		for (string::const_iterator cit = strInput.begin(); cit != strInput.end(); ++cit)
+		for (cit = strInput.begin(); cit != strInput.end(); ++cit)
 		{
 			if (*cit == ' ')
 				continue;
-
+			break;
+		}
+		for (; cit != strInput.end(); ++cit)
+		{
 			if (!m_bNegative && *cit == '-')
 			{
 				if (bDigit || bDec || m_bNegative)
@@ -230,14 +233,14 @@ void CNumber::SetNumber(const string& strInput)
 					throw(exception("Invalid Number"));
 				bDec = true;
 				if (dqInput.size() == 0)
-					dqInput.push_back('0');
+					dqInput.push_back(g_cZero);
 				dqInput.push_back('.');
 				continue;
 			}
 
 			if (isdigit(*cit))
 			{
-				if (*cit == '0')
+				if (*cit == g_cZero)
 				{
 					if (dqInput.size() == 0)
 						continue;
@@ -245,7 +248,7 @@ void CNumber::SetNumber(const string& strInput)
 						continue;
 				}
 
-				if (m_bZero && *cit != '0')
+				if (m_bZero && *cit != g_cZero)
 					m_bZero = false;
 				dqInput.push_back(*cit);
 				bDigit = true;
@@ -253,7 +256,7 @@ void CNumber::SetNumber(const string& strInput)
 			}
 		}
 
-		while (bDec && dqInput.size() > 0 && *(dqInput.end() - 1) == '0')
+		while (bDec && dqInput.size() > 0 && *(dqInput.end() - 1) == g_cZero)
 			dqInput.pop_back();
 		if (dqInput.size() > 0 && *(dqInput.end() - 1) == '.')
 			dqInput.pop_back();
