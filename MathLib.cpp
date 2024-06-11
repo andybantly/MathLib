@@ -15,7 +15,7 @@ int main()
 	bool bAgain = true;
 	do
 	{
-		std::cout << "Enter a number, set of numbers separated by arithmetic operations (+,-,*,/,%)" << endl << "Enter 'test' for verification or 'quit' to exit." << endl << "Examples: 12 * 11 + 12, three + four - two, 9 / 3 + 7 * 10, 10 % 3" << endl << "Input: ";
+		std::cout << "Enter a number, set of numbers separated by arithmetic or comparison operations (+,-,*,/,%, <, >, <=, >=, =)" << endl << "Enter 'test' for verification or 'quit' to exit." << endl << "Examples: 12 * 11 + 12, three + 4 - two, 9 / 3 + 7 * 10, 10 % 3, 2 < 3" << endl << "Input: ";
 
 		strInput.clear();
 		char c;
@@ -34,6 +34,12 @@ int main()
 					for (vector<string>::iterator it = vNumbers.begin(); it != vNumbers.end(); ++it)
 					{
 						if (*it == "+" || *it == "-" || *it == "*" || *it == "/" || *it == "%")
+						{
+							vNumbers2.push_back(strConcatNumber);
+							vNumbers2.push_back(*it);
+							strConcatNumber = "";
+						}
+						else if (*it == "<" || *it == ">" || *it == "=" || *it == "<=" || *it == ">=")
 						{
 							vNumbers2.push_back(strConcatNumber);
 							vNumbers2.push_back(*it);
@@ -74,6 +80,7 @@ int main()
 						std::cout << vNumbers[1] << endl;
 						Number2.ToBase10(Number2.GetBinary(), strBase10);
 						std::cout << Number2 << " = " << Number2.GetPhrase() << " = " << Number2.GetBinary() << " = " << strBase10 << endl;
+						bool bCMP = false;
 						if (vNumbers[1] == "+")
 							Sum = Number + Number2;
 						else if (vNumbers[1] == "-")
@@ -84,8 +91,27 @@ int main()
 							Sum = Number / Number2;
 						else if (vNumbers[1] == "%")
 							Sum = Number % Number2;
-						Sum.ToBase10(Sum.GetBinary(), strBase10);
-						std::cout << Sum.GetNumber() << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
+						else if (vNumbers[1] == "<")
+							bCMP = Number < Number2;
+						else if (vNumbers[1] == ">")
+							bCMP = Number > Number2;
+						else if (vNumbers[1] == "=")
+							bCMP = Number == Number2;
+						else if (vNumbers[1] == "<=")
+							bCMP = Number <= Number2;
+						else if (vNumbers[1] == ">=")
+							bCMP = Number >= Number2;
+
+						if (vNumbers[1] == "+" || vNumbers[1] == "-" || vNumbers[1] == "*" || vNumbers[1] == "/" || vNumbers[1] == "%")
+						{
+							Sum.ToBase10(Sum.GetBinary(), strBase10);
+							std::cout << Sum.GetNumber() << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
+						}
+						else
+						{
+							Sum = bCMP ? "1" : "0";
+							std::cout << Number.GetNumber() << " " + vNumbers[1] + " " << Number2.GetNumber() << " = " << (bCMP ? "TRUE" : "FALSE") << endl;
+						}
 
 						vNumbers2.clear();
 						vNumbers2.push_back(Sum.GetNumber());

@@ -240,35 +240,43 @@ namespace TestMathLib
 			{
 				s = to_string(ull++);
 				iResult = MathLib.Expand(s, sr);
-				Assert::AreEqual(iResult, 0);
+				if (iResult != 0)
+					Assert::AreEqual(iResult, 0);
 
 				iResult = MathLib.Contract(sr, sv);
-				Assert::AreEqual(iResult, 0);
+				if (iResult != 0)
+					Assert::AreEqual(iResult, 0);
 
 				Assert::AreEqual(sv, s);
 
 				iResult = MathLib.ToBase2(sv, sb2);
-				Assert::AreEqual(iResult, 0);
+				if (iResult != 0)
+					Assert::AreEqual(iResult, 0);
 
 				iResult = MathLib.ToBase10(sb2, sb10);
-				Assert::AreEqual(iResult, 0);
+				if (iResult != 0)
+					Assert::AreEqual(iResult, 0);
 
 				Assert::AreEqual(sv, sb10);
 
 				s = to_string(-ull - 1);
 				iResult = MathLib.Expand(s, sr);
-				Assert::AreEqual(iResult, 0);
+				if (iResult != 0)
+					Assert::AreEqual(iResult, 0);
 
 				iResult = MathLib.Contract(sr, sv);
-				Assert::AreEqual(iResult, 0);
+				if (iResult != 0)
+					Assert::AreEqual(iResult, 0);
 
 				Assert::AreEqual(sv, s);
 
 				iResult = MathLib.ToBase2(sv, sb2);
-				Assert::AreEqual(iResult, 0);
+				if (iResult != 0)
+					Assert::AreEqual(iResult, 0);
 
 				iResult = MathLib.ToBase10(sb2, sb10);
-				Assert::AreEqual(iResult, 0);
+				if (iResult != 0)
+					Assert::AreEqual(iResult, 0);
 
 				Assert::AreEqual(sv, sb10);
 			} while (ull <= ulle && ull != 0);
@@ -278,7 +286,7 @@ namespace TestMathLib
 
 		TEST_CLASS_INITIALIZE(TestInitialize)
 		{
-			srand((unsigned)time(NULL));
+			srand((unsigned)time(nullptr));
 			CNumber::Init();
 		}
 
@@ -575,6 +583,11 @@ namespace TestMathLib
 			N1 = "0"; N2 = "-10";
 			N3 = N1 * N2;
 			Assert::AreEqual(CNumber("0"), N3);
+
+			// 2.5 * 2.5 = 6.25
+			N1 = "2.5";
+			N1 = N1 * N1;
+			Assert::AreEqual(CNumber("6.25"), N1);
 		}
 
 		TEST_METHOD(Division)

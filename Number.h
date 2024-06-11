@@ -71,6 +71,7 @@ protected:
     void Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    void DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     const int Greater(const CNumber& LHS, const CNumber& RHS, const GT Type = Regular) const;
 
     bool m_bNegative;

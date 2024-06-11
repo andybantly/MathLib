@@ -8,6 +8,7 @@ using namespace std;
 static map<string, string, CILT> g_mapWordTo99;
 static map<string, string, CILT> g_mapWordTo100; 
 
+static const CNumber g_None("-1");
 static const CNumber g_Zero("0");
 static const CNumber g_One("1");
 static const CNumber g_Two("2");
@@ -165,9 +166,9 @@ CNumber CNumber::operator / (const CNumber& rhs)
 
 CNumber CNumber::operator % (const CNumber& rhs)
 {
-	CNumber Out;
-	Mod(*this, rhs, m_bNegative, Out);
-	return Out;
+	CNumber Rem;
+	Mod(*this, rhs, m_bNegative, Rem);
+	return Rem;
 }
 
 const bool CNumber::operator < (const CNumber& rhs) const
@@ -1039,11 +1040,95 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
 {
 	if (Num2.m_bZero)
+		return; // DIV BY 0
+
+	if (Num1.m_bZero)
+	{
+		Out = g_Zero;
+		return; // 0 DIV BY
+	}
+
+	if (Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
+	{
+		Out = !bNeg ? g_One : g_None;
 		return;
+	}
+	else
+		Out = g_Zero;
+
+	CNumber NBIN = !bNeg ? g_One : g_None;
+	CNumber N2DB = Num2;
+	CNumber TMP;
+	vector<pair<CNumber, CNumber> > vMultTableVec;
+	vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
+	{
+		Mul(N2DB, g_Two, bNeg, TMP); N2DB = TMP;
+		Mul(NBIN, g_Two, bNeg, TMP); NBIN = TMP;
+		vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	}
+
+	CNumber REM = Num1;
+	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableVec.rbegin() + 1;
+	for (; vit != vMultTableVec.rend(); ++vit)
+	{
+		if (Greater(REM, vit->second, GT::Absolute) >= 0)
+		{
+			Sub(REM, vit->second, bNeg, REM);
+			Add(vit->first, Out, bNeg, Out);
+			if (Greater(REM, Num2, GT::Absolute) < 0)
+				break;
+		}
+	}
+}
+
+void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Rem)
+{
+	if (Num2.m_bZero)
+		return;
+
+	if (Num1.m_bZero || Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
+	{
+		Rem.SetNumber("0");
+		return;
+	}
+
+	CNumber NBIN(!bNeg ? g_one : g_none);
+	CNumber N2DB = Num2;
+	CNumber TMP;
+	vector<pair<CNumber, CNumber> > vMultTableMap;
+	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
+	{
+		Mul(N2DB, g_Two, bNeg, TMP); N2DB = TMP;
+		Mul(NBIN, g_Two, bNeg, TMP); NBIN = TMP;
+		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	}
+
+	CNumber N1 = Num1;
+	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
+	for (;vit != vMultTableMap.rend(); ++vit)
+	{
+		if (Greater(N1, vit->second, GT::Absolute) >= 0)
+		{
+			Sub(N1, vit->second, bNeg, N1);
+			Add(vit->first, Rem, bNeg, Rem);
+			if (Greater(N1, Num2, GT::Absolute) < 0)
+				break;
+		}
+	}
+	Rem = N1;
+}
+
+void CNumber::DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
+{
+	if (Num2.m_bZero)
+		return; // DIV BY 0
+
 	if (Num1.m_bZero)
 	{
 		Out.SetNumber("0");
-		return;
+		return; // 0 DIV BY
 	}
 
 	if (Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
@@ -1065,63 +1150,22 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	}
 
-	if (vMultTableVec.size() == 1)
-		return;
-
-	CNumber N1 = Num1;
+	CNumber REM = Num1;
 	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableVec.rbegin() + 1;
 	for (; vit != vMultTableVec.rend(); ++vit)
 	{
-		if (Greater(N1, vit->second, GT::Absolute) >= 0)
+		if (Greater(REM, vit->second, GT::Absolute) >= 0)
 		{
-			Sub(N1, vit->second, bNeg, N1);
+			Sub(REM, vit->second, bNeg, REM);
 			Add(vit->first, Out, bNeg, Out);
-			if (Greater(N1, Num2, GT::Absolute) < 0)
+			if (Greater(REM, Num2, GT::Absolute) < 0)
 				break;
 		}
 	}
-}
 
-void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
-{
-	if (Num2.m_bZero)
-		return;
-
-	if (Num1.m_bZero || Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
+	if (REM != g_Zero)
 	{
-		Out.SetNumber("0");
-		return;
 	}
-
-	Out = Num1;
-
-	CNumber NBIN(!bNeg ? g_one : g_none);
-	CNumber N2DB = Num2;
-	vector<pair<CNumber, CNumber> > vMultTableMap;
-	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
-	{
-		Mul(N2DB, g_Two, bNeg, N2DB);
-		Mul(NBIN, g_Two, bNeg, NBIN);
-		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	}
-
-	if (vMultTableMap.size() == 1)
-		return;
-
-	CNumber N1 = Num1;
-	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
-	for (;vit != vMultTableMap.rend(); ++vit)
-	{
-		if (Greater(N1, vit->second, GT::Absolute) >= 0)
-		{
-			Sub(N1, vit->second, bNeg, N1);
-			Add(vit->first, Out, bNeg, Out);
-			if (Greater(N1, Num2, GT::Absolute) < 0)
-				break;
-		}
-	}
-	Out = N1;
 }
 
 bool TextEqual(const string& strLHS, const string& strRHS)
@@ -1153,7 +1197,6 @@ const int CNumber::Greater(const CNumber& LHS, const CNumber& RHS, const GT Type
 		else if (!LHS.m_bNegative && RHS.m_bNegative)
 			return 1;
 	}
-	const bool bPositive = !LHS.m_bNegative;
 	const string& strLHS = LHS.m_strNumber;
 	const string& strRHS = RHS.m_strNumber;
 
@@ -1169,14 +1212,14 @@ const int CNumber::Greater(const CNumber& LHS, const CNumber& RHS, const GT Type
 		if (nLHS > nRHS)
 		{
 			if (Type == GT::Regular)
-				return bPositive ? 1 : -1;
+				return LHS.m_bNegative ? -1 : 1;
 			else
 				return 1;
 		}
 		else if (nLHS < nRHS)
 		{
 			if (Type == GT::Regular)
-				return bPositive ? -1 : 1;
+				return LHS.m_bNegative ? 1 : -1;
 			else
 				return -1;
 		}
@@ -1203,14 +1246,14 @@ const int CNumber::Greater(const CNumber& LHS, const CNumber& RHS, const GT Type
 			if (iLHS > iRHS)
 			{
 				if (Type == GT::Regular)
-					return bPositive ? 1 : -1;
+					return LHS.m_bNegative ? -1 : 1;
 				else
 					return 1;
 			}
 			else if (iLHS < iRHS)
 			{
 				if (Type == GT::Regular)
-					return bPositive ? -1 : 1;
+					return LHS.m_bNegative ? 1 : -1;
 				else
 					return -1;
 			}
