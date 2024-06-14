@@ -161,6 +161,7 @@ CNumber CNumber::operator / (const CNumber& rhs)
 {
 	CNumber Out;
 	Div(*this, rhs, m_bNegative != rhs.m_bNegative, Out);
+	//DivFP(*this, rhs, m_bNegative != rhs.m_bNegative, Out);
 	return Out;
 }
 
@@ -1063,8 +1064,8 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
 	{
-		Mul(N2DB, g_Two, bNeg, TMP); N2DB = TMP;
-		Mul(NBIN, g_Two, bNeg, TMP); NBIN = TMP;
+		Add(N2DB, N2DB, bNeg, TMP); N2DB = TMP;
+		Add(NBIN, NBIN, bNeg, TMP); NBIN = TMP;
 		vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	}
 
@@ -1100,8 +1101,8 @@ void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
 	{
-		Mul(N2DB, g_Two, bNeg, TMP); N2DB = TMP;
-		Mul(NBIN, g_Two, bNeg, TMP); NBIN = TMP;
+		Add(N2DB, N2DB, bNeg, TMP); N2DB = TMP;
+		Add(NBIN, NBIN, bNeg, TMP); NBIN = TMP;
 		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	}
 
@@ -1127,30 +1128,41 @@ void CNumber::DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber
 
 	if (Num1.m_bZero)
 	{
-		Out.SetNumber("0");
+		Out = g_Zero;
 		return; // 0 DIV BY
 	}
 
 	if (Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
 	{
-		Out = !bNeg ? g_one : g_none;
+		Out = !bNeg ? g_One : g_None;
 		return;
 	}
 	else
-		Out.SetNumber("0");
+		Out = g_Zero;
 
-	CNumber NBIN(!bNeg ? g_one : g_none);
+	CNumber REM = Num1;
 	CNumber N2DB = Num2;
+	string strTen = "1" + string(64, '0');
+	CNumber MULT(strTen);
+	REM = REM * MULT;
+	if (Num2.m_iDecPos > 0)
+	{
+		strTen = "1" + string(Num2.m_iDecPos - 1, '0');
+		MULT.SetNumber(strTen);
+		N2DB = N2DB * MULT;
+	}
+
+	CNumber TMP;
+	CNumber NBIN(!bNeg ? g_one : g_none);
 	vector<pair<CNumber, CNumber> > vMultTableVec;
 	vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
+	while (Greater(REM, N2DB, GT::Absolute) >= 0)
 	{
-		Mul(N2DB, g_Two, bNeg, N2DB);
-		Mul(NBIN, g_Two, bNeg, NBIN);
+		Add(N2DB, N2DB, bNeg, TMP); N2DB = TMP;
+		Add(NBIN, NBIN, bNeg, TMP); NBIN = TMP;
 		vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	}
 
-	CNumber REM = Num1;
 	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableVec.rbegin() + 1;
 	for (; vit != vMultTableVec.rend(); ++vit)
 	{
@@ -1165,6 +1177,12 @@ void CNumber::DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber
 
 	if (REM != g_Zero)
 	{
+		Out.m_strNumber.insert(Out.m_strNumber.begin() + (Num2.m_strNumber.length() - Num2.m_iDecPos), g_cDecSep);
+		Out.m_iDecPos = Out.m_strNumber.length() - (Num2.m_strNumber.length() - Num2.m_iDecPos);
+	}
+	else
+	{
+
 	}
 }
 
