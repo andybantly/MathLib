@@ -159,16 +159,17 @@ CNumber CNumber::operator * (const CNumber& rhs)
 
 CNumber CNumber::operator / (const CNumber& rhs)
 {
-	CNumber Out;
-	Div(*this, rhs, m_bNegative != rhs.m_bNegative, Out);
+	CNumber Out, Rem;
+	Div(*this, rhs, m_bNegative != rhs.m_bNegative, Out, Rem);
 	//DivFP(*this, rhs, m_bNegative != rhs.m_bNegative, Out);
 	return Out;
 }
 
 CNumber CNumber::operator % (const CNumber& rhs)
 {
-	CNumber Rem;
-	Mod(*this, rhs, m_bNegative, Rem);
+	CNumber Out, Rem;// , Rem2;
+	Div(*this, rhs, m_bNegative, Out, Rem);
+	//Mod(*this, rhs, m_bNegative, Rem2);
 	return Rem;
 }
 
@@ -1038,24 +1039,30 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		Out.SetNumber("0");
 }
 
-void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
+void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out, CNumber& Rem)
 {
 	if (Num2.m_bZero)
-		return; // DIV BY 0
+	{
+		Rem = Num1;
+		return;
+	}
 
 	if (Num1.m_bZero)
 	{
 		Out = g_Zero;
+		Rem = g_Zero;
 		return; // 0 DIV BY
 	}
 
 	if (Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
 	{
 		Out = !bNeg ? g_One : g_None;
+		Rem = g_Zero;
 		return;
 	}
-	else
-		Out = g_Zero;
+
+	Out = g_Zero;
+	Rem = Num1;
 
 	CNumber NBIN = !bNeg ? g_One : g_None;
 	CNumber N2DB = Num2;
@@ -1069,76 +1076,43 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
 	}
 
-	CNumber REM = Num1;
 	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableVec.rbegin() + 1;
 	for (; vit != vMultTableVec.rend(); ++vit)
 	{
-		if (Greater(REM, vit->second, GT::Absolute) >= 0)
+		if (Greater(Rem, vit->second, GT::Absolute) >= 0)
 		{
-			Sub(REM, vit->second, bNeg, REM);
+			Sub(Rem, vit->second, bNeg, Rem);
 			Add(vit->first, Out, bNeg, Out);
-			if (Greater(REM, Num2, GT::Absolute) < 0)
+			if (Greater(Rem, Num2, GT::Absolute) < 0)
 				break;
 		}
 	}
 }
 
-void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Rem)
+void CNumber::DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out, CNumber& Rem)
 {
 	if (Num2.m_bZero)
-		return;
-
-	if (Num1.m_bZero || Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
 	{
-		Rem.SetNumber("0");
+		Rem = Num1;
 		return;
 	}
-
-	CNumber NBIN(!bNeg ? g_one : g_none);
-	CNumber N2DB = Num2;
-	CNumber TMP;
-	vector<pair<CNumber, CNumber> > vMultTableMap;
-	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
-	{
-		Add(N2DB, N2DB, bNeg, TMP); N2DB = TMP;
-		Add(NBIN, NBIN, bNeg, TMP); NBIN = TMP;
-		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	}
-
-	CNumber N1 = Num1;
-	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
-	for (;vit != vMultTableMap.rend(); ++vit)
-	{
-		if (Greater(N1, vit->second, GT::Absolute) >= 0)
-		{
-			Sub(N1, vit->second, bNeg, N1);
-			Add(vit->first, Rem, bNeg, Rem);
-			if (Greater(N1, Num2, GT::Absolute) < 0)
-				break;
-		}
-	}
-	Rem = N1;
-}
-
-void CNumber::DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out)
-{
-	if (Num2.m_bZero)
-		return; // DIV BY 0
 
 	if (Num1.m_bZero)
 	{
 		Out = g_Zero;
+		Rem = g_Zero;
 		return; // 0 DIV BY
 	}
 
 	if (Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
 	{
 		Out = !bNeg ? g_One : g_None;
+		Rem = g_Zero;
 		return;
 	}
-	else
-		Out = g_Zero;
+
+	Out = g_Zero;
+	Rem = Num1; // This is different.  It is the whole remainder. Don't combine with REM
 
 	CNumber REM = Num1;
 	CNumber N2DB = Num2;
@@ -1175,7 +1149,7 @@ void CNumber::DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber
 		}
 	}
 
-	if (REM != g_Zero)
+	if (Rem != g_Zero)
 	{
 		Out.m_strNumber.insert(Out.m_strNumber.begin() + (Num2.m_strNumber.length() - Num2.m_iDecPos), g_cDecSep);
 		Out.m_iDecPos = Out.m_strNumber.length() - (Num2.m_strNumber.length() - Num2.m_iDecPos);
@@ -1184,6 +1158,48 @@ void CNumber::DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber
 	{
 
 	}
+}
+
+// Deprecated - use DIV or DIVFP
+void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Rem)
+{
+	if (Num2.m_bZero)
+	{
+		Rem = Num1;
+		return;
+	}
+
+	if (Num1.m_bZero || Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
+	{
+		Rem = g_Zero;
+		return;
+	}
+
+	CNumber NBIN(!bNeg ? g_one : g_none);
+	CNumber N2DB = Num2;
+	CNumber TMP;
+	vector<pair<CNumber, CNumber> > vMultTableMap;
+	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
+	{
+		Add(N2DB, N2DB, bNeg, TMP); N2DB = TMP;
+		Add(NBIN, NBIN, bNeg, TMP); NBIN = TMP;
+		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+	}
+
+	CNumber N1 = Num1;
+	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
+	for (; vit != vMultTableMap.rend(); ++vit)
+	{
+		if (Greater(N1, vit->second, GT::Absolute) >= 0)
+		{
+			Sub(N1, vit->second, bNeg, N1);
+			Add(vit->first, Rem, bNeg, Rem);
+			if (Greater(N1, Num2, GT::Absolute) < 0)
+				break;
+		}
+	}
+	Rem = N1;
 }
 
 bool TextEqual(const string& strLHS, const string& strRHS)

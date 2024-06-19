@@ -51,6 +51,7 @@ public:
 	int Expand(const std::string& strInput, std::string& strResult);
     int ToBase2(const std::string& strInput, std::string& strResult);
     int ToBase10(const std::string& strInput, std::string& strResult);
+    void Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     static std::string WB();
     const std::string& GetNumber();
     const std::string& GetPhrase();
@@ -69,9 +70,8 @@ protected:
     void Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
     void Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
+    void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out, CNumber& Rem);
+    void DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out, CNumber& Rem);
     const int Greater(const CNumber& LHS, const CNumber& RHS, const GT Type = Regular) const;
 
     bool m_bNegative;

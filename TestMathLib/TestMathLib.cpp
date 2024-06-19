@@ -709,15 +709,15 @@ namespace TestMathLib
 			N3 = N1 % N2;
 			Assert::AreEqual(CNumber("0"), N3);
 
-			// 0 % 0 = Division by Zero
+			// 0 % 0 = 0
 			N1 = "0"; N2 = "0";
 			N3 = N1 % N2;
-			Assert::AreEqual(CNumber(""), N3);
+			Assert::AreEqual(CNumber("0"), N3);
 
 			// -10 % 0 = Division by Zero
 			N1 = "-10"; N2 = "0";
 			N3 = N1 % N2;
-			Assert::AreEqual(CNumber(""), N3);
+			Assert::AreEqual(CNumber("-10"), N3);
 		}
 
 		TEST_METHOD(RandomMath)
