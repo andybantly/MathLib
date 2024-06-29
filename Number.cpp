@@ -161,15 +161,13 @@ CNumber CNumber::operator / (const CNumber& rhs)
 {
 	CNumber Out, Rem;
 	Div(*this, rhs, m_bNegative != rhs.m_bNegative, Out, Rem);
-	//DivFP(*this, rhs, m_bNegative != rhs.m_bNegative, Out);
 	return Out;
 }
 
 CNumber CNumber::operator % (const CNumber& rhs)
 {
-	CNumber Out, Rem;// , Rem2;
-	Div(*this, rhs, m_bNegative, Out, Rem);
-	//Mod(*this, rhs, m_bNegative, Rem2);
+	CNumber Out, Rem;
+	Div(*this, rhs, m_bNegative, Out, Rem, true);
 	return Rem;
 }
 
@@ -1039,7 +1037,7 @@ void CNumber::Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		Out.SetNumber("0");
 }
 
-void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out, CNumber& Rem)
+void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out, CNumber& Rem, bool bMod)
 {
 	if (Num2.m_bZero)
 	{
@@ -1061,6 +1059,11 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		return;
 	}
 
+/*
+-a mod b => b - (a mod b)
+
+-4 mod 3 => 3 - (4 mod 3) => 3 - 1 = 2
+*/
 	Out = g_Zero;
 	Rem = Num1;
 
@@ -1087,119 +1090,18 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 				break;
 		}
 	}
-}
 
-void CNumber::DivFP(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out, CNumber& Rem)
-{
-	if (Num2.m_bZero)
+	if (bMod)
 	{
-		Rem = Num1;
-		return;
-	}
-
-	if (Num1.m_bZero)
-	{
-		Out = g_Zero;
-		Rem = g_Zero;
-		return; // 0 DIV BY
-	}
-
-	if (Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
-	{
-		Out = !bNeg ? g_One : g_None;
-		Rem = g_Zero;
-		return;
-	}
-
-	Out = g_Zero;
-	Rem = Num1; // This is different.  It is the whole remainder. Don't combine with REM
-
-	CNumber REM = Num1;
-	CNumber N2DB = Num2;
-	string strTen = "1" + string(64, '0');
-	CNumber MULT(strTen);
-	REM = REM * MULT;
-	if (Num2.m_iDecPos > 0)
-	{
-		strTen = "1" + string(Num2.m_iDecPos - 1, '0');
-		MULT.SetNumber(strTen);
-		N2DB = N2DB * MULT;
-	}
-
-	CNumber TMP;
-	CNumber NBIN(!bNeg ? g_one : g_none);
-	vector<pair<CNumber, CNumber> > vMultTableVec;
-	vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (Greater(REM, N2DB, GT::Absolute) >= 0)
-	{
-		Add(N2DB, N2DB, bNeg, TMP); N2DB = TMP;
-		Add(NBIN, NBIN, bNeg, TMP); NBIN = TMP;
-		vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	}
-
-	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableVec.rbegin() + 1;
-	for (; vit != vMultTableVec.rend(); ++vit)
-	{
-		if (Greater(REM, vit->second, GT::Absolute) >= 0)
+		if (Rem != g_Zero)
 		{
-			Sub(REM, vit->second, bNeg, REM);
-			Add(vit->first, Out, bNeg, Out);
-			if (Greater(REM, Num2, GT::Absolute) < 0)
-				break;
+			if (Num1.m_bNegative && !Num2.m_bNegative)
+			{
+				CNumber TMP = Num2;
+				Rem = TMP + Rem;
+			}
 		}
 	}
-
-	if (Rem != g_Zero)
-	{
-		Out.m_strNumber.insert(Out.m_strNumber.begin() + (Num2.m_strNumber.length() - Num2.m_iDecPos), g_cDecSep);
-		Out.m_iDecPos = Out.m_strNumber.length() - (Num2.m_strNumber.length() - Num2.m_iDecPos);
-	}
-	else
-	{
-
-	}
-}
-
-// Deprecated - use DIV or DIVFP
-void CNumber::Mod(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Rem)
-{
-	if (Num2.m_bZero)
-	{
-		Rem = Num1;
-		return;
-	}
-
-	if (Num1.m_bZero || Greater(Num1.m_strNumber, Num2.m_strNumber, GT::Absolute) == 0)
-	{
-		Rem = g_Zero;
-		return;
-	}
-
-	CNumber NBIN(!bNeg ? g_one : g_none);
-	CNumber N2DB = Num2;
-	CNumber TMP;
-	vector<pair<CNumber, CNumber> > vMultTableMap;
-	vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
-	{
-		Add(N2DB, N2DB, bNeg, TMP); N2DB = TMP;
-		Add(NBIN, NBIN, bNeg, TMP); NBIN = TMP;
-		vMultTableMap.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	}
-
-	CNumber N1 = Num1;
-	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableMap.rbegin() + 1;
-	for (; vit != vMultTableMap.rend(); ++vit)
-	{
-		if (Greater(N1, vit->second, GT::Absolute) >= 0)
-		{
-			Sub(N1, vit->second, bNeg, N1);
-			Add(vit->first, Rem, bNeg, Rem);
-			if (Greater(N1, Num2, GT::Absolute) < 0)
-				break;
-		}
-	}
-	Rem = N1;
 }
 
 bool TextEqual(const string& strLHS, const string& strRHS)
