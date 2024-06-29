@@ -1095,7 +1095,8 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	{
 		if (Rem != g_Zero)
 		{
-			if (Num1.m_bNegative && !Num2.m_bNegative)
+			if ((Num1.m_bNegative && !Num2.m_bNegative) ||
+				(!Num1.m_bNegative && Num2.m_bNegative))
 			{
 				CNumber TMP = Num2;
 				Rem = TMP + Rem;
