@@ -33,6 +33,11 @@ namespace TestMathLib
 			return iNum;
 		}
 
+		int mod(const int& a, const int& b)
+		{
+			return (a % b + b) % b;
+		}
+
 		void Calc()
 		{
 			m_iNum1 = Random();
@@ -55,7 +60,7 @@ namespace TestMathLib
 				m_iSum = m_iNum1 / m_iNum2;
 				break;
 			default:
-				m_iSum = m_iNum1 % m_iNum2;
+				m_iSum = mod(m_iNum1, m_iNum2);
 			}
 
 			m_strSum = to_string(m_iSum);
@@ -916,8 +921,8 @@ namespace TestMathLib
 				N2 = Rnd.Num2();
 				N3 = N1 % N2;
 
-				CNumber SUM(Rnd.Sum());
-				Assert::AreEqual(SUM, N3);
+				CNumber MOD(Rnd.Sum());
+				Assert::AreEqual(MOD, N3);
 			}
 		}
 
