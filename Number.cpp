@@ -1,6 +1,7 @@
 #include "Number.h"
 #include "Constants.h"
 #include <sstream>
+#include <set>
 #pragma warning(disable:6385)
 
 using namespace std;
@@ -440,9 +441,7 @@ int CNumber::Contract(const string& strInput, string& strResult)
 	for (it = vstrTokens.begin(); !bPoint && it != vstrTokens.end(); ++it)
 	{
 		bFound = false;
-		string strToken = *it;
-
-		mit = g_mapWordTo99.find(strToken);
+		mit = g_mapWordTo99.find(*it);
 		if (mit != g_mapWordTo99.end())
 		{
 			vstrNumbers.push_back(mit->second);
@@ -450,7 +449,7 @@ int CNumber::Contract(const string& strInput, string& strResult)
 		}
 		else
 		{
-			mit = g_mapWordTo100.find(strToken);
+			mit = g_mapWordTo100.find(*it);
 			if (mit != g_mapWordTo100.end())
 			{
 				vstrNumbers.push_back(mit->second);
@@ -462,9 +461,9 @@ int CNumber::Contract(const string& strInput, string& strResult)
 
 		if (!bFound)
 		{
-			if (TextEqual(strToken, "Negative"))
+			if (TextEqual(*it, "Negative"))
 				m_bNegative = true;
-			else if (TextEqual(strToken, "Point"))
+			else if (TextEqual(*it, "Point"))
 				bPoint = true;
 			if (!m_bNegative && !bPoint)
 			{
@@ -508,8 +507,7 @@ int CNumber::Contract(const string& strInput, string& strResult)
 		strResult += ".";
 		for (; iResult == 0 && it != vstrTokens.end(); ++it)
 		{
-			string strToken = *it;
-			mit = g_mapWordTo99.find(strToken);
+			mit = g_mapWordTo99.find(*it);
 			if (mit != g_mapWordTo99.end())
 				strResult += mit->second;
 			else
@@ -1059,24 +1057,32 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		return;
 	}
 
-/*
--a mod b => b - (a mod b)
-
--4 mod 3 => 3 - (4 mod 3) => 3 - 1 = 2
-*/
 	Out = g_Zero;
 	Rem = Num1;
 
-	CNumber NBIN = !bNeg ? g_One : g_None;
-	CNumber N2DB = Num2;
 	CNumber TMP;
-	vector<pair<CNumber, CNumber> > vMultTableVec;
-	vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
-	while (Greater(Num1, N2DB, GT::Absolute) >= 0)
+	CNumber DIVD = !bNeg ? g_One : g_None;
+	CNumber DIVS = Num2;
+
+	if (!bMod)
 	{
-		Add(N2DB, N2DB, bNeg, TMP); N2DB = TMP;
-		Add(NBIN, NBIN, bNeg, TMP); NBIN = TMP;
-		vMultTableVec.push_back(pair<CNumber, CNumber>(NBIN, N2DB));
+		if (DIVS.m_iDecPos > 0 || Rem.m_iDecPos > 0)
+		{
+			size_t iDecPos = std::max(DIVS.m_iDecPos, Rem.m_iDecPos);
+			CNumber F10("1" + string(iDecPos - 1, '0'));
+			Mul(DIVS, F10, bNeg, TMP); DIVS = TMP;
+			Mul(Rem, F10, bNeg, TMP); Rem = TMP;
+		}
+	}
+	CNumber Num3 = DIVS;
+
+	vector<pair<CNumber, CNumber> > vMultTableVec;
+	vMultTableVec.push_back(pair<CNumber, CNumber>(DIVD, DIVS));
+	while (Greater(Rem, DIVS, GT::Absolute) >= 0)
+	{
+		Add(DIVS, DIVS, bNeg, TMP); DIVS = TMP;
+		Add(DIVD, DIVD, bNeg, TMP); DIVD = TMP;
+		vMultTableVec.push_back(pair<CNumber, CNumber>(DIVD, DIVS));
 	}
 
 	vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableVec.rbegin() + 1;
@@ -1090,7 +1096,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 				break;
 		}
 	}
-
+	CNumber DIVI = Rem;
 	if (bMod)
 	{
 		if (Rem != g_Zero)
@@ -1101,6 +1107,57 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 				CNumber TMP = Num2;
 				Rem = TMP + Rem;
 			}
+		}
+	}
+	else
+	{
+		if (DIVI == g_Zero)
+			return;
+		set<string> History;
+		Out.m_strNumber += ".";
+		int nCount = 0;
+		while (DIVI != g_Zero)
+		{
+			DIVD = !bNeg ? g_One : g_None;
+			DIVS = vMultTableVec[0].second;
+			for (int iGT = 0; Greater(DIVI, DIVS, GT::Absolute) < 0; iGT++)
+			{
+				DIVI.m_strNumber += "0";
+				if (iGT > 0)
+					Out.m_strNumber += "0";
+			}
+
+			if (History.contains(DIVI.m_strNumber))
+				break; // The remainder is starting to repeat
+			History.insert(DIVI.m_strNumber);
+
+			vMultTableVec.clear();
+			vMultTableVec.push_back(pair<CNumber, CNumber>(DIVD, DIVS));
+			while (Greater(DIVI, DIVS, GT::Absolute) >= 0)
+			{
+				Add(DIVS, DIVS, bNeg, TMP); DIVS = TMP;
+				Add(DIVD, DIVD, bNeg, TMP); DIVD = TMP;
+				vMultTableVec.push_back(pair<CNumber, CNumber>(DIVD, DIVS));
+			}
+
+			TMP = g_Zero;
+			vector<pair<CNumber, CNumber> >::reverse_iterator vit = vMultTableVec.rbegin() + 1;
+			for (; vit != vMultTableVec.rend(); ++vit)
+			{
+				if (Greater(DIVI, vit->second, GT::Absolute) >= 0)
+				{
+					Sub(DIVI, vit->second, bNeg, DIVI);
+					Add(vit->first, TMP, bNeg, TMP);
+					if (Greater(DIVI, Num3, GT::Absolute) < 0)
+					{
+						Out.m_strNumber += !TMP.m_bNegative ? TMP.m_strNumber : TMP.m_strNumber.substr(1);
+						break;
+					}
+				}
+			}
+			nCount++;
+			if (nCount == 64)
+				break;
 		}
 	}
 }
@@ -1238,8 +1295,7 @@ ostream& operator<<(ostream& out, const CNumber& Number)
 // __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
 wstring CNumber::ToString(const CNumber& rhs)
 {
-	string strNumber = rhs.m_strNumber;
 	wstringstream wstrStream;
-	wstrStream << strNumber.c_str();
+	wstrStream << rhs.m_strNumber.c_str();
 	return wstrStream.str();
 }

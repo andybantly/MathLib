@@ -87,7 +87,7 @@ namespace TestMathLib
 	public:
 		CRndPairFP()
 		{
-			m_iOp = rand() % 3 + 1;
+			m_iOp = rand() % 4 + 1;
 			Calc();
 		}
 
@@ -134,7 +134,6 @@ namespace TestMathLib
 				m_dSum = m_dNum1 / m_dNum2;
 				break;
 			default:
-				// No modulus
 				break;
 			}
 
