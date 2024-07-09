@@ -8,6 +8,12 @@
 #include <thread>
 #include <functional>
 
+/*
+Notes:
+Arranges elements of a given type in a linear arrangement and enables fast random access to any element, 
+and efficient insertion and deletion at the back of the container and also the front of the container.
+TODO: Find best arrangement of different containers when converting
+*/
 bool TextEqual(const std::string& strLHS, const std::string& strRHS);
 
 class CNumber
@@ -75,6 +81,7 @@ protected:
     bool m_bNegative;
     bool m_bZero;
     size_t m_iDecPos; // 0 = Integer, > 0 = Floating Point
+    size_t m_iFracRpt; // 0 = beginning of fractional part which means the whole fraction repeats vs. a subset of it, or -1 for does not repeat
     std::string m_strNumber;
     std::string m_strPhrase;
     std::string m_strBinary;

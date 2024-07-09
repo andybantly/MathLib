@@ -1,7 +1,7 @@
 #include "Number.h"
 #include "Constants.h"
 #include <sstream>
-#include <set>
+#include <map>
 #pragma warning(disable:6385)
 
 using namespace std;
@@ -17,7 +17,7 @@ static const CNumber g_Two("2");
 static const string g_one("1");
 static const string g_none("-1");
 
-CNumber::CNumber() : m_bNegative(false), m_bZero(false), m_iDecPos(0)
+CNumber::CNumber() : m_bNegative(false), m_bZero(false), m_iDecPos(0), m_iFracRpt(-1)
 {
 	m_strNumber.clear();
 	m_strPhrase.clear();
@@ -50,7 +50,8 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 		m_bNegative = rhs.m_bNegative;
 		m_bZero = rhs.m_bZero;
 		m_strNumber = rhs.m_strNumber;
-		m_iDecPos   = rhs.m_iDecPos;
+		m_iDecPos = rhs.m_iDecPos;
+		m_iFracRpt = rhs.m_iFracRpt;
 		m_strPhrase = rhs.m_strPhrase;
 		m_strBinary = rhs.m_strBinary;
 	}
@@ -284,6 +285,7 @@ void CNumber::SetNumber(const string& strInput)
 		m_bNegative = false;
 		m_bZero = false;
 		m_iDecPos = 0;
+		m_iFracRpt = -1;
 	}
 
 	m_strPhrase.clear();
@@ -1074,14 +1076,14 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 			Mul(Rem, F10, bNeg, TMP); Rem = TMP;
 		}
 	}
-	CNumber Num3 = DIVS;
+	CNumber Num2a = DIVS;
 
 	vector<pair<CNumber, CNumber> > vMultTableVec;
 	vMultTableVec.push_back(pair<CNumber, CNumber>(DIVD, DIVS));
 	while (Greater(Rem, DIVS, GT::Absolute) >= 0)
 	{
-		Add(DIVS, DIVS, bNeg, TMP); DIVS = TMP;
 		Add(DIVD, DIVD, bNeg, TMP); DIVD = TMP;
+		Add(DIVS, DIVS, bNeg, TMP); DIVS = TMP;
 		vMultTableVec.push_back(pair<CNumber, CNumber>(DIVD, DIVS));
 	}
 
@@ -1096,7 +1098,9 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 				break;
 		}
 	}
+
 	CNumber DIVI = Rem;
+
 	if (bMod)
 	{
 		if (Rem != g_Zero)
@@ -1113,9 +1117,10 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	{
 		if (DIVI == g_Zero)
 			return;
-		set<string> History;
+
+		map<string, size_t> RemHist;
 		Out.m_strNumber += ".";
-		int nCount = 0;
+		size_t nCount = 0;
 		while (DIVI != g_Zero)
 		{
 			DIVD = !bNeg ? g_One : g_None;
@@ -1127,17 +1132,25 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 					Out.m_strNumber += "0";
 			}
 
-			if (History.contains(DIVI.m_strNumber))
-				break; // The remainder is starting to repeat
-			History.insert(DIVI.m_strNumber);
-
-			vMultTableVec.clear();
-			vMultTableVec.push_back(pair<CNumber, CNumber>(DIVD, DIVS));
-			while (Greater(DIVI, DIVS, GT::Absolute) >= 0)
+			if (RemHist.contains(DIVI.m_strNumber))
 			{
-				Add(DIVS, DIVS, bNeg, TMP); DIVS = TMP;
-				Add(DIVD, DIVD, bNeg, TMP); DIVD = TMP;
-				vMultTableVec.push_back(pair<CNumber, CNumber>(DIVD, DIVS));
+				// The remainder is starting to repeat - set the repeat location -1 = never repeats, 0 whole fraction repeats, > 1 index to beginning of start of repeat
+				Out.m_iFracRpt = RemHist[DIVI.m_strNumber];
+				break; 
+			}
+			RemHist[DIVI.m_strNumber] = nCount;
+
+			// Only add to the list when necessary
+			if (Greater(DIVI, (vMultTableVec.end() - 1)->second, GT::Absolute) >= 0)
+			{
+				DIVD = (vMultTableVec.end() - 1)->first.m_strNumber;
+				DIVS = (vMultTableVec.end() - 1)->second.m_strNumber;
+				while (Greater(DIVI, DIVS, GT::Absolute) >= 0)
+				{
+					Add(DIVD, DIVD, bNeg, TMP); DIVD = TMP;
+					Add(DIVS, DIVS, bNeg, TMP); DIVS = TMP;
+					vMultTableVec.push_back(pair<CNumber, CNumber>(DIVD, DIVS));
+				}
 			}
 
 			TMP = g_Zero;
@@ -1148,7 +1161,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 				{
 					Sub(DIVI, vit->second, bNeg, DIVI);
 					Add(vit->first, TMP, bNeg, TMP);
-					if (Greater(DIVI, Num3, GT::Absolute) < 0)
+					if (Greater(DIVI, Num2a, GT::Absolute) < 0)
 					{
 						Out.m_strNumber += !TMP.m_bNegative ? TMP.m_strNumber : TMP.m_strNumber.substr(1);
 						break;
