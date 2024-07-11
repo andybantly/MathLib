@@ -17,7 +17,7 @@ static const CNumber g_Two("2");
 static const string g_one("1");
 static const string g_none("-1");
 
-CNumber::CNumber() : m_bNegative(false), m_bZero(false), m_iDecPos(0), m_iFracRpt(-1)
+CNumber::CNumber() : m_bNegative(false), m_bZero(false), m_iDecPos(0), m_iFracRpt(-1), m_iPrecision(-1)
 {
 	m_strNumber.clear();
 	m_strPhrase.clear();
@@ -52,6 +52,7 @@ CNumber& CNumber::operator = (const CNumber& rhs)
 		m_strNumber = rhs.m_strNumber;
 		m_iDecPos = rhs.m_iDecPos;
 		m_iFracRpt = rhs.m_iFracRpt;
+		m_iPrecision = rhs.m_iPrecision;
 		m_strPhrase = rhs.m_strPhrase;
 		m_strBinary = rhs.m_strBinary;
 	}
@@ -278,6 +279,7 @@ void CNumber::SetNumber(const string& strInput)
 
 		size_t stPos = m_strNumber.find(g_cDecSep);
 		m_iDecPos = stPos != string::npos ? m_strNumber.length() - stPos : 0;
+		m_iPrecision = -1;
 	}
 	else
 	{
@@ -286,10 +288,16 @@ void CNumber::SetNumber(const string& strInput)
 		m_bZero = false;
 		m_iDecPos = 0;
 		m_iFracRpt = -1;
+		m_iPrecision = -1;
 	}
 
 	m_strPhrase.clear();
 	m_strBinary.clear();
+}
+
+void CNumber::SetPrecision(const int iPrecision)
+{
+	m_iPrecision = iPrecision;
 }
 
 string CNumber::WB()
@@ -1062,7 +1070,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	Out = g_Zero;
 	Rem = Num1;
 
-	CNumber TMP;
+	CNumber TMP, TMP2;
 	CNumber DIVD = !bNeg ? g_One : g_None;
 	CNumber DIVS = Num2;
 
@@ -1118,9 +1126,9 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		if (DIVI == g_Zero)
 			return;
 
-		map<string, size_t> RemHist;
+		map<string, int> RemHist;
 		Out.m_strNumber += ".";
-		size_t nCount = 0;
+		int nCount = 0;
 		while (DIVI != g_Zero)
 		{
 			DIVD = !bNeg ? g_One : g_None;
@@ -1159,8 +1167,8 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 			{
 				if (Greater(DIVI, vit->second, GT::Absolute) >= 0)
 				{
-					Sub(DIVI, vit->second, bNeg, DIVI);
-					Add(vit->first, TMP, bNeg, TMP);
+					Sub(DIVI, vit->second, bNeg, TMP2); DIVI = TMP2;
+					Add(vit->first, TMP, bNeg, TMP2); TMP = TMP2;
 					if (Greater(DIVI, Num2a, GT::Absolute) < 0)
 					{
 						Out.m_strNumber += !TMP.m_bNegative ? TMP.m_strNumber : TMP.m_strNumber.substr(1);
@@ -1168,9 +1176,21 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 					}
 				}
 			}
+
 			nCount++;
-			if (nCount == 64)
+			if (m_iPrecision == -1)
+			{
+				if (nCount == 19)
+				{
+					// How does rounding need to happen, do we look at position 19 and round for 18 or not
+					break;
+				}
+			}
+			else if (nCount > m_iPrecision)
+			{
+				// How does rounding need to happen, do we look at position 19 and round for 18 or not
 				break;
+			}
 		}
 	}
 }

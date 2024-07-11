@@ -53,6 +53,7 @@ public:
 
 public:
     void SetNumber(const std::string& strInput);
+    void SetPrecision(const int iPrecision);
     int Contract(const std::string& strInput, std::string& strResult);
 	int Expand(const std::string& strInput, std::string& strResult);
     int ToBase2(const std::string& strInput, std::string& strResult);
@@ -81,7 +82,9 @@ protected:
     bool m_bNegative;
     bool m_bZero;
     size_t m_iDecPos; // 0 = Integer, > 0 = Floating Point
-    size_t m_iFracRpt; // 0 = beginning of fractional part which means the whole fraction repeats vs. a subset of it, or -1 for does not repeat
+    int m_iFracRpt; // 0 = beginning of fractional part which means the whole fraction repeats vs. a subset of it, or -1 for does not repeat
+    int m_iPrecision; // -1 to set the cutoff at 32, 0 for fractional part, > 0 for setting the number of decimals of precision
+
     std::string m_strNumber;
     std::string m_strPhrase;
     std::string m_strBinary;
