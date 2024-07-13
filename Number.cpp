@@ -798,7 +798,7 @@ void CNumber::Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	if (*Sum.begin() == g_cDecSep)
 		Sum.push_front(g_cZero);
 
-	if (m_iDecPos > 0)
+	if (SDP > 0)
 	{
 		while (*(Sum.end() - 1) == g_cZero)
 			Sum.pop_back();
@@ -900,7 +900,7 @@ void CNumber::Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		if (*Sum.begin() == g_cDecSep)
 			Sum.push_front(g_cZero);
 
-		if (m_iDecPos > 0)
+		if (SDP > 0)
 		{
 			while (*(Sum.end() - 1) == g_cZero)
 				Sum.pop_back();
@@ -1078,10 +1078,65 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 	{
 		if (DIVS.m_iDecPos > 0 || Rem.m_iDecPos > 0)
 		{
-			size_t iDecPos = std::max(DIVS.m_iDecPos, Rem.m_iDecPos);
-			CNumber F10("1" + string(iDecPos - 1, '0'));
-			Mul(DIVS, F10, bNeg, TMP); DIVS = TMP;
-			Mul(Rem, F10, bNeg, TMP); Rem = TMP;
+			if (DIVS.m_iDecPos == Rem.m_iDecPos)
+			{
+				deque<char> dq;
+				std::string::const_iterator it;
+				for (it = DIVS.m_strNumber.begin(); it != DIVS.m_strNumber.end(); ++it)
+				{
+					if (*it != '.')
+						dq.push_back(*it);
+				}
+				DIVS.SetNumber(string(dq.begin(), dq.end()));
+				dq.clear();
+
+				for (it = Rem.m_strNumber.begin(); it != Rem.m_strNumber.end(); ++it)
+				{
+					if (*it != '.')
+						dq.push_back(*it);
+				}
+				Rem.SetNumber(string(dq.begin(), dq.end()));
+			}
+			else
+			{
+				bool bPad = false;
+				string strPad = string(std::max(DIVS.m_iDecPos, Rem.m_iDecPos) - std::min(DIVS.m_iDecPos, Rem.m_iDecPos), '0');
+				if (DIVS.m_iDecPos > 0)
+				{
+					deque<char> dq;
+					std::string::const_iterator it;
+					for (it = DIVS.m_strNumber.begin(); it != DIVS.m_strNumber.end(); ++it)
+					{
+						if (*it != '.')
+							dq.push_back(*it);
+					}
+					if (DIVS.m_iDecPos < Rem.m_iDecPos)
+						bPad = true;
+					if (bPad)
+					{
+						for (it = strPad.begin(); it != strPad.end(); ++it)
+							dq.push_back(*it);
+					}
+					DIVS.SetNumber(string(dq.begin(), dq.end()));
+				}
+
+				if (Rem.m_iDecPos > 0)
+				{
+					deque<char> dq;
+					std::string::const_iterator it;
+					for (it = Rem.m_strNumber.begin(); it != Rem.m_strNumber.end(); ++it)
+					{
+						if (*it != '.')
+							dq.push_back(*it);
+					}
+					if (!bPad)
+					{
+						for (it = strPad.begin(); it != strPad.end(); ++it)
+							dq.push_back(*it);
+					}
+					Rem.SetNumber(string(dq.begin(), dq.end()));
+				}
+			}
 		}
 	}
 	CNumber Num2a = DIVS;
@@ -1102,7 +1157,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 		{
 			Sub(Rem, vit->second, bNeg, Rem);
 			Add(vit->first, Out, bNeg, Out);
-			if (Greater(Rem, Num2, GT::Absolute) < 0)
+			if (Greater(Rem, Num2a, GT::Absolute) < 0)
 				break;
 		}
 	}
@@ -1151,8 +1206,8 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 			// Only add to the list when necessary
 			if (Greater(DIVI, (vMultTableVec.end() - 1)->second, GT::Absolute) >= 0)
 			{
-				DIVD = (vMultTableVec.end() - 1)->first.m_strNumber;
-				DIVS = (vMultTableVec.end() - 1)->second.m_strNumber;
+				DIVD.SetNumber((vMultTableVec.end() - 1)->first.m_strNumber);
+				DIVS.SetNumber((vMultTableVec.end() - 1)->second.m_strNumber);
 				while (Greater(DIVI, DIVS, GT::Absolute) >= 0)
 				{
 					Add(DIVD, DIVD, bNeg, TMP); DIVD = TMP;
