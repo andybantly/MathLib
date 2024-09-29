@@ -304,7 +304,7 @@ class CBytes {
             return *this;
         }
 
-        bool hasCarry()
+        bool hasOverFlow()
         {
             return (*this).m_c.C.C0;
         }
@@ -320,77 +320,91 @@ public:
         Iterator(CByte* ptr) : m_ptr(ptr) {}
 
         // Dereference operator
-        CByte& operator*() {
+        CByte& operator*() 
+        {
             return *m_ptr;
         }
 
         // Arrow operator
-        CByte* operator->() {
+        CByte* operator->() 
+        {
             return m_ptr;
         }
 
         // Pre-increment
-        Iterator& operator++() {
+        Iterator& operator++() 
+        {
             ++m_ptr;
             return *this;
         }
 
         // Post-increment
-        Iterator operator++(int) {
+        Iterator operator++(int) 
+        {
             Iterator temp = *this;
             ++m_ptr;
             return temp;
         }
 
         // Pre-decrement
-        Iterator& operator--() {
+        Iterator& operator--() 
+        {
             m_ptr--;
             return *this;
         }
 
         // Post-decrement
-        Iterator operator--(int) {
+        Iterator operator--(int) 
+        {
             Iterator temp = *this;
             m_ptr--;
             return temp;
         }
 
         // Addition assignment
-        Iterator& operator+=(std::ptrdiff_t n) {
+        Iterator& operator+=(std::ptrdiff_t n) 
+        {
             m_ptr += n;
             return *this;
         }
 
         // Subtraction assignment
-        Iterator& operator-=(std::ptrdiff_t n) {
+        Iterator& operator-=(std::ptrdiff_t n) 
+        {
             m_ptr -= n;
             return *this;
         }
 
         // Subscript operator
-        CByte& operator[](std::ptrdiff_t n) {
+        CByte& operator[](std::ptrdiff_t n) 
+        {
             return *(m_ptr + n);
         }
 
         // Comparison operators
-        bool operator==(const Iterator& other) const {
+        bool operator==(const Iterator& other) const 
+        {
             return m_ptr == other.m_ptr;
         }
 
-        bool operator!=(const Iterator& other) const {
+        bool operator!=(const Iterator& other) const 
+        {
             return m_ptr != other.m_ptr;
         }
 
         // Random access operations
-        Iterator operator+(std::ptrdiff_t n) const {
+        Iterator operator+(std::ptrdiff_t n) const 
+        {
             return Iterator(m_ptr + n);
         }
 
-        Iterator operator-(std::ptrdiff_t n) const {
+        Iterator operator-(std::ptrdiff_t n) const 
+        {
             return Iterator(m_ptr - n);
         }
 
-        std::ptrdiff_t operator-(const Iterator& other) const {
+        std::ptrdiff_t operator-(const Iterator& other) const 
+        {
             return m_ptr - other.m_ptr;
         }
 
@@ -400,15 +414,16 @@ public:
 
     CBytes(size_t size) : m_size(size), m_capacity(size), m_Bytes(new CByte[size]) {}
 
-    ~CBytes() {
+    ~CBytes() 
+    {
         delete[] m_Bytes;
     }
 
     // Access element at index
-    CByte& operator[](size_t index) {
-        if (index >= m_size) {
+    CByte& operator[](size_t index) 
+    {
+        if (index >= m_size) 
             throw std::out_of_range("Index out of range");
-        }
         return m_Bytes[index];
     }
 
