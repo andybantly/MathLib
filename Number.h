@@ -428,17 +428,20 @@ public:
     }
 
     // Return size of the vector
-    size_t size() const {
+    size_t size() const 
+    {
         return m_size;
     }
 
     // Return iterator to the beginning
-    Iterator begin() {
+    Iterator begin() 
+    {
         return Iterator(m_Bytes);
     }
 
     // Return iterator to the end
-    Iterator end() {
+    Iterator end() 
+    {
         return Iterator(m_Bytes + m_size);
     }
 
