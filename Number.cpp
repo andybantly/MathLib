@@ -1110,8 +1110,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 						if (*it != '.')
 							dq.push_back(*it);
 					}
-					if (DIVS.m_iDecPos < Rem.m_iDecPos)
-						bPad = true;
+					bPad = DIVS.m_iDecPos < Rem.m_iDecPos;
 					if (bPad)
 					{
 						for (it = strPad.begin(); it != strPad.end(); ++it)
@@ -1183,6 +1182,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 		map<string, int> RemHist;
 		Out.m_strNumber += ".";
+
 		int nCount = 0;
 		while (DIVI != g_Zero)
 		{
@@ -1197,7 +1197,7 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 
 			if (RemHist.contains(DIVI.m_strNumber))
 			{
-				// The remainder is starting to repeat - set the repeat location -1 = never repeats, 0 whole fraction repeats, > 1 index to beginning of start of repeat
+				// The remainder is starting to repeat
 				Out.m_iFracRpt = RemHist[DIVI.m_strNumber];
 				break; 
 			}
@@ -1233,19 +1233,8 @@ void CNumber::Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& 
 			}
 
 			nCount++;
-			if (m_iPrecision == -1)
-			{
-				if (nCount == 19)
-				{
-					// How does rounding need to happen, do we look at position 19 and round for 18 or not
-					break;
-				}
-			}
-			else if (nCount > m_iPrecision)
-			{
-				// How does rounding need to happen, do we look at position 19 and round for 18 or not
+			if (nCount > 36)
 				break;
-			}
 		}
 	}
 }

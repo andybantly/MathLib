@@ -1164,6 +1164,27 @@ namespace TestMathLib
 			for (vector<thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
 				delete* it;
 		}
+
+		TEST_METHOD(ASBYTE)
+		{
+			const int nSize = 3;
+			CBytes LHS(nSize);
+			CBytes RHS(nSize);
+			CBytes OUT(nSize);
+
+			LHS[0] = 9;
+			RHS[0] = 2;
+			OUT[0] = LHS[0] + RHS[0]; // 9 + 2 = 11. There should be a carrybit
+
+			for (int iSize = 1; iSize < nSize; ++iSize)
+			{
+				LHS[iSize] = 3;
+				RHS[iSize] = 2;
+				OUT[iSize] = LHS[iSize] + RHS[iSize];
+
+				// Carry?
+			}
+		}
 	};
 }
 

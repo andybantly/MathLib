@@ -204,107 +204,233 @@ public:
     }
 };
 
-class CByte
-{
-    struct _Byte
+class CBytes {
+    class CByte
     {
-        unsigned B1 : 1;
-        unsigned B2 : 1;
-        unsigned B3 : 1;
-        unsigned B4 : 1;
-        unsigned B5 : 1;
-        unsigned B6 : 1;
-        unsigned B7 : 1;
-        unsigned B8 : 1;
-    };
+        struct _Byte
+        {
+            unsigned B1 : 1;
+            unsigned B2 : 1;
+            unsigned B3 : 1;
+            unsigned B4 : 1;
+            unsigned B5 : 1;
+            unsigned B6 : 1;
+            unsigned B7 : 1;
+            unsigned B8 : 1;
+        };
 
-    struct _Carry
-    {
-        unsigned C0 : 1;
-        unsigned C1 : 1;
-        unsigned C2 : 1;
-        unsigned C3 : 1;
-        unsigned C4 : 1;
-        unsigned C5 : 1;
-        unsigned C6 : 1;
-        unsigned C7 : 1;
-    };
+        struct _Carry
+        {
+            unsigned C0 : 1;
+            unsigned C1 : 1;
+            unsigned C2 : 1;
+            unsigned C3 : 1;
+            unsigned C4 : 1;
+            unsigned C5 : 1;
+            unsigned C6 : 1;
+            unsigned C7 : 1;
+        };
 
-    union BYTE
-    {
-        struct _Byte B;
-        uint8_t U;
-    };
+        union BYTE
+        {
+            struct _Byte B;
+            uint8_t U;
+        };
 
-    union CARRY
-    {
-        struct _Carry C;
-        uint8_t U;
-    };
+        union CARRY
+        {
+            struct _Carry C;
+            uint8_t U;
+        };
+
+    public:
+
+        CByte()
+        {
+            m_b.U = 0;
+            m_c.U = 0;
+        }
+
+        CByte(uint8_t byte)
+        {
+            m_b.U = byte;
+            m_c.U = 0;
+        };
+
+        CByte(const CByte& rhs)
+        {
+            *this = rhs;
+        }
+
+        CByte& operator = (const CByte& rhs)
+        {
+            if (this != &rhs)
+            {
+                m_b = rhs.m_b;
+                m_c = rhs.m_c;
+            }
+            return *this;
+        }
+
+        CByte& operator + (const CByte& rhs)
+        {
+            CByte Out;
+
+            Out.m_b.B.B1 = m_c.C.C0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);
+            m_c.C.C1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & m_c.C.C0) | (m_b.B.B1 & m_c.C.C0);
+
+            Out.m_b.B.B2 = m_c.C.C1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
+            m_c.C.C2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & m_c.C.C1) | (m_b.B.B2 & m_c.C.C1);
+
+            Out.m_b.B.B3 = m_c.C.C2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
+            m_c.C.C3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & m_c.C.C2) | (m_b.B.B3 & m_c.C.C2);
+
+            Out.m_b.B.B4 = m_c.C.C3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
+            m_c.C.C4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & m_c.C.C3) | (m_b.B.B4 & m_c.C.C3);
+
+            Out.m_b.B.B5 = m_c.C.C4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
+            m_c.C.C5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & m_c.C.C4) | (m_b.B.B5 & m_c.C.C4);
+
+            Out.m_b.B.B6 = m_c.C.C5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
+            m_c.C.C6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & m_c.C.C5) | (m_b.B.B6 & m_c.C.C5);
+
+            Out.m_b.B.B7 = m_c.C.C6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
+            m_c.C.C7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & m_c.C.C6) | (m_b.B.B7 & m_c.C.C6);
+
+            Out.m_b.B.B8 = m_c.C.C7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
+            Out.m_c.C.C0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & m_c.C.C7) | (m_b.B.B8 & m_c.C.C7);
+
+            *this = Out;
+            return *this;
+        }
+
+        bool hasCarry()
+        {
+            return (*this).m_c.C.C0;
+        }
+
+    protected:
+        BYTE m_b;
+        CARRY m_c;
+    }; 
 
 public:
+    class Iterator {
+    public:
+        Iterator(CByte* ptr) : m_ptr(ptr) {}
 
-    CByte()
-    {
-        m_b.U = 0;
-        m_c.U = 0;
-    }
+        // Dereference operator
+        CByte& operator*() {
+            return *m_ptr;
+        }
 
-    CByte(uint8_t byte)
-    {
-        m_b.U = byte;
-        m_c.U = 0;
+        // Arrow operator
+        CByte* operator->() {
+            return m_ptr;
+        }
+
+        // Pre-increment
+        Iterator& operator++() {
+            ++m_ptr;
+            return *this;
+        }
+
+        // Post-increment
+        Iterator operator++(int) {
+            Iterator temp = *this;
+            ++m_ptr;
+            return temp;
+        }
+
+        // Pre-decrement
+        Iterator& operator--() {
+            m_ptr--;
+            return *this;
+        }
+
+        // Post-decrement
+        Iterator operator--(int) {
+            Iterator temp = *this;
+            m_ptr--;
+            return temp;
+        }
+
+        // Addition assignment
+        Iterator& operator+=(std::ptrdiff_t n) {
+            m_ptr += n;
+            return *this;
+        }
+
+        // Subtraction assignment
+        Iterator& operator-=(std::ptrdiff_t n) {
+            m_ptr -= n;
+            return *this;
+        }
+
+        // Subscript operator
+        CByte& operator[](std::ptrdiff_t n) {
+            return *(m_ptr + n);
+        }
+
+        // Comparison operators
+        bool operator==(const Iterator& other) const {
+            return m_ptr == other.m_ptr;
+        }
+
+        bool operator!=(const Iterator& other) const {
+            return m_ptr != other.m_ptr;
+        }
+
+        // Random access operations
+        Iterator operator+(std::ptrdiff_t n) const {
+            return Iterator(m_ptr + n);
+        }
+
+        Iterator operator-(std::ptrdiff_t n) const {
+            return Iterator(m_ptr - n);
+        }
+
+        std::ptrdiff_t operator-(const Iterator& other) const {
+            return m_ptr - other.m_ptr;
+        }
+
+    private:
+        CByte* m_ptr;
     };
 
-    CByte(const CByte& rhs)
-    {
-        *this = rhs;
+    CBytes(size_t size) : m_size(size), m_capacity(size), m_Bytes(new CByte[size]) {}
+
+    ~CBytes() {
+        delete[] m_Bytes;
     }
 
-    CByte& operator = (const CByte& rhs)
-    {
-        if (this != &rhs)
-        {
-            m_b = rhs.m_b;
-            m_c = rhs.m_c;
+    // Access element at index
+    CByte& operator[](size_t index) {
+        if (index >= m_size) {
+            throw std::out_of_range("Index out of range");
         }
-        return *this;
+        return m_Bytes[index];
     }
 
-    CByte& operator + (const CByte& rhs)
-    {
-        CByte Out;
-
-        Out.m_b.B.B1 = m_c.C.C0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);
-        m_c.C.C1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & m_c.C.C0) | (m_b.B.B1 & m_c.C.C0);
-
-        Out.m_b.B.B2 = m_c.C.C1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
-        m_c.C.C2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & m_c.C.C1) | (m_b.B.B2 & m_c.C.C1);
-
-        Out.m_b.B.B3 = m_c.C.C2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
-        m_c.C.C3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & m_c.C.C2) | (m_b.B.B3 & m_c.C.C2);
-
-        Out.m_b.B.B4 = m_c.C.C3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
-        m_c.C.C4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & m_c.C.C3) | (m_b.B.B4 & m_c.C.C3);
-
-        Out.m_b.B.B5 = m_c.C.C4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
-        m_c.C.C5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & m_c.C.C4) | (m_b.B.B5 & m_c.C.C4);
-
-        Out.m_b.B.B6 = m_c.C.C5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
-        m_c.C.C6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & m_c.C.C5) | (m_b.B.B6 & m_c.C.C5);
-
-        Out.m_b.B.B7 = m_c.C.C6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
-        m_c.C.C7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & m_c.C.C6) | (m_b.B.B7 & m_c.C.C6);
-
-        Out.m_b.B.B8 = m_c.C.C7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
-        Out.m_c.C.C0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & m_c.C.C7) | (m_b.B.B8 & m_c.C.C7);
-
-        *this = Out;
-
-        return *this;
+    // Return size of the vector
+    size_t size() const {
+        return m_size;
     }
 
-protected:
-    BYTE m_b;
-    CARRY m_c;
+    // Return iterator to the beginning
+    Iterator begin() {
+        return Iterator(m_Bytes);
+    }
+
+    // Return iterator to the end
+    Iterator end() {
+        return Iterator(m_Bytes + m_size);
+    }
+
+private:
+    size_t m_size;
+    size_t m_capacity;
+    CByte* m_Bytes;
 };
+
+
