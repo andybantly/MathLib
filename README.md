@@ -13,8 +13,8 @@ usage:
 
 	CNumber N1, N2("3"), N3("4");
 	N1 = N2 * N3;
-	if (N1 > N2)
-		std::cout << N1 << " Greater than " << N2 << " * " << N3;
+	if (N1 >= (N2 * N3))
+		std::cout << N1 << " Greater than or equal to " << N2 << " * " << N3;
 
   Output:
   12 Greater than 3 * 4
