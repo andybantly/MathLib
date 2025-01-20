@@ -9,7 +9,10 @@
 using namespace std;
 
 int main()
-{
+{ 
+	CBytes A("255"), B("1"), C;
+	C = A + B;
+
 	CNumber::Init();
 	string strInput, strResult;
 	bool bAgain = true;

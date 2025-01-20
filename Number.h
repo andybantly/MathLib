@@ -8,12 +8,6 @@
 #include <thread>
 #include <functional>
 
-/*
-Notes:
-Arranges elements of a given type in a linear arrangement and enables fast random access to any element, 
-and efficient insertion and deletion at the back of the container and also the front of the container.
-TODO: Find best arrangement of different containers when converting
-*/
 bool TextEqual(const std::string& strLHS, const std::string& strRHS);
 
 class CNumber
@@ -204,10 +198,13 @@ public:
     }
 };
 
-class CBytes {
+class CBytes 
+{
+protected:
     class CByte
     {
-        struct _Byte
+    public:
+        struct _Bits
         {
             unsigned B1 : 1;
             unsigned B2 : 1;
@@ -231,9 +228,9 @@ class CBytes {
             unsigned C7 : 1;
         };
 
-        union BYTE
+        union BITS
         {
-            struct _Byte B;
+            struct _Bits B;
             uint8_t U;
         };
 
@@ -242,8 +239,6 @@ class CBytes {
             struct _Carry C;
             uint8_t U;
         };
-
-    public:
 
         CByte()
         {
@@ -304,151 +299,184 @@ class CBytes {
             return *this;
         }
 
-        bool hasOverFlow()
+        uint8_t overFlow() const
         {
-            return (*this).m_c.C.C0;
+            return (*this).m_c.C.C0; // Re-use C0 to indicate a carry, it can't ever start as 1
+        }
+
+        void setValue(const uint8_t rhs)
+        {
+            m_b.U = rhs;
         }
 
     protected:
-        BYTE m_b;
+        BITS m_b;
         CARRY m_c;
     }; 
 
 public:
-    class Iterator {
-    public:
-        Iterator(CByte* ptr) : m_ptr(ptr) {}
+    CBytes() : m_size(0), m_Bytes(0) {};
+    CBytes(const std::string& strNumber)
+    {
+        m_Bytes = 0;
+        uint8_t pow[] = { 1,2,4,8,16,32,64,128 };
 
-        // Dereference operator
-        CByte& operator*() 
+        std::string strInput = strNumber;
+        if (strInput.empty())
+            throw("Invalid number");
+
+        std::string strOut;
+        uint8_t idnm = 0;
+        std::deque<char> binary;
+
+        uint8_t bVal = 0;
+        uint8_t bPos = 0;
+        uint8_t bSiz = 0;
+        std::vector<uint8_t> vbytes;
+
+        std::string::const_iterator cit = strInput.begin();
+        for (;;)
         {
-            return *m_ptr;
+            // Compute the denominator of the division
+            idnm = idnm * 10 + *cit - '0';
+            if (idnm < 2 && cit + 1 != strInput.end())
+            {
+                // Carry a 0
+                if (!strOut.empty())
+                    strOut += '0';
+
+                // The denominator has to be greater than 2 now
+                idnm = idnm * 10 + (*(cit + 1) - '0');
+
+                // Move to the next character
+                cit += 2;
+            }
+            else
+            {
+                // Check for completion the conversion
+                if (strInput.length() == 1 && idnm < 2)
+                {
+                    /////////////////////////////////////
+                    // Binary stream 0s and 1s
+
+                    binary.push_front('0' + idnm);
+
+                    /////////////////////////////////////
+                    // Byte stream 0-255
+
+                    bSiz++;
+                    if (idnm)
+                        bVal += pow[bPos];
+                    bPos++;
+                    if (bPos > 7)
+                    {
+                        vbytes.push_back(bVal);
+                        bVal = 0;
+                        bPos = 0;
+                    }
+
+                    /////////////////////////////////////
+
+                    break;
+                }
+
+                // Move to the next character
+                cit++;
+            }
+
+            // Append the digit to the output that becomes the new input from integer division by 2
+            strOut += '0' + idnm / 2;
+            idnm = idnm % 2;
+
+            // Has the input been processed
+            if (cit == strInput.end())
+            {
+                // Add the remainder of 0 or 1 to the binary string
+                binary.push_front('0' + idnm);
+
+                /////////////////////////////////////
+
+                bSiz++;
+                if (idnm)
+                    bVal += pow[bPos];
+                bPos++;
+                if (bPos > 7)
+                {
+                    vbytes.push_back(bVal);
+                    bVal = 0;
+                    bPos = 0;
+                }
+
+                /////////////////////////////////////
+
+                // Reset and restart (but not the incremental bytes, they carry over)
+                strInput = strOut;
+                strOut.clear();
+                idnm = 0;
+                cit = strInput.begin();
+            }
         }
+        if (bVal)
+            vbytes.push_back(bVal);
 
-        // Arrow operator
-        CByte* operator->() 
-        {
-            return m_ptr;
-        }
+        size_t size = uint8_t(vbytes.size());
+        m_Bytes = new CByte[size];
+        for (size_t iByte = 0; iByte < size; ++iByte)
+            m_Bytes[iByte].setValue(vbytes[iByte]);
+        m_size = size;
+    }
 
-        // Pre-increment
-        Iterator& operator++() 
-        {
-            ++m_ptr;
-            return *this;
-        }
-
-        // Post-increment
-        Iterator operator++(int) 
-        {
-            Iterator temp = *this;
-            ++m_ptr;
-            return temp;
-        }
-
-        // Pre-decrement
-        Iterator& operator--() 
-        {
-            m_ptr--;
-            return *this;
-        }
-
-        // Post-decrement
-        Iterator operator--(int) 
-        {
-            Iterator temp = *this;
-            m_ptr--;
-            return temp;
-        }
-
-        // Addition assignment
-        Iterator& operator+=(std::ptrdiff_t n) 
-        {
-            m_ptr += n;
-            return *this;
-        }
-
-        // Subtraction assignment
-        Iterator& operator-=(std::ptrdiff_t n) 
-        {
-            m_ptr -= n;
-            return *this;
-        }
-
-        // Subscript operator
-        CByte& operator[](std::ptrdiff_t n) 
-        {
-            return *(m_ptr + n);
-        }
-
-        // Comparison operators
-        bool operator==(const Iterator& other) const 
-        {
-            return m_ptr == other.m_ptr;
-        }
-
-        bool operator!=(const Iterator& other) const 
-        {
-            return m_ptr != other.m_ptr;
-        }
-
-        // Random access operations
-        Iterator operator+(std::ptrdiff_t n) const 
-        {
-            return Iterator(m_ptr + n);
-        }
-
-        Iterator operator-(std::ptrdiff_t n) const 
-        {
-            return Iterator(m_ptr - n);
-        }
-
-        std::ptrdiff_t operator-(const Iterator& other) const 
-        {
-            return m_ptr - other.m_ptr;
-        }
-
-    private:
-        CByte* m_ptr;
-    };
-
-    CBytes(size_t size) : m_size(size), m_capacity(size), m_Bytes(new CByte[size]) {}
+    CBytes(size_t size) : m_size(size), m_Bytes(new CByte[size]) {}
 
     ~CBytes() 
     {
         delete[] m_Bytes;
     }
 
-    // Access element at index
+    // Operator at
     CByte& operator[](size_t index) 
     {
         if (index >= m_size) 
-            throw std::out_of_range("Index out of range");
+            throw std::out_of_range("Byte index out of range");
         return m_Bytes[index];
     }
 
-    // Return size of the vector
-    size_t size() const 
+    // Return size of the collection
+    const size_t size() const 
     {
         return m_size;
     }
 
-    // Return iterator to the beginning
-    Iterator begin() 
+    CBytes& operator = (const CBytes& rhs)
     {
-        return Iterator(m_Bytes);
+        if (this != &rhs)
+        {
+            m_size = rhs.m_size;
+            m_Bytes = new CByte[size()];
+            for (size_t iByte = 0; iByte < size(); ++iByte)
+                m_Bytes[iByte] = rhs.m_Bytes[iByte];
+        }
+        return *this;
     }
 
-    // Return iterator to the end
-    Iterator end() 
+    CBytes operator + (const CBytes& rhs) const
     {
-        return Iterator(m_Bytes + m_size);
+        size_t l = size(), r = rhs.size();
+        size_t stMax = l == r ? l : (l < r ? r : l);
+        CBytes out(stMax);
+
+        CByte Zero(0);
+        for (size_t st = 0; st < stMax; ++st)
+        {
+            CByte lb = st < l ? m_Bytes[st] : Zero;
+            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
+            CByte& ob =  out.m_Bytes[st];
+            ob = lb + rb;
+        }
+        return out;
     }
 
 private:
     size_t m_size;
-    size_t m_capacity;
     CByte* m_Bytes;
 };
-
-
