@@ -198,7 +198,7 @@ public:
     }
 };
 
-class CBytes 
+class Number
 {
 protected:
     class CByte
@@ -267,6 +267,20 @@ protected:
             return *this;
         }
 
+        operator std::string()
+        {
+            m_s[7] = m_b.B.B1 ? '1' : '0';
+            m_s[6] = m_b.B.B2 ? '1' : '0';
+            m_s[5] = m_b.B.B3 ? '1' : '0';
+            m_s[4] = m_b.B.B4 ? '1' : '0';
+            m_s[3] = m_b.B.B5 ? '1' : '0';
+            m_s[2] = m_b.B.B6 ? '1' : '0';
+            m_s[1] = m_b.B.B7 ? '1' : '0';
+            m_s[0] = m_b.B.B8 ? '1' : '0';
+            std::string bits = std::string(m_s, 8);
+            return bits;
+        }
+
         CByte& operator + (const CByte& rhs)
         {
             CByte Out;
@@ -301,7 +315,7 @@ protected:
 
         uint8_t overFlow() const
         {
-            return (*this).m_c.C.C0; // Re-use C0 to indicate a carry, it can't ever start as 1
+            return m_c.C.C0; // Re-use C0 to indicate a carry, it can't ever start as 1
         }
 
         void setValue(const uint8_t rhs)
@@ -309,14 +323,20 @@ protected:
             m_b.U = rhs;
         }
 
+        void setCarry(bool rhs)
+        {
+            m_c.C.C0 = rhs ? 1 : 0;
+        }
+
     protected:
         BITS m_b;
         CARRY m_c;
+        char m_s[8];
     }; 
 
 public:
-    CBytes() : m_size(0), m_Bytes(0) {};
-    CBytes(const std::string& strNumber)
+    Number() : m_size(0), m_Bytes(0) {};
+    Number(const std::string& strNumber)
     {
         m_Bytes = 0;
         uint8_t pow[] = { 1,2,4,8,16,32,64,128 };
@@ -426,11 +446,107 @@ public:
         m_size = size;
     }
 
-    CBytes(size_t size) : m_size(size), m_Bytes(new CByte[size]) {}
+    Number(size_t size) : m_size(size), m_Bytes(new CByte[size]) {}
 
-    ~CBytes() 
+    ~Number()
     {
         delete[] m_Bytes;
+    }
+
+    std::string ToNumber()
+    {
+        std::string strResult = "0";
+        if (size() == 0)
+            return strResult;
+
+        std::string strInput;
+        for (size_t iByte = 0; iByte < size(); ++iByte)
+            strInput += m_Bytes[size() - iByte - 1];
+
+        const uint8_t cZero = '0', cOne = '1', cDec = '.';
+        std::string strNum = "1";
+        std::string::const_reverse_iterator crit = strInput.rbegin();
+        std::string::const_reverse_iterator crend = strInput.rend();
+        do
+        {
+            uint8_t iProd;
+            std::deque<char> mout;
+            bool bCarry = false;
+            for (std::string::const_reverse_iterator crit2 = strNum.rbegin(); crit2 != strNum.rend(); )
+            {
+                uint8_t iMP = *crit2++ - cZero;
+                iProd = 2 * iMP;
+                if (bCarry)
+                {
+                    iProd++;
+                    bCarry = false;
+                }
+                if (iProd >= 10)
+                {
+                    iProd -= 10;
+                    bCarry = true;
+                }
+                mout.push_front(cZero + iProd);
+            }
+
+            if (bCarry)
+                mout.push_front(cOne);
+
+            if (*crit++ == cOne)
+            {
+                const std::string& strS1 = strNum;
+                const std::string& strS2 = strResult;
+
+                uint8_t iSum;
+                std::deque<char> Sum;
+                bool bCarry = false;
+
+                std::string::const_reverse_iterator S1_crend = strS1.rend();
+                std::string::const_reverse_iterator S2_crend = strS2.rend();
+
+                for (std::string::const_reverse_iterator S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
+                    S1_crit != S1_crend || S2_crit != S2_crend;)
+                {
+                    uint8_t S1 = S1_crit != S1_crend ? *S1_crit++ : cZero;
+                    uint8_t S2 = S2_crit != S2_crend ? *S2_crit++ : cZero;
+
+                    if (S1 == cDec || S2 == cDec)
+                    {
+                        Sum.push_front(cDec);
+                        continue;
+                    }
+
+                    uint8_t N1 = S1 - cZero;
+                    uint8_t N2 = S2 - cZero;
+
+                    iSum = N1 + N2;
+
+                    if (bCarry)
+                    {
+                        iSum++;
+                        bCarry = false;
+                    }
+
+                    if (iSum >= 10)
+                    {
+                        iSum -= 10;
+                        bCarry = true;
+                    }
+
+                    Sum.push_front(cZero + iSum);
+                }
+
+                if (bCarry)
+                    Sum.push_front(cOne);
+
+                if (*Sum.begin() == cDec)
+                    Sum.push_front(cZero);
+
+                strResult = std::string(Sum.begin(), Sum.end());
+            }
+            strNum = std::string(mout.begin(), mout.end());
+        } while (crit != crend);
+        return strResult;
     }
 
     // Operator at
@@ -447,7 +563,7 @@ public:
         return m_size;
     }
 
-    CBytes& operator = (const CBytes& rhs)
+    Number& operator = (const Number& rhs)
     {
         if (this != &rhs)
         {
@@ -459,20 +575,30 @@ public:
         return *this;
     }
 
-    CBytes operator + (const CBytes& rhs) const
+    Number operator + (const Number& rhs) const
     {
         size_t l = size(), r = rhs.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        CBytes out(stMax);
-
+        Number out(stMax + 1);
         CByte Zero(0);
+        uint8_t of = 0;
         for (size_t st = 0; st < stMax; ++st)
         {
             CByte lb = st < l ? m_Bytes[st] : Zero;
             CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
-            CByte& ob =  out.m_Bytes[st];
-            ob = lb + rb;
+            CByte& ob = out.m_Bytes[st];
+            if (of)
+            {
+                lb.setCarry(of);
+                ob = lb + rb;
+                lb.setCarry(0);
+            }
+            else
+                ob = lb + rb;
+            of = ob.overFlow();
         }
+        if (of)
+            out.m_Bytes[stMax].setValue(1);
         return out;
     }
 

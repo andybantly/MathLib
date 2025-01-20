@@ -10,8 +10,9 @@ using namespace std;
 
 int main()
 { 
-	CBytes A("255"), B("1"), C;
+	Number A("9223372036854775807"), B("9223372036854775807"), C;
 	C = A + B;
+	std::cout << C.ToNumber() << std::endl;
 
 	CNumber::Init();
 	string strInput, strResult;
