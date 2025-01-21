@@ -1168,9 +1168,9 @@ namespace TestMathLib
 		TEST_METHOD(ASBYTE)
 		{
 			const int nSize = 3;
-			CBytes LHS(nSize);
-			CBytes RHS(nSize);
-			CBytes OUT(nSize);
+			Number LHS(nSize);
+			Number RHS(nSize);
+			Number OUT(nSize);
 
 			LHS[0] = 9;
 			RHS[0] = 2;

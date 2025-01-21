@@ -596,9 +596,15 @@ public:
             else
                 ob = lb + rb;
             of = ob.overFlow();
+            if (of)
+                ob.setCarry(0);
         }
+
         if (of)
             out.m_Bytes[stMax].setValue(1);
+        else
+            out.m_size--;
+
         return out;
     }
 

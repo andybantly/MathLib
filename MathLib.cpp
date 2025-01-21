@@ -14,6 +14,14 @@ int main()
 	C = A + B;
 	std::cout << C.ToNumber() << std::endl;
 
+	{
+		CDuration w("65536 additions by 1");
+		Number D("1"), E("1");
+		for (int i = 0; i < 0xFFFF; ++i)
+			D = D + E;
+		std::cout << D.ToNumber() << std::endl;
+	}
+
 	CNumber::Init();
 	string strInput, strResult;
 	bool bAgain = true;
