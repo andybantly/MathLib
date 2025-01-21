@@ -13,6 +13,8 @@ int main()
 	Number A("9223372036854775807"), B("9223372036854775807"), C;
 	C = A + B;
 	std::cout << C.ToDisplay() << std::endl;
+	C = A - B;
+	std::cout << C.ToDisplay() << std::endl;
 
 	{
 		CDuration w("65536 additions by 1");

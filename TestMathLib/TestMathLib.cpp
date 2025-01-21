@@ -1165,14 +1165,52 @@ namespace TestMathLib
 				delete* it;
 		}
 
-		TEST_METHOD(ASBYTE)
+		TEST_METHOD(ByteAddition)
 		{
-			Number N1, N2, N3;
+			Number N1, N2, N3, NONE("1"), NTWO("2");
+			int nN1, nN2, nN3;
 
-			// 10 + 15 = 25
 			N1 = "10"; N2 = "15";
-			N3 = N1 + N2;
-			Assert::AreEqual(std::string("25"), N3.ToDisplay());
+			N3 = N2 - N1;
+			nN1 = 10; nN2 = 15;
+
+			for (int i = 0; i < 0xFFFF; ++i)
+			{
+				N3 = N1 + N2;
+				nN3 = nN1 + nN2;
+
+				Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
+
+				N1 = N1 + NTWO;
+				N2 = N2 + NONE;
+				nN1+=2; nN2++;
+			}
+		}
+
+		TEST_METHOD(ByteSubtraction)
+		{
+			Number N1, N2, N3, NONE("1"), NTWO("2");
+			int nN1, nN2, nN3;
+
+			Number Z0("0"), Z1("1"), Z2;
+			Z2 = Z1 - Z0;
+			Z2 = Z0 - Z1;
+
+			N1 = "20"; N2 = "15";
+			N3 = N2 - N1;
+			nN1 = 20; nN2 = 15;
+
+			for (int i = 0; i < 0xFFFF; ++i)
+			{
+				N3 = N1 + N2;
+				nN3 = nN1 + nN2;
+
+				Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
+
+				N1 = N1 + NTWO;
+				N2 = N2 + NONE;
+				nN1+=2; nN2++;
+			}
 		}
 	};
 }

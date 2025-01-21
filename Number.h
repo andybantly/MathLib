@@ -216,16 +216,16 @@ protected:
             unsigned B8 : 1;
         };
 
-        struct _Carry
+        struct _Xtra
         {
-            unsigned C0 : 1;
-            unsigned C1 : 1;
-            unsigned C2 : 1;
-            unsigned C3 : 1;
-            unsigned C4 : 1;
-            unsigned C5 : 1;
-            unsigned C6 : 1;
-            unsigned C7 : 1;
+            unsigned X0 : 1;
+            unsigned X1 : 1;
+            unsigned X2 : 1;
+            unsigned X3 : 1;
+            unsigned X4 : 1;
+            unsigned X5 : 1;
+            unsigned X6 : 1;
+            unsigned X7 : 1;
         };
 
         union BITS
@@ -234,22 +234,22 @@ protected:
             uint8_t U;
         };
 
-        union CARRY
+        union XTRA
         {
-            struct _Carry C;
+            struct _Xtra X;
             uint8_t U;
         };
 
         CByte()
         {
             m_b.U = 0;
-            m_c.U = 0;
+            m_x.U = 0;
         }
 
         CByte(uint8_t byte)
         {
             m_b.U = byte;
-            m_c.U = 0;
+            m_x.U = 0;
         };
 
         CByte(const CByte& rhs)
@@ -262,22 +262,23 @@ protected:
             if (this != &rhs)
             {
                 m_b = rhs.m_b;
-                m_c = rhs.m_c;
+                m_x = rhs.m_x;
             }
             return *this;
         }
 
-        operator std::string()
+        operator std::string() const
         {
-            m_s[7] = m_b.B.B1 ? '1' : '0';
-            m_s[6] = m_b.B.B2 ? '1' : '0';
-            m_s[5] = m_b.B.B3 ? '1' : '0';
-            m_s[4] = m_b.B.B4 ? '1' : '0';
-            m_s[3] = m_b.B.B5 ? '1' : '0';
-            m_s[2] = m_b.B.B6 ? '1' : '0';
-            m_s[1] = m_b.B.B7 ? '1' : '0';
-            m_s[0] = m_b.B.B8 ? '1' : '0';
-            std::string bits = std::string(m_s, 8);
+            char s[8];
+            s[7] = m_b.B.B1 ? '1' : '0';
+            s[6] = m_b.B.B2 ? '1' : '0';
+            s[5] = m_b.B.B3 ? '1' : '0';
+            s[4] = m_b.B.B4 ? '1' : '0';
+            s[3] = m_b.B.B5 ? '1' : '0';
+            s[2] = m_b.B.B6 ? '1' : '0';
+            s[1] = m_b.B.B7 ? '1' : '0';
+            s[0] = m_b.B.B8 ? '1' : '0';
+            std::string bits = std::string(s, 8);
             return bits;
         }
 
@@ -285,29 +286,61 @@ protected:
         {
             CByte Out;
 
-            Out.m_b.B.B1 = m_c.C.C0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);
-            m_c.C.C1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & m_c.C.C0) | (m_b.B.B1 & m_c.C.C0);
+            Out.m_b.B.B1 = m_x.X.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
+            m_x.X.X1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & m_x.X.X0) | (m_b.B.B1 & m_x.X.X0); // CARRY: Carry-out AB OR BC OR ACin
 
-            Out.m_b.B.B2 = m_c.C.C1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
-            m_c.C.C2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & m_c.C.C1) | (m_b.B.B2 & m_c.C.C1);
+            Out.m_b.B.B2 = m_x.X.X1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
+            m_x.X.X2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & m_x.X.X1) | (m_b.B.B2 & m_x.X.X1);
 
-            Out.m_b.B.B3 = m_c.C.C2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
-            m_c.C.C3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & m_c.C.C2) | (m_b.B.B3 & m_c.C.C2);
+            Out.m_b.B.B3 = m_x.X.X2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
+            m_x.X.X3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & m_x.X.X2) | (m_b.B.B3 & m_x.X.X2);
 
-            Out.m_b.B.B4 = m_c.C.C3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
-            m_c.C.C4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & m_c.C.C3) | (m_b.B.B4 & m_c.C.C3);
+            Out.m_b.B.B4 = m_x.X.X3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
+            m_x.X.X4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & m_x.X.X3) | (m_b.B.B4 & m_x.X.X3);
 
-            Out.m_b.B.B5 = m_c.C.C4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
-            m_c.C.C5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & m_c.C.C4) | (m_b.B.B5 & m_c.C.C4);
+            Out.m_b.B.B5 = m_x.X.X4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
+            m_x.X.X5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & m_x.X.X4) | (m_b.B.B5 & m_x.X.X4);
 
-            Out.m_b.B.B6 = m_c.C.C5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
-            m_c.C.C6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & m_c.C.C5) | (m_b.B.B6 & m_c.C.C5);
+            Out.m_b.B.B6 = m_x.X.X5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
+            m_x.X.X6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & m_x.X.X5) | (m_b.B.B6 & m_x.X.X5);
 
-            Out.m_b.B.B7 = m_c.C.C6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
-            m_c.C.C7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & m_c.C.C6) | (m_b.B.B7 & m_c.C.C6);
+            Out.m_b.B.B7 = m_x.X.X6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
+            m_x.X.X7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & m_x.X.X6) | (m_b.B.B7 & m_x.X.X6);
 
-            Out.m_b.B.B8 = m_c.C.C7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
-            Out.m_c.C.C0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & m_c.C.C7) | (m_b.B.B8 & m_c.C.C7);
+            Out.m_b.B.B8 = m_x.X.X7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
+            Out.m_x.X.X0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & m_x.X.X7) | (m_b.B.B8 & m_x.X.X7);
+
+            *this = Out;
+            return *this;
+        }
+
+        CByte& operator - (const CByte& rhs)
+        {
+            CByte Out;
+
+            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ m_x.X.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
+            m_x.X.X1 = (~m_b.B.B1 & m_x.X.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & m_x.X.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
+
+            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ m_x.X.X1;
+            m_x.X.X2 = (~m_b.B.B2 & m_x.X.X1) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & m_x.X.X1);
+
+            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ m_x.X.X2;
+            m_x.X.X3 = (~m_b.B.B3 & m_x.X.X2) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & m_x.X.X2);
+
+            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ m_x.X.X3;
+            m_x.X.X4 = (~m_b.B.B4 & m_x.X.X3) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & m_x.X.X3);
+
+            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ m_x.X.X4;
+            m_x.X.X5 = (~m_b.B.B5 & m_x.X.X4) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & m_x.X.X4);
+
+            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ m_x.X.X5;
+            m_x.X.X6 = (~m_b.B.B6 & m_x.X.X5) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & m_x.X.X5);
+
+            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ m_x.X.X6;
+            m_x.X.X7 = (~m_b.B.B7 & m_x.X.X6) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & m_x.X.X6);
+
+            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ m_x.X.X7;
+            Out.m_x.X.X0 = (~m_b.B.B8 & m_x.X.X7) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & m_x.X.X7);
 
             *this = Out;
             return *this;
@@ -315,7 +348,7 @@ protected:
 
         uint8_t overFlow() const
         {
-            return m_c.C.C0; // Re-use C0 to indicate a carry, it can't ever start as 1
+            return m_x.X.X0; // X0 used to indicate a carry/borrow
         }
 
         void setValue(const uint8_t rhs)
@@ -323,15 +356,14 @@ protected:
             m_b.U = rhs;
         }
 
-        void setCarry(bool rhs)
+        void setXtra(const bool rhs)
         {
-            m_c.C.C0 = rhs ? 1 : 0;
+            m_x.X.X0 = rhs;
         }
 
     protected:
         BITS m_b;
-        CARRY m_c;
-        char m_s[8];
+        XTRA m_x;
     }; 
 
 public:
@@ -348,6 +380,106 @@ public:
     {
         delete[] m_Bytes;
     }
+
+    // Operator at
+    CByte& operator[](size_t index) 
+    {
+        if (index >= m_size) 
+            throw std::out_of_range("Byte index out of range");
+        return m_Bytes[index];
+    }
+
+    // Return size of the collection
+    const size_t size() const 
+    {
+        return m_size;
+    }
+
+    Number& operator = (const Number& rhs)
+    {
+        if (this != &rhs)
+        {
+            m_size = rhs.m_size;
+            m_Bytes = new CByte[size()];
+            for (size_t iByte = 0; iByte < size(); ++iByte)
+                m_Bytes[iByte] = rhs.m_Bytes[iByte];
+        }
+        return *this;
+    }
+
+    Number& operator = (const std::string& strNumber)
+    {
+        ToBinary(strNumber);
+        return *this;
+    }
+
+    Number operator + (const Number& rhs) const
+    {
+        size_t l = size(), r = rhs.size();
+        size_t stMax = l == r ? l : (l < r ? r : l);
+        Number out(stMax + 1);
+        CByte Zero(0);
+        uint8_t of = 0;
+        for (size_t st = 0; st < stMax; ++st)
+        {
+            CByte lb = st < l ? m_Bytes[st] : Zero;
+            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
+            CByte& ob = out.m_Bytes[st];
+            if (of)
+            {
+                lb.setXtra(of);
+                ob = lb + rb;
+                lb.setXtra(0);
+            }
+            else
+                ob = lb + rb;
+            of = ob.overFlow();
+            if (of)
+                ob.setXtra(0);
+        }
+
+        if (of)
+            out.m_Bytes[stMax].setValue(1);
+        else
+            out.m_size--;
+
+        return out;
+    }
+
+    Number operator - (const Number& rhs) const
+    {
+        size_t l = size(), r = rhs.size();
+        size_t stMax = l == r ? l : (l < r ? r : l);
+        Number out(stMax + 1);
+        CByte Zero(0);
+        uint8_t of = 0;
+        for (size_t st = 0; st < stMax; ++st)
+        {
+            CByte lb = st < l ? m_Bytes[st] : Zero;
+            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
+            CByte& ob = out.m_Bytes[st];
+            if (of)
+            {
+                lb.setXtra(of);
+                ob = lb - rb;
+                lb.setXtra(0);
+            }
+            else
+                ob = lb - rb;
+            of = ob.overFlow();
+            if (of)
+                ob.setXtra(0);
+        }
+
+        if (of)
+            out.m_Bytes[stMax].setValue(255);
+        else
+            out.m_size--;
+
+        return out;
+    }
+
+    // Conversion functions
 
     void ToBinary(const std::string strNumber)
     {
@@ -465,7 +597,6 @@ public:
         if (size() == 0)
             return strResult;
 
-        // ASB - TODO - don't convert to string first
         std::string strInput;
         for (size_t iByte = 0; iByte < size(); ++iByte)
             strInput += m_Bytes[size() - iByte - 1];
@@ -554,71 +685,6 @@ public:
             strNum = std::string(mout.begin(), mout.end());
         } while (crit != crend);
         return strResult;
-    }
-
-    // Operator at
-    CByte& operator[](size_t index) 
-    {
-        if (index >= m_size) 
-            throw std::out_of_range("Byte index out of range");
-        return m_Bytes[index];
-    }
-
-    // Return size of the collection
-    const size_t size() const 
-    {
-        return m_size;
-    }
-
-    Number& operator = (const Number& rhs)
-    {
-        if (this != &rhs)
-        {
-            m_size = rhs.m_size;
-            m_Bytes = new CByte[size()];
-            for (size_t iByte = 0; iByte < size(); ++iByte)
-                m_Bytes[iByte] = rhs.m_Bytes[iByte];
-        }
-        return *this;
-    }
-
-    Number& operator = (const std::string& strNumber)
-    {
-        ToBinary(strNumber);
-        return *this;
-    }
-
-    Number operator + (const Number& rhs) const
-    {
-        size_t l = size(), r = rhs.size();
-        size_t stMax = l == r ? l : (l < r ? r : l);
-        Number out(stMax + 1);
-        CByte Zero(0);
-        uint8_t of = 0;
-        for (size_t st = 0; st < stMax; ++st)
-        {
-            CByte lb = st < l ? m_Bytes[st] : Zero;
-            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
-            CByte& ob = out.m_Bytes[st];
-            if (of)
-            {
-                lb.setCarry(of);
-                ob = lb + rb;
-                lb.setCarry(0);
-            }
-            else
-                ob = lb + rb;
-            of = ob.overFlow();
-            if (of)
-                ob.setCarry(0);
-        }
-
-        if (of)
-            out.m_Bytes[stMax].setValue(1);
-        else
-            out.m_size--;
-
-        return out;
     }
 
 private:
