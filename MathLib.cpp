@@ -12,14 +12,14 @@ int main()
 { 
 	Number A("9223372036854775807"), B("9223372036854775807"), C;
 	C = A + B;
-	std::cout << C.ToNumber() << std::endl;
+	std::cout << C.ToDisplay() << std::endl;
 
 	{
 		CDuration w("65536 additions by 1");
 		Number D("1"), E("1");
 		for (int i = 0; i < 0xFFFF; ++i)
 			D = D + E;
-		std::cout << D.ToNumber() << std::endl;
+		std::cout << D.ToDisplay() << std::endl;
 	}
 
 	CNumber::Init();

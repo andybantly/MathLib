@@ -336,7 +336,20 @@ protected:
 
 public:
     Number() : m_size(0), m_Bytes(0) {};
+
     Number(const std::string& strNumber)
+    {
+        ToBinary(strNumber);
+    }
+
+    Number(size_t size) : m_size(size), m_Bytes(new CByte[size]) {}
+
+    ~Number()
+    {
+        delete[] m_Bytes;
+    }
+
+    void ToBinary(const std::string strNumber)
     {
         m_Bytes = 0;
         uint8_t pow[] = { 1,2,4,8,16,32,64,128 };
@@ -446,19 +459,13 @@ public:
         m_size = size;
     }
 
-    Number(size_t size) : m_size(size), m_Bytes(new CByte[size]) {}
-
-    ~Number()
-    {
-        delete[] m_Bytes;
-    }
-
-    std::string ToNumber()
+    std::string ToDisplay()
     {
         std::string strResult = "0";
         if (size() == 0)
             return strResult;
 
+        // ASB - TODO - don't convert to string first
         std::string strInput;
         for (size_t iByte = 0; iByte < size(); ++iByte)
             strInput += m_Bytes[size() - iByte - 1];
@@ -572,6 +579,12 @@ public:
             for (size_t iByte = 0; iByte < size(); ++iByte)
                 m_Bytes[iByte] = rhs.m_Bytes[iByte];
         }
+        return *this;
+    }
+
+    Number& operator = (const std::string& strNumber)
+    {
+        ToBinary(strNumber);
         return *this;
     }
 

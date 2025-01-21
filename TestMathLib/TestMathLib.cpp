@@ -1167,23 +1167,12 @@ namespace TestMathLib
 
 		TEST_METHOD(ASBYTE)
 		{
-			const int nSize = 3;
-			Number LHS(nSize);
-			Number RHS(nSize);
-			Number OUT(nSize);
+			Number N1, N2, N3;
 
-			LHS[0] = 9;
-			RHS[0] = 2;
-			OUT[0] = LHS[0] + RHS[0]; // 9 + 2 = 11. There should be a carrybit
-
-			for (int iSize = 1; iSize < nSize; ++iSize)
-			{
-				LHS[iSize] = 3;
-				RHS[iSize] = 2;
-				OUT[iSize] = LHS[iSize] + RHS[iSize];
-
-				// Carry?
-			}
+			// 10 + 15 = 25
+			N1 = "10"; N2 = "15";
+			N3 = N1 + N2;
+			Assert::AreEqual(std::string("25"), N3.ToDisplay());
 		}
 	};
 }
