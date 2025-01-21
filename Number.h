@@ -426,13 +426,8 @@ public:
             CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
             CByte& ob = out.m_Bytes[st];
             if (of)
-            {
                 lb.setXtra(of);
-                ob = lb + rb;
-                lb.setXtra(0);
-            }
-            else
-                ob = lb + rb;
+            ob = lb + rb;
             of = ob.overFlow();
             if (of)
                 ob.setXtra(0);
@@ -450,7 +445,7 @@ public:
     {
         size_t l = size(), r = rhs.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        Number out(stMax + 1);
+        Number out(stMax);
         CByte Zero(0);
         uint8_t of = 0;
         for (size_t st = 0; st < stMax; ++st)
@@ -459,22 +454,12 @@ public:
             CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
             CByte& ob = out.m_Bytes[st];
             if (of)
-            {
                 lb.setXtra(of);
-                ob = lb - rb;
-                lb.setXtra(0);
-            }
-            else
-                ob = lb - rb;
+            ob = lb - rb;
             of = ob.overFlow();
             if (of)
                 ob.setXtra(0);
         }
-
-        if (of)
-            out.m_Bytes[stMax].setValue(255);
-        else
-            out.m_size--;
 
         return out;
     }

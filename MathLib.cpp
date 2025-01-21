@@ -10,7 +10,7 @@ using namespace std;
 
 int main()
 { 
-	Number A("9223372036854775807"), B("9223372036854775807"), C;
+	Number A("0"), B("256"), C;
 	C = A + B;
 	std::cout << C.ToDisplay() << std::endl;
 	C = A - B;
