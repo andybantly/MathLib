@@ -156,6 +156,40 @@ namespace TestMathLib
 		string m_strSum;
 	};
 
+	class CRndDouble
+	{
+	public:
+		CRndDouble() { Calc(); };
+		double Random()
+		{
+			double dLO = 1;
+			double dHI = RAND_MAX;
+			double dNum = dLO + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX) / (dHI - dLO));
+			if (rand() > (RAND_MAX / 2))
+				dNum = -dNum;
+			return dNum;
+		}
+
+		void Calc()
+		{
+			m_dN1 = Random();
+			char buf[80];
+			sprintf_s(buf, "%.4Lf", m_dN1);
+			m_sN1 = buf;
+			m_dN2 = Random();
+			sprintf_s(buf, "%.4Lf", m_dN2);
+			m_sN2 = buf;
+		}
+
+		const string& Num1() { return m_sN1; }
+		const string& Num2() { return m_sN2; }
+
+		double m_dN1;
+		double m_dN2;
+		string m_sN1;
+		string m_sN2;
+	};
+
 	class CRndPairCMP
 	{
 	public:
@@ -1170,46 +1204,99 @@ namespace TestMathLib
 			Number N1, N2, N3, NONE("1"), NTWO("2");
 			int nN1, nN2, nN3;
 
-			N1 = "10"; N2 = "15";
-			N3 = N2 - N1;
-			nN1 = 10; nN2 = 15;
+			N1 = "1"; N2 = "2";
+			nN1 = 1;  nN2 = 2;
 
 			for (int i = 0; i < 0xFFFF; ++i)
 			{
-				N3 = N1 + N2;
-				nN3 = nN1 + nN2;
+				N3 = N2 - N1;
+				nN3 = nN2 - nN1;
 
 				Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
 
-				N1 = N1 + NTWO;
-				N2 = N2 + NONE;
-				nN1+=2; nN2++;
+				N1 = N1 + NONE;
+				nN1++;
+
+				N2 = N2 + NTWO;
+				nN2 += 2;
 			}
 		}
 
 		TEST_METHOD(ByteSubtraction)
 		{
-			Number N1, N2, N3, NONE("1"), NTWO("2");
+			Number N1, N2, N3, NONE("1");
 			int nN1, nN2, nN3;
 
-			Number Z0("0"), Z1("1"), Z2;
-			Z2 = Z1 - Z0;
-			Z2 = Z0 - Z1;
-
-			N1 = "20"; N2 = "15";
-			N3 = N2 - N1;
-			nN1 = 20; nN2 = 15;
+			N1 = "965523"; N2 = "1";
+			nN1 = 965523;  nN2 = 1;
 
 			for (int i = 0; i < 0xFFFF; ++i)
 			{
-				N3 = N1 + N2;
-				nN3 = nN1 + nN2;
+				N3 = N1 - N2;
+				nN3 = nN1 - nN2;
 
 				Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
 
-				N1 = N1 + NTWO;
+				N1 = N1 - NONE;
+				nN1--;
+
 				N2 = N2 + NONE;
-				nN1+=2; nN2++;
+				nN2++;
+			}
+		}
+
+		TEST_METHOD(ByteLogic)
+		{
+			int nRM = 0xFFFF;
+			bool bCMP = false, bRes = false;
+			Number N1, N2;
+			int nEQ = 0;
+			for (int i = 0; i < nRM; ++i)
+			{
+				CRndDouble Rnd;
+				for (int ic = 1; ic != 6; ++ic)
+				{
+					std::string s1 = Rnd.Num1();
+					std::string s2 = Rnd.Num2();
+
+					if (i % 100 == 0)
+						s2 = s1;
+
+					int i1 = int(abs(stod(s1)));
+					int i2 = int(abs(stod(s2)));
+
+					N1 = std::to_string(i1);
+					N2 = std::to_string(i2);
+
+					switch (ic)
+					{
+					case 1:
+						bRes = i1 < i2;
+						bCMP = N1 < N2;
+						break;
+					case 2:
+						bRes = i1 <= i2;
+						bCMP = N1 <= N2;
+						break;
+					case 3:
+						bRes = i1 > i2;
+						bCMP = N1 > N2;
+						break;
+					case 4:
+						bRes = i1 >= i2;
+						bCMP = N1 >= N2;
+						break;
+					case 5:
+					default:
+						bRes = i1 == i2;
+						bCMP = N1 == N2;
+						if (bCMP) nEQ++;
+					}
+
+					if (bRes != bCMP)
+						Assert::AreEqual(bRes, bCMP);
+					Rnd.Calc();
+				}
 			}
 		}
 	};

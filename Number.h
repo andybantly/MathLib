@@ -282,68 +282,68 @@ protected:
             return bits;
         }
 
-        CByte& operator + (const CByte& rhs)
+        CByte operator + (const CByte& rhs) const
         {
             CByte Out;
+            Out.setXtra(m_x.X.X0); // Is there a better way to handle Carry?
 
-            Out.m_b.B.B1 = m_x.X.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
-            m_x.X.X1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & m_x.X.X0) | (m_b.B.B1 & m_x.X.X0); // CARRY: Carry-out AB OR BC OR ACin
+            Out.m_b.B.B1 = Out.m_x.X.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
+            Out.m_x.X.X1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0) | (m_b.B.B1 & Out.m_x.X.X0); // CARRY: Carry-out AB OR BC OR ACin
 
-            Out.m_b.B.B2 = m_x.X.X1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
-            m_x.X.X2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & m_x.X.X1) | (m_b.B.B2 & m_x.X.X1);
+            Out.m_b.B.B2 = Out.m_x.X.X1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
+            Out.m_x.X.X2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X.X1) | (m_b.B.B2 & Out.m_x.X.X1);
 
-            Out.m_b.B.B3 = m_x.X.X2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
-            m_x.X.X3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & m_x.X.X2) | (m_b.B.B3 & m_x.X.X2);
+            Out.m_b.B.B3 = Out.m_x.X.X2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
+            Out.m_x.X.X3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X.X2) | (m_b.B.B3 & Out.m_x.X.X2);
 
-            Out.m_b.B.B4 = m_x.X.X3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
-            m_x.X.X4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & m_x.X.X3) | (m_b.B.B4 & m_x.X.X3);
+            Out.m_b.B.B4 = Out.m_x.X.X3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
+            Out.m_x.X.X4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X.X3) | (m_b.B.B4 & Out.m_x.X.X3);
 
-            Out.m_b.B.B5 = m_x.X.X4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
-            m_x.X.X5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & m_x.X.X4) | (m_b.B.B5 & m_x.X.X4);
+            Out.m_b.B.B5 = Out.m_x.X.X4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
+            Out.m_x.X.X5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X.X4) | (m_b.B.B5 & Out.m_x.X.X4);
 
-            Out.m_b.B.B6 = m_x.X.X5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
-            m_x.X.X6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & m_x.X.X5) | (m_b.B.B6 & m_x.X.X5);
+            Out.m_b.B.B6 = Out.m_x.X.X5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
+            Out.m_x.X.X6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X.X5) | (m_b.B.B6 & Out.m_x.X.X5);
 
-            Out.m_b.B.B7 = m_x.X.X6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
-            m_x.X.X7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & m_x.X.X6) | (m_b.B.B7 & m_x.X.X6);
+            Out.m_b.B.B7 = Out.m_x.X.X6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
+            Out.m_x.X.X7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X.X6) | (m_b.B.B7 & Out.m_x.X.X6);
 
-            Out.m_b.B.B8 = m_x.X.X7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
-            Out.m_x.X.X0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & m_x.X.X7) | (m_b.B.B8 & m_x.X.X7);
+            Out.m_b.B.B8 = Out.m_x.X.X7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
+            Out.m_x.X.X0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X.X7) | (m_b.B.B8 & Out.m_x.X.X7);
 
-            *this = Out;
-            return *this;
+            return Out;
         }
 
-        CByte& operator - (const CByte& rhs)
+        CByte operator - (const CByte& rhs) const
         {
             CByte Out;
+            Out.setXtra(m_x.X.X0); // Is there a better way to handle borrowing?
 
-            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ m_x.X.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
-            m_x.X.X1 = (~m_b.B.B1 & m_x.X.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & m_x.X.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
+            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.m_x.X.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
+            Out.m_x.X.X1 = (~m_b.B.B1 & Out.m_x.X.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
 
-            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ m_x.X.X1;
-            m_x.X.X2 = (~m_b.B.B2 & m_x.X.X1) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & m_x.X.X1);
+            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ Out.m_x.X.X1;
+            Out.m_x.X.X2 = (~m_b.B.B2 & Out.m_x.X.X1) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X.X1);
 
-            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ m_x.X.X2;
-            m_x.X.X3 = (~m_b.B.B3 & m_x.X.X2) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & m_x.X.X2);
+            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ Out.m_x.X.X2;
+            Out.m_x.X.X3 = (~m_b.B.B3 & Out.m_x.X.X2) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X.X2);
 
-            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ m_x.X.X3;
-            m_x.X.X4 = (~m_b.B.B4 & m_x.X.X3) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & m_x.X.X3);
+            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ Out.m_x.X.X3;
+            Out.m_x.X.X4 = (~m_b.B.B4 & Out.m_x.X.X3) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X.X3);
 
-            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ m_x.X.X4;
-            m_x.X.X5 = (~m_b.B.B5 & m_x.X.X4) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & m_x.X.X4);
+            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ Out.m_x.X.X4;
+            Out.m_x.X.X5 = (~m_b.B.B5 & Out.m_x.X.X4) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X.X4);
 
-            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ m_x.X.X5;
-            m_x.X.X6 = (~m_b.B.B6 & m_x.X.X5) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & m_x.X.X5);
+            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ Out.m_x.X.X5;
+            Out.m_x.X.X6 = (~m_b.B.B6 & Out.m_x.X.X5) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X.X5);
 
-            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ m_x.X.X6;
-            m_x.X.X7 = (~m_b.B.B7 & m_x.X.X6) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & m_x.X.X6);
+            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ Out.m_x.X.X6;
+            Out.m_x.X.X7 = (~m_b.B.B7 & Out.m_x.X.X6) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X.X6);
 
-            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ m_x.X.X7;
-            Out.m_x.X.X0 = (~m_b.B.B8 & m_x.X.X7) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & m_x.X.X7);
+            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ Out.m_x.X.X7;
+            Out.m_x.X.X0 = (~m_b.B.B8 & Out.m_x.X.X7) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X.X7);
 
-            *this = Out;
-            return *this;
+            return Out;
         }
 
         uint8_t overFlow() const
@@ -361,13 +361,17 @@ protected:
             m_x.X.X0 = rhs;
         }
 
-    protected:
         BITS m_b;
         XTRA m_x;
-    }; 
+    };
 
 public:
     Number() : m_size(0), m_Bytes(0) {};
+
+    Number(const char* pstrNumber)
+    {
+        ToBinary(pstrNumber);
+    }
 
     Number(const std::string& strNumber)
     {
@@ -382,15 +386,15 @@ public:
     }
 
     // Operator at
-    CByte& operator[](size_t index) 
+    CByte& operator[](size_t index)
     {
-        if (index >= m_size) 
+        if (index >= m_size)
             throw std::out_of_range("Byte index out of range");
         return m_Bytes[index];
     }
 
     // Return size of the collection
-    const size_t size() const 
+    const size_t size() const
     {
         return m_size;
     }
@@ -400,9 +404,12 @@ public:
         if (this != &rhs)
         {
             m_size = rhs.m_size;
-            m_Bytes = new CByte[size()];
-            for (size_t iByte = 0; iByte < size(); ++iByte)
-                m_Bytes[iByte] = rhs.m_Bytes[iByte];
+            if (m_size)
+            {
+                m_Bytes = new CByte[size()];
+                for (size_t iByte = 0; iByte < size(); ++iByte)
+                    m_Bytes[iByte] = rhs.m_Bytes[iByte];
+            }
         }
         return *this;
     }
@@ -411,6 +418,74 @@ public:
     {
         ToBinary(strNumber);
         return *this;
+    }
+
+    Number& operator = (const char* pstrNumber)
+    {
+        ToBinary(pstrNumber);
+        return *this;
+    }
+
+    bool operator == (const Number& rhs) const
+    {
+        if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
+            return true;
+
+        if (size() != rhs.size())
+            return false;
+
+        bool bRet = true;
+        size_t iByte = size() - 1;
+        for (; bRet && iByte != size_t(-1); --iByte)
+        {
+            if (m_Bytes[iByte].m_b.U == rhs.m_Bytes[iByte].m_b.U)
+                continue;
+            bRet = false;
+        }
+
+        return bRet;
+    }
+
+    bool operator != (const Number& rhs) const
+    {
+        return !(operator == (rhs));
+    }
+
+    bool operator < (const Number& rhs) const
+    {
+        if (this == &rhs)
+            return false; // I CANT BE LESS THAN MYSELF!
+
+        bool bPositive = true;
+        if (size() != rhs.size())
+            return bPositive ? size() < rhs.size() : size() > rhs.size();
+
+        size_t iByte = size() - 1;
+        for (; iByte != size_t(-1); --iByte)
+        {
+            if (m_Bytes[iByte].m_b.U == rhs.m_Bytes[iByte].m_b.U)
+                continue;
+            break;
+        }
+
+        if (iByte != size_t(-1))
+            return m_Bytes[iByte].m_b.U < rhs.m_Bytes[iByte].m_b.U;
+        return false;
+    }
+
+    bool operator <= (const Number& rhs) const
+    {
+        return (operator < (rhs) || operator == (rhs));
+    }
+
+    bool operator > (const Number& rhs) const
+    {
+        return !(operator <= (rhs));
+    }
+
+    bool operator >= (const Number& rhs) const
+    {
+        return !(operator < (rhs));
     }
 
     Number operator + (const Number& rhs) const
@@ -423,7 +498,7 @@ public:
         for (size_t st = 0; st < stMax; ++st)
         {
             CByte lb = st < l ? m_Bytes[st] : Zero;
-            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
+            CByte& rb = st < r ? rhs.m_Bytes[st] : Zero;
             CByte& ob = out.m_Bytes[st];
             if (of)
                 lb.setXtra(of);
@@ -451,7 +526,7 @@ public:
         for (size_t st = 0; st < stMax; ++st)
         {
             CByte lb = st < l ? m_Bytes[st] : Zero;
-            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
+            CByte& rb = st < r ? rhs.m_Bytes[st] : Zero;
             CByte& ob = out.m_Bytes[st];
             if (of)
                 lb.setXtra(of);
