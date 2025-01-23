@@ -1245,6 +1245,37 @@ namespace TestMathLib
 			}
 		}
 
+		TEST_METHOD(ByteMultiplication)
+		{
+			/*
+			Number NI, NJ, NOUT, ONE("1");
+			int no;
+
+			Number A = "1";
+			Number B = "1";
+
+			Number C;
+			C = A * B;
+
+			NJ = "1";
+			for (int j = 1; j < 0xFF; ++j)
+			{
+				NI = "1";
+				for (int i = 1; i < 0xFFFF; ++i)
+				{
+					no = i * j;
+					NOUT = NI * NJ;
+
+					std::string strNO = NOUT.ToDisplay();
+					Assert::AreEqual(std::to_string(no), strNO);
+
+					NI = NI + ONE;
+				}
+				NJ = NJ + ONE;
+			}
+			*/
+		}
+
 		TEST_METHOD(ByteLogic)
 		{
 			int nRM = 0xFFFF;

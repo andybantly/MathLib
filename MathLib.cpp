@@ -10,39 +10,19 @@ using namespace std;
 
 int main()
 {
-	/*
-	Number A = "19999"; 
-	Number B = "19999";
-	Number C;
-
-	bool b;
-	b = A < B;
-	b = A <= B;
-	b = A > B;
-	b = A >= B;
-	b = false;
-	b = B == A;
-
-	A = A + B;
-	C = A + B;
-	B = A + C;
+	Number A = "3";
+	Number B = "1";
 
 	std::cout << A.ToDisplay() << std::endl;
 	std::cout << B.ToDisplay() << std::endl;
+
+	Number C = A + B;
 	std::cout << C.ToDisplay() << std::endl;
 
-	C = A - B;
-
+	C = B;
 	std::cout << C.ToDisplay() << std::endl;
 
-	{
-		CDuration w("65536 additions by 1");
-		Number D = "1", E = "1";
-		for (int i = 0; i < 0xFFFF; ++i)
-			D = D + E;
-		std::cout << D.ToDisplay() << std::endl;
-	}
-	*/
+	std::cout << C.ToDisplay() << std::endl;
 
 	CNumber::Init();
 	string strInput, strResult;

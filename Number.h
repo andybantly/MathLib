@@ -366,7 +366,7 @@ protected:
     };
 
 public:
-    Number() : m_size(0), m_Bytes(0) {};
+    Number() {};
 
     Number(const char* pstrNumber)
     {
@@ -378,38 +378,28 @@ public:
         ToBinary(strNumber);
     }
 
-    Number(size_t size) : m_size(size), m_Bytes(new CByte[size]) {}
+    Number(size_t size)
+    {
+        m_Bytes.resize(size);
+    }
 
     ~Number()
     {
-        delete[] m_Bytes;
     }
 
     // Operator at
     CByte& operator[](size_t index)
     {
-        if (index >= m_size)
+        if (index >= m_Bytes.size())
             throw std::out_of_range("Byte index out of range");
         return m_Bytes[index];
-    }
-
-    // Return size of the collection
-    const size_t size() const
-    {
-        return m_size;
     }
 
     Number& operator = (const Number& rhs)
     {
         if (this != &rhs)
         {
-            m_size = rhs.m_size;
-            if (m_size)
-            {
-                m_Bytes = new CByte[size()];
-                for (size_t iByte = 0; iByte < size(); ++iByte)
-                    m_Bytes[iByte] = rhs.m_Bytes[iByte];
-            }
+            m_Bytes = rhs.m_Bytes;
         }
         return *this;
     }
@@ -431,12 +421,12 @@ public:
         if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
             return true;
 
-        if (size() != rhs.size())
+        if (m_Bytes.size() != rhs.m_Bytes.size())
             return false;
 
-        bool bRet = true;
-        size_t iByte = size() - 1;
-        for (; bRet && iByte != size_t(-1); --iByte)
+        bool bRet;
+        size_t iByte = m_Bytes.size() - 1;
+        for (bRet = true; bRet && iByte != size_t(-1); --iByte)
         {
             if (m_Bytes[iByte].m_b.U == rhs.m_Bytes[iByte].m_b.U)
                 continue;
@@ -457,10 +447,10 @@ public:
             return false; // I CANT BE LESS THAN MYSELF!
 
         bool bPositive = true;
-        if (size() != rhs.size())
-            return bPositive ? size() < rhs.size() : size() > rhs.size();
+        if (m_Bytes.size() != rhs.m_Bytes.size())
+            return bPositive ? m_Bytes.size() < rhs.m_Bytes.size() : m_Bytes.size() > rhs.m_Bytes.size();
 
-        size_t iByte = size() - 1;
+        size_t iByte = m_Bytes.size() - 1;
         for (; iByte != size_t(-1); --iByte)
         {
             if (m_Bytes[iByte].m_b.U == rhs.m_Bytes[iByte].m_b.U)
@@ -490,15 +480,15 @@ public:
 
     Number operator + (const Number& rhs) const
     {
-        size_t l = size(), r = rhs.size();
+        size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        Number out(stMax + 1);
+        Number out(stMax);
         CByte Zero(0);
         uint8_t of = 0;
         for (size_t st = 0; st < stMax; ++st)
         {
             CByte lb = st < l ? m_Bytes[st] : Zero;
-            CByte& rb = st < r ? rhs.m_Bytes[st] : Zero;
+            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
             CByte& ob = out.m_Bytes[st];
             if (of)
                 lb.setXtra(of);
@@ -509,16 +499,17 @@ public:
         }
 
         if (of)
+        {
+            out.m_Bytes.push_back(CByte());
             out.m_Bytes[stMax].setValue(1);
-        else
-            out.m_size--;
+        }
 
         return out;
     }
 
     Number operator - (const Number& rhs) const
     {
-        size_t l = size(), r = rhs.size();
+        size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
         Number out(stMax);
         CByte Zero(0);
@@ -526,7 +517,7 @@ public:
         for (size_t st = 0; st < stMax; ++st)
         {
             CByte lb = st < l ? m_Bytes[st] : Zero;
-            CByte& rb = st < r ? rhs.m_Bytes[st] : Zero;
+            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
             CByte& ob = out.m_Bytes[st];
             if (of)
                 lb.setXtra(of);
@@ -543,7 +534,6 @@ public:
 
     void ToBinary(const std::string strNumber)
     {
-        m_Bytes = 0;
         uint8_t pow[] = { 1,2,4,8,16,32,64,128 };
 
         std::string strInput = strNumber;
@@ -645,21 +635,21 @@ public:
             vbytes.push_back(bVal);
 
         size_t size = uint8_t(vbytes.size());
-        m_Bytes = new CByte[size];
+        m_Bytes.resize(size);
         for (size_t iByte = 0; iByte < size; ++iByte)
             m_Bytes[iByte].setValue(vbytes[iByte]);
-        m_size = size;
     }
 
     std::string ToDisplay()
     {
         std::string strResult = "0";
-        if (size() == 0)
+        size_t size = m_Bytes.size();
+        if (size == 0)
             return strResult;
 
         std::string strInput;
-        for (size_t iByte = 0; iByte < size(); ++iByte)
-            strInput += m_Bytes[size() - iByte - 1];
+        for (size_t iByte = 0; iByte < size; ++iByte)
+            strInput += m_Bytes[size - iByte - 1];
 
         const uint8_t cZero = '0', cOne = '1', cDec = '.';
         std::string strNum = "1";
@@ -747,7 +737,5 @@ public:
         return strResult;
     }
 
-private:
-    size_t m_size;
-    CByte* m_Bytes;
+    std::vector<CByte> m_Bytes;
 };
