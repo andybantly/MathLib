@@ -267,21 +267,6 @@ protected:
             return *this;
         }
 
-        operator std::string() const
-        {
-            char s[8];
-            s[7] = m_b.B.B1 ? '1' : '0';
-            s[6] = m_b.B.B2 ? '1' : '0';
-            s[5] = m_b.B.B3 ? '1' : '0';
-            s[4] = m_b.B.B4 ? '1' : '0';
-            s[3] = m_b.B.B5 ? '1' : '0';
-            s[2] = m_b.B.B6 ? '1' : '0';
-            s[1] = m_b.B.B7 ? '1' : '0';
-            s[0] = m_b.B.B8 ? '1' : '0';
-            std::string bits = std::string(s, 8);
-            return bits;
-        }
-
         CByte operator + (const CByte& rhs) const
         {
             CByte Out;
@@ -365,6 +350,8 @@ protected:
         XTRA m_x;
     };
 
+    uint8_t pow[8] = { 1,2,4,8,16,32,64,128 };
+
 public:
     Number() {};
 
@@ -385,14 +372,6 @@ public:
 
     ~Number()
     {
-    }
-
-    // Operator at
-    CByte& operator[](size_t index)
-    {
-        if (index >= m_Bytes.size())
-            throw std::out_of_range("Byte index out of range");
-        return m_Bytes[index];
     }
 
     Number& operator = (const Number& rhs)
@@ -531,11 +510,25 @@ public:
     }
 
     // Conversion functions
+    Number TwosComplement()
+    {
+        size_t size = m_Bytes.size();
+        Number Out(size), One(1);
+        One.m_Bytes[0].setValue(1);
+
+        uint8_t iByte = 0;
+        do
+        {
+            Out.m_Bytes[iByte].m_b.U = ~m_Bytes[iByte].m_b.U;
+            iByte++;
+        } while (iByte != size);
+
+        Out = Out + One;
+        return Out;
+    }
 
     void ToBinary(const std::string strNumber)
     {
-        uint8_t pow[] = { 1,2,4,8,16,32,64,128 };
-
         std::string strInput = strNumber;
         if (strInput.empty())
             throw("Invalid number");
@@ -647,14 +640,14 @@ public:
         if (size == 0)
             return strResult;
 
-        std::string strInput;
-        for (size_t iByte = 0; iByte < size; ++iByte)
-            strInput += m_Bytes[size - iByte - 1];
-
         const uint8_t cZero = '0', cOne = '1', cDec = '.';
         std::string strNum = "1";
-        std::string::const_reverse_iterator crit = strInput.rbegin();
-        std::string::const_reverse_iterator crend = strInput.rend();
+
+        uint8_t iByte = 0;
+        uint8_t iBit = 0;
+        uint8_t iBitV = 0;
+        bool bNeg = (m_Bytes[size - 1].m_b.U & pow[7]) > 0;
+
         do
         {
             uint8_t iProd;
@@ -680,7 +673,8 @@ public:
             if (bCarry)
                 mout.push_front(cOne);
 
-            if (*crit++ == cOne)
+            iBitV = m_Bytes[iByte].m_b.U & pow[iBit++];
+            if (iBitV)
             {
                 const std::string& strS1 = strNum;
                 const std::string& strS2 = strResult;
@@ -733,9 +727,16 @@ public:
                 strResult = std::string(Sum.begin(), Sum.end());
             }
             strNum = std::string(mout.begin(), mout.end());
-        } while (crit != crend);
+
+            if (iBit == 8)
+            {
+                iByte++;
+                iBit = 0;
+            }
+
+        } while (iByte != size);
         return strResult;
     }
-
+    
     std::vector<CByte> m_Bytes;
 };

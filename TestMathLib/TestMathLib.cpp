@@ -1201,7 +1201,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteAddition)
 		{
-			Number N1, N2, N3, NONE("1"), NTWO("2");
+			Number N1, N2, N3, ONE = "1", TWO = "2";
 			int nN1, nN2, nN3;
 
 			N1 = "1"; N2 = "2";
@@ -1209,15 +1209,15 @@ namespace TestMathLib
 
 			for (int i = 0; i < 0xFFFF; ++i)
 			{
-				N3 = N2 - N1;
-				nN3 = nN2 - nN1;
+				N3 = N2 + N1;
+				nN3 = nN2 + nN1;
 
 				Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
 
-				N1 = N1 + NONE;
+				N1 = N1 + ONE;
 				nN1++;
 
-				N2 = N2 + NTWO;
+				N2 = N2 + TWO;
 				nN2 += 2;
 			}
 		}

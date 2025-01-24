@@ -10,10 +10,14 @@ using namespace std;
 
 int main()
 {
-	Number A = "3";
-	Number B = "1";
+	Number A = "255";
+
+	Number A2 = A.TwosComplement();
+
+	Number B = "1999";
 
 	std::cout << A.ToDisplay() << std::endl;
+	std::cout << A2.ToDisplay() << std::endl;
 	std::cout << B.ToDisplay() << std::endl;
 
 	Number C = A + B;
