@@ -10,9 +10,12 @@ using namespace std;
 
 int main()
 {
-	Number A = "255";
+	Number A = "0";
 
 	Number A2 = A.TwosComplement();
+
+	A = "255";
+	A2 = A.TwosComplement();
 
 	Number B = "1999";
 

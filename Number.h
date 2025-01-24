@@ -350,8 +350,6 @@ protected:
         XTRA m_x;
     };
 
-    uint8_t pow[8] = { 1,2,4,8,16,32,64,128 };
-
 public:
     Number() {};
 
@@ -628,9 +626,17 @@ public:
             vbytes.push_back(bVal);
 
         size_t size = uint8_t(vbytes.size());
-        m_Bytes.resize(size);
-        for (size_t iByte = 0; iByte < size; ++iByte)
-            m_Bytes[iByte].setValue(vbytes[iByte]);
+        if (size)
+        {
+            m_Bytes.resize(size);
+            for (size_t iByte = 0; iByte < size; ++iByte)
+                m_Bytes[iByte].m_b.U = vbytes[iByte];
+        }
+        else
+        {
+            m_Bytes.resize(1);
+            m_Bytes[0].m_b.U = 0;
+        }
     }
 
     std::string ToDisplay()
@@ -738,5 +744,7 @@ public:
         return strResult;
     }
     
+    protected:
+    uint8_t pow[8] = { 1,2,4,8,16,32,64,128 };
     std::vector<CByte> m_Bytes;
 };
