@@ -18,10 +18,12 @@ int main()
 	A2 = A.TwosComplement();
 	std::cout << A2.ToDisplay() << std::endl;
 
-	Number B = "1999";
-
+	A = "5";
 	std::cout << A.ToDisplay() << std::endl;
+	A2 = A.TwosComplement();
 	std::cout << A2.ToDisplay() << std::endl;
+	
+	Number B = "1999";
 	std::cout << B.ToDisplay() << std::endl;
 
 	Number C = A + B;
@@ -33,6 +35,8 @@ int main()
 	A = "1";
 	B = "2";
 	C = B - A;
+	std::cout << C.ToDisplay() << std::endl;
+
 	C = A - B;
 	std::cout << C.ToDisplay() << std::endl;
 

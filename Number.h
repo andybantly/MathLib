@@ -556,6 +556,13 @@ public:
         if (m_bNAN)
             return "NAN";
 
+        if (m_bNeg)
+        {
+            Number Disp = TwosComplement();
+            Disp.m_bNeg = false;
+            return "-" + Disp.ToDisplay();
+        }
+
         size_t size = m_Bytes.size();
         std::string strResult = "0";
 
@@ -651,9 +658,6 @@ public:
             }
 
         } while (iByte != size);
-
-        if (m_bNeg)
-            strResult = "-" + strResult;
 
         return strResult;
     }
