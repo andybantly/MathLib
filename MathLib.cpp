@@ -11,12 +11,12 @@ using namespace std;
 int main()
 {
 	Number A = "0";
-
 	Number A2 = A.TwosComplement();
 
-	A = "5";
-
+	A = "-5";
+	std::cout << A.ToDisplay() << std::endl;
 	A2 = A.TwosComplement();
+	std::cout << A2.ToDisplay() << std::endl;
 
 	Number B = "1999";
 
