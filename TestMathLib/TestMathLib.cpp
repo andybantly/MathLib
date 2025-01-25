@@ -1204,8 +1204,8 @@ namespace TestMathLib
 			Number N1, N2, N3, ONE = "1", TWO = "2";
 			int nN1, nN2, nN3;
 
-			N1 = "1"; N2 = "2";
-			nN1 = 1;  nN2 = 2;
+			N1 = "65535"; N2 = "1";
+			nN1 = 65535;  nN2 = 1;
 
 			for (int i = 0; i < 0xFFFF; ++i)
 			{
@@ -1224,11 +1224,11 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteSubtraction)
 		{
-			Number N1, N2, N3, NONE("1");
+			Number N1, N2, N3, ONE = "1";
 			int nN1, nN2, nN3;
 
-			N1 = "965523"; N2 = "1";
-			nN1 = 965523;  nN2 = 1;
+			N1 = "65535"; N2 = "1";
+			nN1 = 65535;  nN2 = 1;
 
 			for (int i = 0; i < 0xFFFF; ++i)
 			{
@@ -1237,10 +1237,10 @@ namespace TestMathLib
 
 				Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
 
-				N1 = N1 - NONE;
+				N1 = N1 - ONE;
 				nN1--;
 
-				N2 = N2 + NONE;
+				N2 = N2 + ONE;
 				nN2++;
 			}
 		}
