@@ -351,7 +351,7 @@ protected:
     };
 
 public:
-    Number() {};
+    Number() : m_bNeg(false) {};
 
     Number(const char* pstrNumber)
     {
@@ -365,7 +365,8 @@ public:
 
     Number(size_t size)
     {
-        m_Bytes.resize(size);
+        m_Bytes.resize(size, 0);
+        m_bNeg = false;
     }
 
     ~Number()
@@ -377,6 +378,7 @@ public:
         if (this != &rhs)
         {
             m_Bytes = rhs.m_Bytes;
+            m_bNeg = rhs.m_bNeg;
         }
         return *this;
     }
@@ -397,6 +399,9 @@ public:
     {
         if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
             return true;
+
+        if (m_bNeg != rhs.m_bNeg)
+            return false;
 
         if (m_Bytes.size() != rhs.m_Bytes.size())
             return false;
@@ -423,9 +428,8 @@ public:
         if (this == &rhs)
             return false; // I CANT BE LESS THAN MYSELF!
 
-        bool bPositive = true;
         if (m_Bytes.size() != rhs.m_Bytes.size())
-            return bPositive ? m_Bytes.size() < rhs.m_Bytes.size() : m_Bytes.size() > rhs.m_Bytes.size();
+            return m_bNeg ? m_Bytes.size() > rhs.m_Bytes.size() : m_Bytes.size() < rhs.m_Bytes.size();
 
         size_t iByte = m_Bytes.size() - 1;
         for (; iByte != size_t(-1); --iByte)
@@ -504,6 +508,9 @@ public:
                 ob.setXtra(0);
         }
 
+        if (of)
+            out.m_bNeg = true;
+
         return out;
     }
 
@@ -572,7 +579,7 @@ public:
 
                     bSiz++;
                     if (idnm)
-                        bVal += pow[bPos];
+                        bVal += m_pow[bPos];
                     bPos++;
                     if (bPos > 7)
                     {
@@ -604,7 +611,7 @@ public:
 
                 bSiz++;
                 if (idnm)
-                    bVal += pow[bPos];
+                    bVal += m_pow[bPos];
                 bPos++;
                 if (bPos > 7)
                 {
@@ -646,13 +653,19 @@ public:
         if (size == 0)
             return strResult;
 
+        if (m_bNeg)
+        {
+            Number Tmp = *this;
+            Tmp = Tmp.TwosComplement();
+            return "-" + Tmp.ToDisplay();
+        }
+
         const uint8_t cZero = '0', cOne = '1', cDec = '.';
         std::string strNum = "1";
 
         uint8_t iByte = 0;
         uint8_t iBit = 0;
         uint8_t iBitV = 0;
-        bool bNeg = (m_Bytes[size - 1].m_b.U & pow[7]) > 0;
 
         do
         {
@@ -679,7 +692,7 @@ public:
             if (bCarry)
                 mout.push_front(cOne);
 
-            iBitV = m_Bytes[iByte].m_b.U & pow[iBit++];
+            iBitV = m_Bytes[iByte].m_b.U & m_pow[iBit++];
             if (iBitV)
             {
                 const std::string& strS1 = strNum;
@@ -745,6 +758,9 @@ public:
     }
     
     protected:
-    uint8_t pow[8] = { 1,2,4,8,16,32,64,128 };
-    std::vector<CByte> m_Bytes;
+        uint8_t m_pow[8] = { 1,2,4,8,16,32,64,128 };
+
+    protected:
+        std::vector<CByte> m_Bytes;
+        bool m_bNeg;
 };

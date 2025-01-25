@@ -14,7 +14,8 @@ int main()
 
 	Number A2 = A.TwosComplement();
 
-	A = "255";
+	A = "5";
+
 	A2 = A.TwosComplement();
 
 	Number B = "1999";
@@ -29,6 +30,10 @@ int main()
 	C = B;
 	std::cout << C.ToDisplay() << std::endl;
 
+	A = "1";
+	B = "2";
+	C = B - A;
+	C = A - B;
 	std::cout << C.ToDisplay() << std::endl;
 
 	CNumber::Init();
