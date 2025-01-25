@@ -545,7 +545,9 @@ public:
             iByte++;
         } while (iByte != size);
 
+        size_t sz = Out.m_Bytes.size();
         Out = Out + One;
+        Out.m_Bytes.resize(sz);
         Out.m_bNeg = m_bNeg;
 
         return Out;

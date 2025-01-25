@@ -10,8 +10,13 @@ using namespace std;
 
 int main()
 {
-	Number A = "0";
+	Number A;
+	std::cout << A.ToDisplay() << std::endl;
+	A = "0";
+	std::cout << A.ToDisplay() << std::endl;
+
 	Number A2 = A.TwosComplement();
+	std::cout << A2.ToDisplay() << std::endl;
 
 	A = "-5";
 	std::cout << A.ToDisplay() << std::endl;
