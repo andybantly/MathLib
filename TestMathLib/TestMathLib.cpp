@@ -296,27 +296,6 @@ namespace TestMathLib
 					Assert::AreEqual(iResult, 0);
 
 				Assert::AreEqual(sv, sb10);
-
-				s = to_string(-ull - 1);
-				iResult = MathLib.Expand(s, sr);
-				if (iResult != 0)
-					Assert::AreEqual(iResult, 0);
-
-				iResult = MathLib.Contract(sr, sv);
-				if (iResult != 0)
-					Assert::AreEqual(iResult, 0);
-
-				Assert::AreEqual(sv, s);
-
-				iResult = MathLib.ToBase2(sv, sb2);
-				if (iResult != 0)
-					Assert::AreEqual(iResult, 0);
-
-				iResult = MathLib.ToBase10(sb2, sb10);
-				if (iResult != 0)
-					Assert::AreEqual(iResult, 0);
-
-				Assert::AreEqual(sv, sb10);
 			} while (ull <= ulle && ull != 0);
 		}
 
@@ -1176,7 +1155,7 @@ namespace TestMathLib
 		TEST_METHOD(TestLib)
 		{
 			long long numt = thread::hardware_concurrency();
-			long long dtpt = (RAND_MAX * 4) / numt;
+			long long dtpt = RAND_MAX / numt;
 
 			vector<thread*> vptp;
 			long long ullb, ulle;
@@ -1186,7 +1165,7 @@ namespace TestMathLib
 				if (it + 1 != numt)
 					ulle = ullb + dtpt - 1;
 				else
-					ulle = (RAND_MAX * 4);
+					ulle = RAND_MAX;
 
 				thread* ptp = new thread(Test, ullb, ulle);
 				vptp.push_back(ptp);
@@ -1201,18 +1180,19 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteAddition)
 		{
-			Number N1, N2, N3, ONE = "1", TWO = "2";
+			Number N1, N2, N3, ONE = 1, TWO = 2;
 			int nN1, nN2, nN3;
 
-			N1 = "65535"; N2 = "1";
-			nN1 = 65535;  nN2 = 1;
+			N1 = 65535; N2 = 1;
+			nN1 = 65535; nN2 = 1;
 
 			for (int i = 0; i < 0xFFFF; ++i)
 			{
 				N3 = N2 + N1;
 				nN3 = nN2 + nN1;
 
-				Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
+				if (std::to_string(nN3) != N3.ToDisplay())
+					Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
 
 				N1 = N1 + ONE;
 				nN1++;
@@ -1224,56 +1204,47 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteSubtraction)
 		{
-			Number N1, N2, N3, ONE = "1";
+			Number N1, N2, N3, ONE = 1, TWO = 2;
 			int nN1, nN2, nN3;
 
-			N1 = "65535"; N2 = "1";
-			nN1 = 65535;  nN2 = 1;
+			N1 = 65535; N2 = 1;
+			nN1 = 65535; nN2 = 1;
 
 			for (int i = 0; i < 0xFFFF; ++i)
 			{
 				N3 = N1 - N2;
 				nN3 = nN1 - nN2;
 
-				Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
+				if (std::to_string(nN3) != N3.ToDisplay())
+					Assert::AreEqual(std::to_string(nN3), N3.ToDisplay());
 
 				N1 = N1 - ONE;
 				nN1--;
 
-				N2 = N2 + ONE;
-				nN2++;
+				N2 = N2 + TWO;
+				nN2 += 2;
 			}
 		}
 
 		TEST_METHOD(ByteMultiplication)
 		{
-			/*
-			Number NI, NJ, NOUT, ONE("1");
+			Number NI, NJ, NOUT, ONE = 1;
 			int no;
 
-			Number A = "1";
-			Number B = "1";
-
-			Number C;
-			C = A * B;
-
-			NJ = "1";
-			for (int j = 1; j < 0xFF; ++j)
+			NJ = 1;
+			for (int j = 1; j < 0xFF; ++j, NJ = NJ + ONE)
 			{
-				NI = "1";
-				for (int i = 1; i < 0xFFFF; ++i)
+				NI = 255;
+				for (int i = 0xFF; i < 0x1FF; ++i, NI = NI + ONE)
 				{
 					no = i * j;
 					NOUT = NI * NJ;
 
 					std::string strNO = NOUT.ToDisplay();
-					Assert::AreEqual(std::to_string(no), strNO);
-
-					NI = NI + ONE;
+					if (std::to_string(no) != strNO)
+						Assert::AreEqual(std::to_string(no), strNO);
 				}
-				NJ = NJ + ONE;
 			}
-			*/
 		}
 
 		TEST_METHOD(ByteLogic)

@@ -204,6 +204,107 @@ protected:
     class CByte
     {
     public:
+        CByte()
+        {
+            m_b.U = 0;
+            m_x.U = 0;
+        }
+
+        CByte(uint8_t byte)
+        {
+            m_b.U = byte;
+            m_x.U = 0;
+        };
+
+        CByte(const CByte& rhs)
+        {
+            *this = rhs;
+        }
+
+        CByte& operator = (const CByte& rhs)
+        {
+            if (this != &rhs)
+            {
+                m_b = rhs.m_b;
+                m_x = rhs.m_x;
+            }
+            return *this;
+        }
+
+        CByte operator + (const CByte& rhs) const // Full-Adder
+        {
+            CByte Out;
+            Out.setOF(m_x.X.X0); // Is there a better way to handle Carry?
+
+            Out.m_b.B.B1 = Out.m_x.X.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
+            Out.m_x.X.X1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0) | (m_b.B.B1 & Out.m_x.X.X0); // CARRY: Carry-out AB OR BC OR ACin
+
+            Out.m_b.B.B2 = Out.m_x.X.X1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
+            Out.m_x.X.X2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X.X1) | (m_b.B.B2 & Out.m_x.X.X1);
+
+            Out.m_b.B.B3 = Out.m_x.X.X2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
+            Out.m_x.X.X3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X.X2) | (m_b.B.B3 & Out.m_x.X.X2);
+
+            Out.m_b.B.B4 = Out.m_x.X.X3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
+            Out.m_x.X.X4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X.X3) | (m_b.B.B4 & Out.m_x.X.X3);
+
+            Out.m_b.B.B5 = Out.m_x.X.X4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
+            Out.m_x.X.X5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X.X4) | (m_b.B.B5 & Out.m_x.X.X4);
+
+            Out.m_b.B.B6 = Out.m_x.X.X5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
+            Out.m_x.X.X6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X.X5) | (m_b.B.B6 & Out.m_x.X.X5);
+
+            Out.m_b.B.B7 = Out.m_x.X.X6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
+            Out.m_x.X.X7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X.X6) | (m_b.B.B7 & Out.m_x.X.X6);
+
+            Out.m_b.B.B8 = Out.m_x.X.X7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
+            Out.m_x.X.X0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X.X7) | (m_b.B.B8 & Out.m_x.X.X7);
+
+            return Out;
+        }
+
+        CByte operator - (const CByte& rhs) const // Full-Subtractor
+        {
+            CByte Out;
+            Out.setOF(m_x.X.X0); // Is there a better way to handle borrowing?
+
+            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.m_x.X.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
+            Out.m_x.X.X1 = (~m_b.B.B1 & Out.m_x.X.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
+
+            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ Out.m_x.X.X1;
+            Out.m_x.X.X2 = (~m_b.B.B2 & Out.m_x.X.X1) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X.X1);
+
+            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ Out.m_x.X.X2;
+            Out.m_x.X.X3 = (~m_b.B.B3 & Out.m_x.X.X2) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X.X2);
+
+            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ Out.m_x.X.X3;
+            Out.m_x.X.X4 = (~m_b.B.B4 & Out.m_x.X.X3) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X.X3);
+
+            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ Out.m_x.X.X4;
+            Out.m_x.X.X5 = (~m_b.B.B5 & Out.m_x.X.X4) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X.X4);
+
+            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ Out.m_x.X.X5;
+            Out.m_x.X.X6 = (~m_b.B.B6 & Out.m_x.X.X5) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X.X5);
+
+            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ Out.m_x.X.X6;
+            Out.m_x.X.X7 = (~m_b.B.B7 & Out.m_x.X.X6) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X.X6);
+
+            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ Out.m_x.X.X7;
+            Out.m_x.X.X0 = (~m_b.B.B8 & Out.m_x.X.X7) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X.X7);
+
+            return Out;
+        }
+
+        unsigned getOF() const
+        {
+            return m_x.X.X0; // X0 used to indicate a carry/borrow
+        }
+
+        void setOF(const unsigned rhs)
+        {
+            m_x.X.X0 = rhs;
+        }
+
         struct _Bits
         {
             unsigned B1 : 1;
@@ -240,112 +341,6 @@ protected:
             uint8_t U;
         };
 
-        CByte()
-        {
-            m_b.U = 0;
-            m_x.U = 0;
-        }
-
-        CByte(uint8_t byte)
-        {
-            m_b.U = byte;
-            m_x.U = 0;
-        };
-
-        CByte(const CByte& rhs)
-        {
-            *this = rhs;
-        }
-
-        CByte& operator = (const CByte& rhs)
-        {
-            if (this != &rhs)
-            {
-                m_b = rhs.m_b;
-                m_x = rhs.m_x;
-            }
-            return *this;
-        }
-
-        CByte operator + (const CByte& rhs) const
-        {
-            CByte Out;
-            Out.setXtra(m_x.X.X0); // Is there a better way to handle Carry?
-
-            Out.m_b.B.B1 = Out.m_x.X.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
-            Out.m_x.X.X1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0) | (m_b.B.B1 & Out.m_x.X.X0); // CARRY: Carry-out AB OR BC OR ACin
-
-            Out.m_b.B.B2 = Out.m_x.X.X1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
-            Out.m_x.X.X2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X.X1) | (m_b.B.B2 & Out.m_x.X.X1);
-
-            Out.m_b.B.B3 = Out.m_x.X.X2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
-            Out.m_x.X.X3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X.X2) | (m_b.B.B3 & Out.m_x.X.X2);
-
-            Out.m_b.B.B4 = Out.m_x.X.X3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
-            Out.m_x.X.X4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X.X3) | (m_b.B.B4 & Out.m_x.X.X3);
-
-            Out.m_b.B.B5 = Out.m_x.X.X4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
-            Out.m_x.X.X5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X.X4) | (m_b.B.B5 & Out.m_x.X.X4);
-
-            Out.m_b.B.B6 = Out.m_x.X.X5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
-            Out.m_x.X.X6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X.X5) | (m_b.B.B6 & Out.m_x.X.X5);
-
-            Out.m_b.B.B7 = Out.m_x.X.X6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
-            Out.m_x.X.X7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X.X6) | (m_b.B.B7 & Out.m_x.X.X6);
-
-            Out.m_b.B.B8 = Out.m_x.X.X7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
-            Out.m_x.X.X0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X.X7) | (m_b.B.B8 & Out.m_x.X.X7);
-
-            return Out;
-        }
-
-        CByte operator - (const CByte& rhs) const
-        {
-            CByte Out;
-            Out.setXtra(m_x.X.X0); // Is there a better way to handle borrowing?
-
-            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.m_x.X.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
-            Out.m_x.X.X1 = (~m_b.B.B1 & Out.m_x.X.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
-
-            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ Out.m_x.X.X1;
-            Out.m_x.X.X2 = (~m_b.B.B2 & Out.m_x.X.X1) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X.X1);
-
-            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ Out.m_x.X.X2;
-            Out.m_x.X.X3 = (~m_b.B.B3 & Out.m_x.X.X2) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X.X2);
-
-            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ Out.m_x.X.X3;
-            Out.m_x.X.X4 = (~m_b.B.B4 & Out.m_x.X.X3) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X.X3);
-
-            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ Out.m_x.X.X4;
-            Out.m_x.X.X5 = (~m_b.B.B5 & Out.m_x.X.X4) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X.X4);
-
-            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ Out.m_x.X.X5;
-            Out.m_x.X.X6 = (~m_b.B.B6 & Out.m_x.X.X5) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X.X5);
-
-            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ Out.m_x.X.X6;
-            Out.m_x.X.X7 = (~m_b.B.B7 & Out.m_x.X.X6) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X.X6);
-
-            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ Out.m_x.X.X7;
-            Out.m_x.X.X0 = (~m_b.B.B8 & Out.m_x.X.X7) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X.X7);
-
-            return Out;
-        }
-
-        uint8_t overFlow() const
-        {
-            return m_x.X.X0; // X0 used to indicate a carry/borrow
-        }
-
-        void setValue(const uint8_t rhs)
-        {
-            m_b.U = rhs;
-        }
-
-        void setXtra(const bool rhs)
-        {
-            m_x.X.X0 = rhs;
-        }
-
         BITS m_b;
         XTRA m_x;
     };
@@ -363,9 +358,14 @@ public:
         ToBinary(strNumber);
     }
 
-    Number(size_t size)
+    Number(const int iNumber)
     {
-        m_Bytes.resize(size, 0);
+        ToBinary(std::to_string(iNumber));
+    }
+
+    Number(CByte ch, size_t size)
+    {
+        m_Bytes.resize(size, ch);
         m_bNeg = false;
         m_bNAN = false;
     }
@@ -382,6 +382,12 @@ public:
             m_bNeg = rhs.m_bNeg;
             m_bNAN = rhs.m_bNAN;
         }
+        return *this;
+    }
+
+    Number& operator = (const int& iNumber)
+    {
+        ToBinary(std::to_string(iNumber));
         return *this;
     }
 
@@ -474,27 +480,24 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        Number out(stMax);
         CByte Zero(0);
-        uint8_t of = 0;
+        Number out(Zero, stMax);
+        unsigned of = 0;
         for (size_t st = 0; st < stMax; ++st)
         {
             CByte lb = st < l ? m_Bytes[st] : Zero;
             CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
             CByte& ob = out.m_Bytes[st];
             if (of)
-                lb.setXtra(of);
+                lb.setOF(of);
             ob = lb + rb;
-            of = ob.overFlow();
+            of = ob.getOF();
             if (of)
-                ob.setXtra(0);
+                ob.setOF(0);
         }
 
         if (of)
-        {
-            out.m_Bytes.push_back(CByte());
-            out.m_Bytes[stMax].setValue(1);
-        }
+            out.m_Bytes.push_back(CByte(1));
 
         return out;
     }
@@ -506,24 +509,50 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        Number out(stMax);
         CByte Zero(0);
-        uint8_t of = 0;
+        Number out(Zero, stMax);
+        unsigned of = 0;
         for (size_t st = 0; st < stMax; ++st)
         {
             CByte lb = st < l ? m_Bytes[st] : Zero;
             CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
             CByte& ob = out.m_Bytes[st];
             if (of)
-                lb.setXtra(of);
+                lb.setOF(of);
             ob = lb - rb;
-            of = ob.overFlow();
+            of = ob.getOF();
             if (of)
-                ob.setXtra(0);
+                ob.setOF(0);
         }
 
         if (of)
             out.m_bNeg = true;
+
+        return out;
+    }
+
+    // positive only right now
+    Number operator * (const Number& rhs) const
+    {
+        if (m_bNAN || rhs.m_bNAN)
+            throw("Invalid number");
+
+        Number out;
+
+        if (*this < rhs)
+        {
+            // rhs lhs times
+            out = rhs;
+            for (Number One = "1", Loop = "1"; Loop < *this; Loop = Loop + One)
+                out = out + rhs;
+        }
+        else
+        {
+            // lhs rhs times
+            out = *this;
+            for (Number One = "1", Loop = "1"; Loop < rhs; Loop = Loop + One)
+                out = out + *this;
+        }
 
         return out;
     }
@@ -535,8 +564,7 @@ public:
             throw("Invalid number");
 
         size_t size = m_Bytes.size();
-        Number Out(size), One(1);
-        One.m_Bytes[0].setValue(1);
+        Number Out(CByte(0), size), One(CByte(1), 1);
 
         uint8_t iByte = 0;
         do
@@ -599,7 +627,7 @@ public:
             if (bCarry)
                 mout.push_front(cOne);
 
-            if (m_Bytes[iByte].m_b.U & m_pow[iBit++])
+            if (m_Bytes[iByte].m_b.U & m_pow[iBit++]) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,66,128
             {
                 const std::string& strS1 = strNum;
                 const std::string& strS2 = strResult;
@@ -670,7 +698,7 @@ protected:
     {
         if (strNumber.empty())
             throw("Invalid number");
-
+        
         if (strNumber[0] == '-')
         {
             if (strNumber.length() < 2)
@@ -798,10 +826,11 @@ protected:
     }
     
     protected:
-        uint8_t m_pow[8] = { 1,2,4,8,16,32,64,128 };
-
-    protected:
         std::vector<CByte> m_Bytes;
         bool m_bNeg;
         bool m_bNAN;
+        //bool m_bOF;
+
+    protected:
+        uint8_t m_pow[8] = { 1,2,4,8,16,32,64,128 };
 };

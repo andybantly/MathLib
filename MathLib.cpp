@@ -28,21 +28,32 @@ int main()
 	A2 = A.TwosComplement();
 	std::cout << A2.ToDisplay() << std::endl;
 	
-	Number B = "1999";
+	Number B = "-9";
 	std::cout << B.ToDisplay() << std::endl;
 
 	Number C = A + B;
 	std::cout << C.ToDisplay() << std::endl;
 
-	C = B;
+	C = "-3";
 	std::cout << C.ToDisplay() << std::endl;
+	C = "259";
+	std::cout << C.TwosComplement().ToDisplay() << std::endl;
 
 	A = "1";
-	B = "2";
+	B = "3";
 	C = B - A;
 	std::cout << C.ToDisplay() << std::endl;
 
 	C = A - B;
+	std::cout << C.ToDisplay() << std::endl;
+
+	C = B * B;
+	std::cout << C.ToDisplay() << std::endl;
+	
+	C = A * B;
+	std::cout << C.ToDisplay() << std::endl;
+
+	C = B * A;
 	std::cout << C.ToDisplay() << std::endl;
 
 	CNumber::Init();
