@@ -1228,19 +1228,17 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteMultiplication)
 		{
-			Number NI, NJ, NOUT, ONE = 1;
+			Number NI, NJ, NO, ONE = 1;
 			int no;
 
-			NJ = 1;
-			for (int j = 1; j < 0xFF; ++j, NJ = NJ + ONE)
+			for (int j = 1, NJ = 1; j < 0xFF; ++j, NJ = NJ + 1)
 			{
-				NI = 255;
-				for (int i = 0xFF; i < 0x1FF; ++i, NI = NI + ONE)
+				for (int i = 0xFF, NI = 255; i < 0x1FF; ++i, NI = NI + 1)
 				{
 					no = i * j;
-					NOUT = NI * NJ;
+					NO = NI * NJ;
 
-					std::string strNO = NOUT.ToDisplay();
+					std::string strNO = NO.ToDisplay();
 					if (std::to_string(no) != strNO)
 						Assert::AreEqual(std::to_string(no), strNO);
 				}
