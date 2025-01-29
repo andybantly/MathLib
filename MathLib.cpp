@@ -10,52 +10,6 @@ using namespace std;
 
 int main()
 {
-	Number A;
-	std::cout << A.ToDisplay() << std::endl;
-	A = "0";
-	std::cout << A.ToDisplay() << std::endl;
-
-	Number A2 = A.TwosComplement();
-	std::cout << A2.ToDisplay() << std::endl;
-
-	A = "-5";
-	std::cout << A.ToDisplay() << std::endl;
-	A2 = A.TwosComplement();
-	std::cout << A2.ToDisplay() << std::endl;
-
-	A = "5";
-	std::cout << A.ToDisplay() << std::endl;
-	A2 = A.TwosComplement();
-	std::cout << A2.ToDisplay() << std::endl;
-	
-	Number B = "-9";
-	std::cout << B.ToDisplay() << std::endl;
-
-	Number C = A + B;
-	std::cout << C.ToDisplay() << std::endl;
-
-	C = "-3";
-	std::cout << C.ToDisplay() << std::endl;
-	C = "259";
-	std::cout << C.TwosComplement().ToDisplay() << std::endl;
-
-	A = "1";
-	B = "3";
-	C = B - A;
-	std::cout << C.ToDisplay() << std::endl;
-
-	C = A - B;
-	std::cout << C.ToDisplay() << std::endl;
-
-	C = B * B;
-	std::cout << C.ToDisplay() << std::endl;
-	
-	C = A * B;
-	std::cout << C.ToDisplay() << std::endl;
-
-	C = B * A;
-	std::cout << C.ToDisplay() << std::endl;
-
 	CNumber::Init();
 	string strInput, strResult;
 	bool bAgain = true;

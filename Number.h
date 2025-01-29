@@ -198,6 +198,8 @@ public:
     }
 };
 
+static uint8_t g_pow[8] = { 1,2,4,8,16,32,64,128 }; 
+
 class Number
 {
 protected:
@@ -497,7 +499,7 @@ public:
         }
 
         if (of)
-            out.m_Bytes.push_back(CByte(1));
+            out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
 
         return out;
     }
@@ -526,7 +528,7 @@ public:
         }
 
         if (of)
-            out.m_bNeg = true;
+            out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
 
         return out;
     }
@@ -555,6 +557,16 @@ public:
         }
 
         return out;
+    }
+
+    void SetSize(size_t uiSize)
+    {
+        m_Bytes.resize(uiSize, m_bNeg ? 255 : 0);
+    }
+
+    size_t GetSize()
+    {
+        return m_Bytes.size();
     }
 
     // Conversion functions
@@ -627,7 +639,7 @@ public:
             if (bCarry)
                 mout.push_front(cOne);
 
-            if (m_Bytes[iByte].m_b.U & m_pow[iBit++]) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,66,128
+            if (m_Bytes[iByte].m_b.U & g_pow[iBit++]) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,66,128
             {
                 const std::string& strS1 = strNum;
                 const std::string& strS2 = strResult;
@@ -755,7 +767,7 @@ protected:
 
                     bSiz++;
                     if (idnm)
-                        bVal += m_pow[bPos];
+                        bVal += g_pow[bPos];
                     bPos++;
                     if (bPos > 7)
                     {
@@ -787,7 +799,7 @@ protected:
 
                 bSiz++;
                 if (idnm)
-                    bVal += m_pow[bPos];
+                    bVal += g_pow[bPos];
                 bPos++;
                 if (bPos > 7)
                 {
@@ -823,14 +835,12 @@ protected:
 
         if (m_bNeg)
             *this = TwosComplement();
+
+        SetSize(std::max(GetSize(), size_t(4)));
     }
     
     protected:
         std::vector<CByte> m_Bytes;
         bool m_bNeg;
         bool m_bNAN;
-        //bool m_bOF;
-
-    protected:
-        uint8_t m_pow[8] = { 1,2,4,8,16,32,64,128 };
 };
