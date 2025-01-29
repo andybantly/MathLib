@@ -534,7 +534,6 @@ public:
         return out;
     }
 
-    // positive only right now
     Number operator * (const Number& rhs) const
     {
         if (m_bNAN || rhs.m_bNAN)

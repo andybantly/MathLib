@@ -1442,9 +1442,9 @@ namespace TestMathLib
 			Number NI, NJ, NO, ONE = 1;
 			int no;
 
-			for (int j = 1, NJ = 1; j < 0xFF; ++j, NJ = NJ + 1)
+			for (int j = -127, NJ = -127; j < 128; ++j, NJ = NJ + 1)
 			{
-				for (int i = 0xFF, NI = 255; i < 0x1FF; ++i, NI = NI + 1)
+				for (int i = -127, NI = -127; i < 128; ++i, NI = NI + 1)
 				{
 					no = i * j;
 					NO = NI * NJ;
@@ -1458,10 +1458,11 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteLogic)
 		{
-			int nRM = 0xFFFFF;
+			int nRM = 0xFFFF;
 			bool bCMP = false, bRes = false;
 			Number N1, N2;
 			int nEQ = 0;
+			int c = 0;
 			for (int i = 0; i < nRM; ++i)
 			{
 				CRndDouble Rnd;
@@ -1470,11 +1471,22 @@ namespace TestMathLib
 					std::string s1 = Rnd.Num1();
 					std::string s2 = Rnd.Num2();
 
-					if (i % 100 == 0)
-						s2 = s1;
-
 					int i1 = int(stod(s1));
 					int i2 = int(stod(s2));
+
+					if (i % 100 == 0)
+					{
+						switch (c++)
+						{
+						case 0:
+							i2 = -i1;
+							break;
+						default:
+							i2 = i1;
+							c = 0;
+							break;
+						}
+					}
 
 					N1 = std::to_string(i1);
 					N2 = std::to_string(i2);
