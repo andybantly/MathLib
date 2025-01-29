@@ -410,7 +410,7 @@ public:
         if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
             return true;
 
-        if (m_bNAN || rhs.m_bNAN) // Can't be equal
+        if (m_bNAN || rhs.m_bNAN)
             return false;
 
         if (m_bNeg != rhs.m_bNeg)
@@ -419,16 +419,18 @@ public:
         if (m_Bytes.size() != rhs.m_Bytes.size())
             return false;
 
-        bool bRet;
-        size_t iByte = m_Bytes.size() - 1;
-        for (bRet = true; bRet && iByte != size_t(-1); --iByte)
+        size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t stMax = l == r ? l : (l < r ? r : l);
+        CByte Zero(0), Neg1(255);
+        for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
-            if (m_Bytes[iByte].m_b.U == rhs.m_Bytes[iByte].m_b.U)
-                continue;
-            bRet = false;
+            CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
+            CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+            if (lb.m_b.U != rb.m_b.U)
+                return false;
         }
 
-        return bRet;
+        return true;
     }
 
     bool operator != (const Number& rhs) const
@@ -441,22 +443,23 @@ public:
         if (this == &rhs)
             return false; // I CANT BE LESS THAN MYSELF!
 
-        if (m_bNAN || rhs.m_bNAN) // Can't have equality
+        if (m_bNAN || rhs.m_bNAN)
             return false;
 
-        if (m_Bytes.size() != rhs.m_Bytes.size())
-            return m_bNeg ? m_Bytes.size() > rhs.m_Bytes.size() : m_Bytes.size() < rhs.m_Bytes.size();
+        if (m_bNeg != rhs.m_bNeg)
+            return m_bNeg;
 
-        size_t iByte = m_Bytes.size() - 1;
-        for (; iByte != size_t(-1); --iByte)
+        size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t stMax = l == r ? l : (l < r ? r : l);
+        CByte Zero(0), Neg1(255);
+        for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
-            if (m_Bytes[iByte].m_b.U == rhs.m_Bytes[iByte].m_b.U)
-                continue;
-            break;
+            CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
+            CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+            if (lb.m_b.U != rb.m_b.U)
+                return m_bNeg ? lb.m_b.U < rb.m_b.U : lb.m_b.U < rb.m_b.U;
         }
 
-        if (iByte != size_t(-1))
-            return m_Bytes[iByte].m_b.U < rhs.m_Bytes[iByte].m_b.U;
         return false;
     }
 
@@ -482,13 +485,13 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        CByte Zero(0);
+        CByte Zero(0), Neg1(255);
         Number out(Zero, stMax);
         unsigned of = 0;
         for (size_t st = 0; st < stMax; ++st)
         {
-            CByte lb = st < l ? m_Bytes[st] : Zero;
-            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
+            CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
+            CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
             CByte& ob = out.m_Bytes[st];
             if (of)
                 lb.setOF(of);
@@ -498,8 +501,7 @@ public:
                 ob.setOF(0);
         }
 
-        if (of)
-            out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
+        out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
 
         return out;
     }
@@ -511,13 +513,13 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        CByte Zero(0);
+        CByte Zero(0), Neg1(255);
         Number out(Zero, stMax);
         unsigned of = 0;
         for (size_t st = 0; st < stMax; ++st)
         {
-            CByte lb = st < l ? m_Bytes[st] : Zero;
-            CByte rb = st < r ? rhs.m_Bytes[st] : Zero;
+            CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
+            CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
             CByte& ob = out.m_Bytes[st];
             if (of)
                 lb.setOF(of);
@@ -527,8 +529,7 @@ public:
                 ob.setOF(0);
         }
 
-        if (of)
-            out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
+        out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
 
         return out;
     }
