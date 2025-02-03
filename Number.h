@@ -212,7 +212,7 @@ protected:
             m_x.U = 0;
         }
 
-        CByte(uint8_t byte)
+        CByte(int32_t byte)
         {
             m_b.U = byte;
             m_x.U = 0;
@@ -236,7 +236,7 @@ protected:
         CByte operator + (const CByte& rhs) const // Full-Adder
         {
             CByte Out;
-            Out.setOF(m_x.X.X0); // Is there a better way to handle Carry?
+            Out.setOF(getOF()); // Is there a better way to handle Carry?
 
             Out.m_b.B.B1 = Out.m_x.X.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
             Out.m_x.X.X1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0) | (m_b.B.B1 & Out.m_x.X.X0); // CARRY: Carry-out AB OR BC OR ACin
@@ -268,7 +268,7 @@ protected:
         CByte operator - (const CByte& rhs) const // Full-Subtractor
         {
             CByte Out;
-            Out.setOF(m_x.X.X0); // Is there a better way to handle borrowing?
+            Out.setOF(getOF()); // Is there a better way to handle borrowing?
 
             Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.m_x.X.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
             Out.m_x.X.X1 = (~m_b.B.B1 & Out.m_x.X.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
@@ -360,15 +360,16 @@ public:
         ToBinary(strNumber);
     }
 
-    Number(const int iNumber)
+    Number(const int32_t iNumber)
     {
         ToBinary(std::to_string(iNumber));
     }
 
     Number(CByte ch, size_t size)
     {
-        m_Bytes.resize(size, ch);
-        m_bNeg = false;
+        m_bNeg = ch.m_b.B.B8;
+        m_Bytes.resize(size, m_bNeg ? CByte(255) : CByte(0));
+        m_Bytes[0] = ch;
         m_bNAN = false;
     }
 
@@ -387,7 +388,7 @@ public:
         return *this;
     }
 
-    Number& operator = (const int& iNumber)
+    Number& operator = (const int32_t& iNumber)
     {
         ToBinary(std::to_string(iNumber));
         return *this;
@@ -478,6 +479,42 @@ public:
         return !(operator < (rhs));
     }
 
+    Number& operator ++ () // ++Number
+    {
+        if (m_bNAN)
+            throw("Invalid number");
+
+        *this = *this + Number(CByte(1), m_Bytes.size());
+        return *this;
+    }
+
+    Number& operator -- ()
+    {
+        if (m_bNAN)
+            throw("Invalid number");
+
+        *this = *this - Number(CByte(1), m_Bytes.size());
+        return *this;
+    }
+
+    Number& operator ++ (int)
+    {
+        if (m_bNAN)
+            throw("Invalid number");
+
+        *this = *this + Number(CByte(1), m_Bytes.size());
+        return *this;
+    }
+
+    Number& operator -- (int)
+    {
+        if (m_bNAN)
+            throw("Invalid number");
+
+        *this = *this - Number(CByte(1), m_Bytes.size());
+        return *this;
+    }
+
     Number operator + (const Number& rhs) const
     {
         if (m_bNAN || rhs.m_bNAN)
@@ -539,24 +576,169 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        Number out;
+        const Number& lhs = *this;
 
-        if (*this < rhs)
+        Number out(0,4), one(1,4), zero(0,4);
+
+        Number loop = zero;
+        if (rhs.m_bNeg)
         {
-            // rhs lhs times
-            out = rhs;
-            for (Number One = "1", Loop = "1"; Loop < *this; Loop = Loop + One)
-                out = out + rhs;
+            // - and -/+
+            while (loop > rhs)
+            {
+                out = out - lhs;
+                loop = loop - one;
+            }
         }
         else
         {
-            // lhs rhs times
-            out = *this;
-            for (Number One = "1", Loop = "1"; Loop < rhs; Loop = Loop + One)
-                out = out + *this;
+            // + and -/+
+            while (loop < rhs)
+            {
+                out = out + lhs;
+                loop = loop + one;
+            }
         }
 
         return out;
+    }
+
+    Number operator / (const Number& rhs) const
+    {
+        if (m_bNAN || rhs.m_bNAN)
+            throw("Invalid number");
+
+        const Number& lhs = *this;
+
+        Number tmp(0, 4), one(1, 4), zero(0, 4);
+        
+        Number loop;
+        if (rhs == zero)
+            return loop;
+        loop = zero;
+        if (lhs == zero)
+            return zero;
+
+        if (m_bNeg)
+        {
+            if (rhs.m_bNeg)
+            {
+                while (tmp > lhs)
+                {
+                    tmp = tmp + rhs;
+                    loop = loop + one;
+                }
+
+                if (tmp != lhs)
+                    loop = loop - one;
+            }
+            else
+            {
+                while (tmp > lhs)
+                {
+                    tmp = tmp - rhs;
+                    loop = loop - one;
+                }
+
+                if (tmp != lhs)
+                    loop = loop + one;
+            }
+        }
+        else
+        {
+            if (rhs.m_bNeg)
+            {
+                while (tmp < lhs)
+                {
+                    tmp = tmp - rhs;
+                    loop = loop - one;
+                }
+
+                if (tmp != lhs)
+                    loop = loop + one;
+            }
+            else
+            {
+                while (tmp < lhs)
+                {
+                    tmp = tmp + rhs;
+                    loop = loop + one;
+                }
+
+                if (tmp != lhs)
+                    loop = loop - one;
+            }
+        }
+
+        return loop;
+    }
+
+    Number operator % (const Number& rhs) const
+    {
+        if (m_bNAN || rhs.m_bNAN)
+            throw("Invalid number");
+
+        const Number& lhs = *this;
+
+        Number tmp(0, 4), one(1, 4), zero(0, 4);
+
+        Number rem;
+        if (rhs == zero)
+            return rem;
+        rem = zero;
+
+        if (m_bNeg)
+        {
+            if (rhs.m_bNeg)
+            {
+                while (tmp > lhs)
+                    tmp = tmp + rhs;
+
+                if (tmp != lhs)
+                {
+                    tmp = tmp - rhs;
+                    rem = lhs - tmp;
+                }
+            }
+            else
+            {
+                while (tmp > lhs)
+                    tmp = tmp - rhs;
+
+                if (tmp != lhs)
+                {
+                    tmp = tmp + rhs;
+                    rem = lhs - tmp;
+                }
+            }
+        }
+        else
+        {
+            if (rhs.m_bNeg)
+            {
+                while (tmp < lhs)
+                    tmp = tmp - rhs;
+
+                if (tmp != lhs)
+                {
+                    tmp = tmp + rhs;
+                    rem = lhs - tmp;
+                }
+            }
+            else
+            {
+                while (tmp < lhs)
+                    tmp = tmp + rhs;
+
+                if (tmp != lhs)
+                {
+                    tmp = tmp - rhs;
+                    rem = lhs - tmp;
+                }
+            }
+        }
+
+        return rem;
     }
 
     void SetSize(size_t uiSize)
@@ -576,7 +758,7 @@ public:
             throw("Invalid number");
 
         size_t size = m_Bytes.size();
-        Number Out(CByte(0), size), One(CByte(1), 1);
+        Number Out(CByte(0), size), One(CByte(1), size);
 
         uint8_t iByte = 0;
         do
