@@ -388,7 +388,7 @@ public:
         return *this;
     }
 
-    Number& operator = (const int32_t& iNumber)
+    Number& operator = (const int32_t iNumber)
     {
         ToBinary(std::to_string(iNumber));
         return *this;
