@@ -521,11 +521,26 @@ public:
             throw("Invalid number");
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
         CByte Zero(0), Neg1(255);
         Number out(Zero, stMax);
         unsigned of = 0;
-        for (size_t st = 0; st < stMax; ++st)
+
+        for (size_t st = 0; st < stMin; ++st)
+        {
+            CByte lb = m_Bytes[st];
+            CByte rb = rhs.m_Bytes[st];
+            CByte& ob = out.m_Bytes[st];
+            if (of)
+                lb.setOF(of);
+            ob = lb + rb;
+            of = ob.getOF();
+            if (of)
+                ob.setOF(0);
+        }
+
+        for (size_t st = stMin; st < stMax; ++st)
         {
             CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
@@ -549,11 +564,26 @@ public:
             throw("Invalid number");
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
         CByte Zero(0), Neg1(255);
         Number out(Zero, stMax);
         unsigned of = 0;
-        for (size_t st = 0; st < stMax; ++st)
+
+        for (size_t st = 0; st < stMin; ++st)
+        {
+            CByte lb = m_Bytes[st];
+            CByte rb = rhs.m_Bytes[st];
+            CByte& ob = out.m_Bytes[st];
+            if (of)
+                lb.setOF(of);
+            ob = lb - rb;
+            of = ob.getOF();
+            if (of)
+                ob.setOF(0);
+        }
+
+        for (size_t st = stMin; st < stMax; ++st)
         {
             CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
