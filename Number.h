@@ -521,36 +521,56 @@ public:
             throw("Invalid number");
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
-        size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        CByte Zero(0), Neg1(255);
+        CByte Zero(0);
         Number out(Zero, stMax);
         unsigned of = 0;
 
-        for (size_t st = 0; st < stMin; ++st)
+        CByte lb, rb;
+        if (l == r)
         {
-            CByte lb = m_Bytes[st];
-            CByte rb = rhs.m_Bytes[st];
-            CByte& ob = out.m_Bytes[st];
-            if (of)
-                lb.setOF(of);
-            ob = lb + rb;
-            of = ob.getOF();
-            if (of)
-                ob.setOF(0);
+            for (size_t st = 0; st < stMax; ++st)
+            {
+                lb = m_Bytes[st];
+                rb = rhs.m_Bytes[st];
+                CByte& ob = out.m_Bytes[st];
+                if (of)
+                    lb.setOF(of);
+                ob = lb + rb;
+                of = ob.getOF();
+                if (of)
+                    ob.setOF(0);
+            }
         }
-
-        for (size_t st = stMin; st < stMax; ++st)
+        else
         {
-            CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
-            CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            CByte& ob = out.m_Bytes[st];
-            if (of)
-                lb.setOF(of);
-            ob = lb + rb;
-            of = ob.getOF();
-            if (of)
-                ob.setOF(0);
+            size_t stMin = l == r ? l : (l < r ? l : r);
+            for (size_t st = 0; st < stMin; ++st)
+            {
+                lb = m_Bytes[st];
+                rb = rhs.m_Bytes[st];
+                CByte& ob = out.m_Bytes[st];
+                if (of)
+                    lb.setOF(of);
+                ob = lb + rb;
+                of = ob.getOF();
+                if (of)
+                    ob.setOF(0);
+            }
+
+            CByte Neg1(255);
+            for (size_t st = stMin; st < stMax; ++st)
+            {
+                lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
+                rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+                CByte& ob = out.m_Bytes[st];
+                if (of)
+                    lb.setOF(of);
+                ob = lb + rb;
+                of = ob.getOF();
+                if (of)
+                    ob.setOF(0);
+            }
         }
 
         out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
@@ -564,36 +584,56 @@ public:
             throw("Invalid number");
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
-        size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        CByte Zero(0), Neg1(255);
+        CByte Zero(0);
         Number out(Zero, stMax);
         unsigned of = 0;
 
-        for (size_t st = 0; st < stMin; ++st)
+        CByte lb, rb;
+        if (l == r)
         {
-            CByte lb = m_Bytes[st];
-            CByte rb = rhs.m_Bytes[st];
-            CByte& ob = out.m_Bytes[st];
-            if (of)
-                lb.setOF(of);
-            ob = lb - rb;
-            of = ob.getOF();
-            if (of)
-                ob.setOF(0);
+            for (size_t st = 0; st < stMax; ++st)
+            {
+                lb = m_Bytes[st];
+                rb = rhs.m_Bytes[st];
+                CByte& ob = out.m_Bytes[st];
+                if (of)
+                    lb.setOF(of);
+                ob = lb - rb;
+                of = ob.getOF();
+                if (of)
+                    ob.setOF(0);
+            }
         }
-
-        for (size_t st = stMin; st < stMax; ++st)
+        else
         {
-            CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
-            CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            CByte& ob = out.m_Bytes[st];
-            if (of)
-                lb.setOF(of);
-            ob = lb - rb;
-            of = ob.getOF();
-            if (of)
-                ob.setOF(0);
+            size_t stMin = l == r ? l : (l < r ? l : r);
+            for (size_t st = 0; st < stMin; ++st)
+            {
+                lb = m_Bytes[st];
+                rb = rhs.m_Bytes[st];
+                CByte& ob = out.m_Bytes[st];
+                if (of)
+                    lb.setOF(of);
+                ob = lb - rb;
+                of = ob.getOF();
+                if (of)
+                    ob.setOF(0);
+            }
+
+            CByte Neg1(255);
+            for (size_t st = stMin; st < stMax; ++st)
+            {
+                lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
+                rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+                CByte& ob = out.m_Bytes[st];
+                if (of)
+                    lb.setOF(of);
+                ob = lb - rb;
+                of = ob.getOF();
+                if (of)
+                    ob.setOF(0);
+            }
         }
 
         out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
@@ -606,29 +646,23 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        const Number& lhs = *this;
+        Number lhs = *this;
+        Number out(0, m_Bytes.size());
 
-        Number out(0,4), one(1,4), zero(0,4);
-
-        Number loop = zero;
-        if (rhs.m_bNeg)
+        // For every on bit in the rhs, add the lhs to the list and shifted to get ready for addition
+        std::vector<Number> mlt;
+        for (size_t iByte = 0, nBytes = rhs.m_Bytes.size(); iByte < nBytes; ++iByte)
         {
-            // - and -/+
-            while (loop > rhs)
+            for (size_t iBit = 0; iBit < 8; ++iBit)
             {
-                out = out - lhs;
-                loop = loop - one;
+                if (g_pow[iBit] & rhs.m_Bytes[iByte].m_b.U)
+                    mlt.push_back(lhs);
+                lhs = lhs + lhs;
             }
         }
-        else
-        {
-            // + and -/+
-            while (loop < rhs)
-            {
-                out = out + lhs;
-                loop = loop + one;
-            }
-        }
+
+        for (int im = 0; im < mlt.size(); ++im)
+            out = out + mlt[im];
 
         return out;
     }
@@ -914,6 +948,23 @@ public:
         } while (iByte != size);
 
         return strResult;
+    }
+
+    std::string ToBinary() const
+    {
+        size_t nBin = m_Bytes.size() * size_t(8);
+        std::string strBin(nBin, '0');
+
+        for (size_t iByte = 0, nBytes = m_Bytes.size(); iByte < nBytes; ++iByte, nBin -= 8)
+        {
+            for (size_t iBit = 0; iBit < 8; ++iBit)
+            {
+                if (g_pow[iBit] & m_Bytes[iByte].m_b.U)
+                    strBin[nBin - iBit - 1] = '1';
+            }
+        }
+
+        return strBin;
     }
 
 protected:

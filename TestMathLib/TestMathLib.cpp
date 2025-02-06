@@ -1182,11 +1182,53 @@ namespace TestMathLib
 		{
 			Number A, B, C;
 			int a, b, c;
+			std::string s;
 
 			////// TEST CASE //////
 
+			A = -98765;
+			s = A.ToBinary();
+			std::cout << s << std::endl;
+
+			A = a = 7;
+			B = b = 8;
+
+			c = a * b;
+			C = A * B;
+
+			if (std::to_string(c) != C.ToDisplay())
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
+			A = a = 7;
+			B = b = -8;
+
+			c = a * b;
+			C = A * B;
+
+			if (std::to_string(c) != C.ToDisplay())
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
+			A = a = -7;
+			B = b = 8;
+
+			c = a * b;
+			C = A * B;
+
+			if (std::to_string(c) != C.ToDisplay())
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
+			A = a = -7;
+			B = b = -8;
+
+			c = a * b;
+			C = A * B;
+
+			if (std::to_string(c) != C.ToDisplay())
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
 			A = a = -127;
 			B = b = -127;
+			A.SetSize(8);
 
 			++a;
 			++b;
