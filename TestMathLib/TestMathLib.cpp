@@ -1186,12 +1186,82 @@ namespace TestMathLib
 
 			////// TEST CASE //////
 
+			A = a = 127;
+			B = b = 25;
+
+			c = a / b;
+			C = A / B;
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
+			A = a = 125;
+			B = b = 25;
+
+			c = a / b;
+			C = A / B;
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
+			A = a = -361;
+			B = b = 53;
+
+			c = a / b;
+			C = A / B;
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
+			A = a = 361;
+			B = b = -53;
+
+			c = a / b;
+			C = A / B;
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
+			A = a = -361;
+			B = b = -53;
+
+			c = a / b;
+			C = A / B;
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
+			///////////////////////////////////////////////////////////////////////////////////////////////
+
+			////// TEST CASE //////
+
+			B = 1;
+			B = B.Shl();
+			s = B.ToDisplay();
+
+			B = 1;
+			B = B.Rol();
+			s = B.ToDisplay();
+
+			A = 56;
+			B = 7;
+			C = A / B;
+
 			A = -98765;
 			s = A.ToBinary();
 			std::cout << s << std::endl;
 
+			/// Notes - Shifting is not safe yet for doubling or halving
+
+			////// TEST CASE //////
+
 			A = a = 7;
-			B = b = 8;
+			B = b = 65535;
 
 			c = a * b;
 			C = A * B;
@@ -1679,17 +1749,36 @@ namespace TestMathLib
 					if (j == 0)
 						continue;
 
-					int no = i * j;
-					NO = NI * NJ;
+					int no = i / j;
+					NO = NI / NJ;
 
 					std::string strNO = NO.ToDisplay();
 					if (std::to_string(no) != strNO)
 						Assert::AreEqual(std::to_string(no), strNO);
 
-					no = i % j;
+					i++;
+				}
+				j++;
+			}
+		}
+
+		TEST_METHOD(ByteModulus)
+		{
+			Number NI, NJ, NO;
+
+			int j = -127;
+			for (NJ = j; NJ < 128; ++NJ)
+			{
+				int i = -127;
+				for (NI = -127; NI < 128; ++NI)
+				{
+					if (j == 0)
+						continue;
+
+					int no = i % j;
 					NO = NI % NJ;
 
-					strNO = NO.ToDisplay();
+					std::string strNO = NO.ToDisplay();
 					if (std::to_string(no) != strNO)
 						Assert::AreEqual(std::to_string(no), strNO);
 

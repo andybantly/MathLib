@@ -646,10 +646,9 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
+        Number out(CByte(0), m_Bytes.size());
         Number lhs = *this;
-        Number out(0, m_Bytes.size());
 
-        // For every on bit in the rhs, add the lhs to the list and shifted to get ready for addition
         std::vector<Number> mlt;
         for (size_t iByte = 0, nBytes = rhs.m_Bytes.size(); iByte < nBytes; ++iByte)
         {
@@ -661,7 +660,7 @@ public:
             }
         }
 
-        for (int im = 0; im < mlt.size(); ++im)
+        for (size_t im = 0; im < mlt.size(); ++im)
             out = out + mlt[im];
 
         return out;
@@ -672,65 +671,54 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        const Number& lhs = *this;
-
-        Number tmp(0, 4), one(1, 4), zero(0, 4);
-        
-        Number loop;
+        Number loop, zero(CByte(0), m_Bytes.size());
         if (rhs == zero)
             return loop;
-        loop = zero;
-        if (lhs == zero)
-            return zero;
+
+        Number lhs = *this;
+        Number rhsin = rhs;
 
         if (m_bNeg)
         {
-            if (rhs.m_bNeg)
-            {
-                while (tmp > lhs)
-                {
-                    tmp = tmp + rhs;
-                    loop = loop + one;
-                }
-
-                if (tmp != lhs)
-                    loop = loop - one;
-            }
-            else
-            {
-                while (tmp > lhs)
-                {
-                    tmp = tmp - rhs;
-                    loop = loop - one;
-                }
-
-                if (tmp != lhs)
-                    loop = loop + one;
-            }
+            lhs = lhs.TwosComplement();
+            lhs.m_bNeg = false;
         }
-        else
+
+        if (rhs.m_bNeg)
         {
-            if (rhs.m_bNeg)
-            {
-                while (tmp < lhs)
-                {
-                    tmp = tmp - rhs;
-                    loop = loop - one;
-                }
+            rhsin = rhsin.TwosComplement();
+            rhsin.m_bNeg = false;
+        }
 
-                if (tmp != lhs)
-                    loop = loop + one;
-            }
-            else
-            {
-                while (tmp < lhs)
-                {
-                    tmp = tmp + rhs;
-                    loop = loop + one;
-                }
+        Number dbl = rhsin;
+        Number pow(CByte(1), m_Bytes.size());
 
-                if (tmp != lhs)
-                    loop = loop - one;
+        std::vector<Number> vdbl(1, dbl);
+        std::vector<Number> vpow(1, pow);
+
+        while (dbl < lhs)
+        {
+            dbl = dbl + dbl;
+            pow = pow + pow;
+            vdbl.push_back(dbl);
+            vpow.push_back(pow);
+        }
+
+        loop = zero;
+        for (size_t ndbl = vdbl.size();ndbl > 0;ndbl--)
+        {
+            if (vdbl[ndbl - 1] > lhs)
+                continue;
+            loop = loop + vpow[ndbl - 1];
+            lhs = lhs - vdbl[ndbl - 1];
+        }
+
+        if (loop != zero)
+        {
+            if (m_bNeg != rhs.m_bNeg)
+            {
+                loop = loop.TwosComplement();
+                loop.m_bNeg = true;
             }
         }
 
@@ -742,67 +730,55 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        const Number& lhs = *this;
-
-        Number tmp(0, 4), one(1, 4), zero(0, 4);
-
-        Number rem;
+        Number loop, zero(CByte(0), m_Bytes.size());
         if (rhs == zero)
-            return rem;
-        rem = zero;
+            return loop;
+
+        Number lhs = *this;
+        Number rhsin = rhs;
 
         if (m_bNeg)
         {
-            if (rhs.m_bNeg)
-            {
-                while (tmp > lhs)
-                    tmp = tmp + rhs;
-
-                if (tmp != lhs)
-                {
-                    tmp = tmp - rhs;
-                    rem = lhs - tmp;
-                }
-            }
-            else
-            {
-                while (tmp > lhs)
-                    tmp = tmp - rhs;
-
-                if (tmp != lhs)
-                {
-                    tmp = tmp + rhs;
-                    rem = lhs - tmp;
-                }
-            }
+            lhs = lhs.TwosComplement();
+            lhs.m_bNeg = false;
         }
-        else
+
+        if (rhs.m_bNeg)
         {
-            if (rhs.m_bNeg)
-            {
-                while (tmp < lhs)
-                    tmp = tmp - rhs;
-
-                if (tmp != lhs)
-                {
-                    tmp = tmp + rhs;
-                    rem = lhs - tmp;
-                }
-            }
-            else
-            {
-                while (tmp < lhs)
-                    tmp = tmp + rhs;
-
-                if (tmp != lhs)
-                {
-                    tmp = tmp - rhs;
-                    rem = lhs - tmp;
-                }
-            }
+            rhsin = rhsin.TwosComplement();
+            rhsin.m_bNeg = false;
         }
 
-        return rem;
+        Number dbl = rhsin;
+        Number pow(CByte(1), m_Bytes.size());
+
+        std::vector<Number> vdbl(1, dbl);
+        std::vector<Number> vpow(1, pow);
+
+        while (dbl < lhs)
+        {
+            dbl = dbl + dbl;
+            pow = pow + pow;
+            vdbl.push_back(dbl);
+            vpow.push_back(pow);
+        }
+
+        loop = zero;
+        for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+        {
+            if (vdbl[ndbl - 1] > lhs)
+                continue;
+            loop = loop + vpow[ndbl - 1];
+            lhs = lhs - vdbl[ndbl - 1];
+        }
+
+        if (lhs != zero && (m_bNeg || (m_bNeg && rhs.m_bNeg)))
+        {
+            lhs = lhs.TwosComplement();
+            lhs.m_bNeg = true;
+        }
+
+        return lhs;
     }
 
     void SetSize(size_t uiSize)
@@ -813,6 +789,120 @@ public:
     size_t GetSize()
     {
         return m_Bytes.size();
+    }
+
+    Number Shr() // Shift Right
+    {
+        Number out = *this;
+
+        size_t iByte = 0;
+        for (size_t nBytes = out.m_Bytes.size() - 1; iByte < nBytes; iByte++)
+        {
+            out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte].m_b.B.B2;
+            out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B3;
+            out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B4;
+            out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B5;
+            out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B6;
+            out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B7;
+            out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B8;
+            out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte + 1].m_b.B.B1;
+        }
+
+        out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte].m_b.B.B2;
+        out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B3;
+        out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B4;
+        out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B5;
+        out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B6;
+        out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B7;
+        out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B8;
+        out.m_Bytes[iByte].m_b.B.B8 = m_bNeg;
+
+        return out;
+    }
+
+    Number Shl() // Shift Left
+    {
+        Number out = *this;
+
+        size_t iByte = out.m_Bytes.size() - 1;
+        for (; iByte != 0; iByte--)
+        {
+            out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte].m_b.B.B7;
+            out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B6;
+            out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B5;
+            out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B4;
+            out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B3;
+            out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B2;
+            out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B1;
+            out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte - 1].m_b.B.B8;
+        }
+
+        out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte].m_b.B.B7;
+        out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B6;
+        out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B5;
+        out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B4;
+        out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B3;
+        out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B2;
+        out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B1;
+        out.m_Bytes[iByte].m_b.B.B1 = m_bNeg;
+
+        return out;
+    }
+
+    Number Ror() // Roll Right
+    {
+        Number out = *this;
+        unsigned bit = out.m_Bytes[0].m_b.B.B1;
+        size_t iByte = 0;
+        for (size_t nBytes = out.m_Bytes.size() - 1; iByte < nBytes; iByte++)
+        {
+            out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte].m_b.B.B2;
+            out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B3;
+            out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B4;
+            out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B5;
+            out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B6;
+            out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B7;
+            out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B8;
+            out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte + 1].m_b.B.B1;
+        }
+        out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte].m_b.B.B2;
+        out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B3;
+        out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B4;
+        out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B5;
+        out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B6;
+        out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B7;
+        out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B8;
+        out.m_Bytes[iByte].m_b.B.B8 = bit;
+        return out;
+    }
+
+    Number Rol() // Roll Left
+    {
+        Number out = *this;
+        unsigned bit = out.m_Bytes[0].m_b.B.B8;
+        size_t iByte = out.m_Bytes.size() - 1;
+        for (; iByte != 0; iByte--)
+        {
+            out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte].m_b.B.B7;
+            out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B6;
+            out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B5;
+            out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B4;
+            out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B3;
+            out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B2;
+            out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B1;
+            out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte - 1].m_b.B.B8;
+        }
+
+        out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte].m_b.B.B7;
+        out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B6;
+        out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B5;
+        out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B4;
+        out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B3;
+        out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B2;
+        out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B1;
+        out.m_Bytes[iByte].m_b.B.B1 = bit;
+
+        return out;
     }
 
     // Conversion functions
