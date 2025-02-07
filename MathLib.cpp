@@ -58,59 +58,102 @@ int main()
 
 				if (vNumbers.size() == 1)
 				{
-					CNumber Number(strInput);
-					const string& strPhrase = Number.GetPhrase();
-					const string& strBinary = Number.GetBinary();
+					CNumber Number1(strInput);
+					Number N(strInput);
+					const string& strPhrase = Number1.GetPhrase();
+					const string& strBinary = Number1.GetBinary();
 					string strBase10;
-					Number.ToBase10(strBinary, strBase10);
-					std::cout << Number << " = " << strPhrase << " = " << strBinary << " = " << strBase10 << endl;
+					Number1.ToBase10(strBinary, strBase10);
+					std::cout << Number1 << " " << strBinary << endl;
+					std::cout << N.ToDisplay() << " " << N.ToBinary() << endl;
 					std::cout << endl;
 				}
 				else if (vNumbers.size() >= 3)
 				{
 					do
 					{
-						CNumber Number(vNumbers[0]);
+						CNumber Number1(vNumbers[0]);
 						CNumber Number2(vNumbers[2]);
 						CNumber Sum;
 
+						Number N1(vNumbers[0]);
+						Number N2(vNumbers[2]);
+						Number S;
+
 						string strBase10;
-						Number.ToBase10(Number.GetBinary(), strBase10);
-						std::cout << Number << " = " << Number.GetPhrase() << " = " << Number.GetBinary() << " = " << strBase10 << endl;
+						Number1.ToBase10(Number1.GetBinary(), strBase10);
+						std::cout << Number1 << " " << Number1.GetBinary() << endl;
+
 						std::cout << vNumbers[1] << endl;
+
 						Number2.ToBase10(Number2.GetBinary(), strBase10);
-						std::cout << Number2 << " = " << Number2.GetPhrase() << " = " << Number2.GetBinary() << " = " << strBase10 << endl;
-						bool bCMP = false;
+						std::cout << Number2 << " " << Number2.GetBinary() << endl;
+
+						bool bCMP = false, bCMP2 = false;
 						if (vNumbers[1] == "+")
-							Sum = Number + Number2;
+						{
+							Sum = Number1 + Number2;
+							S = N1 + N2;
+						}
 						else if (vNumbers[1] == "-")
-							Sum = Number - Number2;
+						{
+							Sum = Number1 - Number2;
+							S = N1 - N2;
+						}
 						else if (vNumbers[1] == "*")
-							Sum = Number * Number2;
+						{
+							Sum = Number1 * Number2;
+							S = N1 * N2;
+						}
 						else if (vNumbers[1] == "/")
-							Sum = Number / Number2;
+						{
+							Sum = Number1 / Number2;
+							S = N1 / N2;
+						}
 						else if (vNumbers[1] == "%")
-							Sum = Number % Number2;
+						{
+							Sum = Number1 % Number2;
+							S = N1 % N2;
+						}
 						else if (vNumbers[1] == "<")
-							bCMP = Number < Number2;
+						{
+							bCMP = Number1 < Number2;
+							bCMP2 = N1 < N2;
+						}
 						else if (vNumbers[1] == ">")
-							bCMP = Number > Number2;
+						{
+							bCMP = Number1 > Number2;
+							bCMP2 = N1 > N2;
+						}
 						else if (vNumbers[1] == "=")
-							bCMP = Number == Number2;
+						{
+							bCMP = Number1 == Number2;
+							bCMP2 = N1 == N2;
+						}
 						else if (vNumbers[1] == "<=")
-							bCMP = Number <= Number2;
+						{
+							bCMP = Number1 <= Number2;
+							bCMP2 = N1 <= N2;
+						}
 						else if (vNumbers[1] == ">=")
-							bCMP = Number >= Number2;
+						{
+							bCMP = Number1 >= Number2;
+							bCMP2 = N1 >= N2;
+						}
 
 						if (vNumbers[1] == "+" || vNumbers[1] == "-" || vNumbers[1] == "*" || vNumbers[1] == "/" || vNumbers[1] == "%")
 						{
 							Sum.ToBase10(Sum.GetBinary(), strBase10);
-							std::cout << Sum.GetNumber() << " = " << Sum.GetPhrase() << " = " << Sum.GetBinary() << " = " << strBase10 << endl;
+							std::cout << Sum.GetNumber() << " = " << Sum.GetBinary() << endl;
+							std::cout << S.ToDisplay() << " = " << S.ToBinary() << endl;
 						}
 						else
 						{
 							Sum = bCMP ? "1" : "0";
-							std::cout << Number.GetNumber() << " " + vNumbers[1] + " " << Number2.GetNumber() << " = " << (bCMP ? "TRUE" : "FALSE") << endl;
+							std::cout << Number1.GetNumber() << " " + vNumbers[1] + " " << Number2.GetNumber() << " = " << (bCMP ? "TRUE" : "FALSE") << endl;
+
+							S = bCMP2 ? "1" : "0";
+							std::cout << N1.ToDisplay() << " " + vNumbers[1] + " " << N2.ToDisplay() << " = " << (bCMP2 ? "TRUE" : "FALSE") << endl;
 						}
 
 						vNumbers2.clear();
