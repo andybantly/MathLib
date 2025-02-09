@@ -668,71 +668,22 @@ public:
 
     Number operator / (const Number& rhs) const
     {
-        if (m_bNAN || rhs.m_bNAN)
-            throw("Invalid number");
-
-        Number loop, zero(CByte(0), m_Bytes.size());
-        if (rhs == zero)
-            return loop;
-
-        Number lhs = *this;
-        Number rhsin = rhs;
-
-        if (m_bNeg)
-        {
-            lhs = lhs.TwosComplement();
-            lhs.m_bNeg = false;
-        }
-
-        if (rhs.m_bNeg)
-        {
-            rhsin = rhsin.TwosComplement();
-            rhsin.m_bNeg = false;
-        }
-
-        Number dbl = rhsin;
-        Number pow(CByte(1), m_Bytes.size());
-
-        std::vector<Number> vdbl(1, dbl);
-        std::vector<Number> vpow(1, pow);
-
-        while (dbl < lhs)
-        {
-            dbl = dbl + dbl;
-            pow = pow + pow;
-            vdbl.push_back(dbl);
-            vpow.push_back(pow);
-        }
-
-        loop = zero;
-        for (size_t ndbl = vdbl.size();ndbl > 0;ndbl--)
-        {
-            if (vdbl[ndbl - 1] > lhs)
-                continue;
-            loop = loop + vpow[ndbl - 1];
-            lhs = lhs - vdbl[ndbl - 1];
-        }
-
-        if (loop != zero)
-        {
-            if (m_bNeg != rhs.m_bNeg)
-            {
-                loop = loop.TwosComplement();
-                loop.m_bNeg = true;
-            }
-        }
-
-        return loop;
+        return (operator , (rhs)).first;
     }
 
     Number operator % (const Number& rhs) const
+    {
+        return (operator , (rhs)).second;
+    }
+
+    std::pair<Number, Number> operator , (const Number& rhs) const
     {
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
         Number loop, zero(CByte(0), m_Bytes.size());
         if (rhs == zero)
-            return loop;
+            return std::pair<Number, Number>(loop, loop);
 
         Number lhs = *this;
         Number rhsin = rhs;
@@ -778,12 +729,16 @@ public:
             lhs.m_bNeg = true;
         }
 
-        return lhs;
-    }
+        if (loop != zero)
+        {
+            if (m_bNeg != rhs.m_bNeg)
+            {
+                loop = loop.TwosComplement();
+                loop.m_bNeg = true;
+            }
+        }
 
-    std::pair<Number, Number> operator , (const Number& rhs) const
-    {
-        return std::pair<Number, Number>(operator / (rhs), operator % (rhs));
+        return std::pair<Number, Number>(loop, lhs);
     }
 
     void SetSize(size_t uiSize)

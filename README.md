@@ -33,7 +33,8 @@ It has the following arithmetic operators
 - : subtraction		:	returns new number
 * : multiplication	:	returns new number
 / : division		:	returns new number
-% : modulus			:	returns new number
+% : modulus			:	returns new number					
+, : div and mod     :   returns a pair of number(s)
 
 It has the following properties
 

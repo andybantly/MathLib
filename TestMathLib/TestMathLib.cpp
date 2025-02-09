@@ -1204,10 +1204,10 @@ namespace TestMathLib
 				Assert::AreEqual(std::to_string(c), C.ToDisplay());
 
 			std::pair<Number, Number> QR = (A , B);
-
-			s = C.ToDisplay();
-			if (std::to_string(c) != s)
-				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+			if (std::to_string(a / b) != QR.first.ToDisplay())
+				Assert::AreEqual(std::to_string(a / b), QR.first.ToDisplay());
+			if (std::to_string(a % b) != QR.second.ToDisplay())
+				Assert::AreEqual(std::to_string(a % b), QR.second.ToDisplay());
 
 			A = a = 125;
 			B = b = 25;
