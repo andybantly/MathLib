@@ -15,7 +15,7 @@ int main()
 	bool bAgain = true;
 	do
 	{
-		std::cout << "Enter a number, set of numbers separated by arithmetic or comparison operations (+,-,*,/,%, <, >, <=, >=, =)" << endl << "Enter 'test' for verification or 'quit' to exit." << endl << "Examples: 12 * 11 + 12, three + 4 - two, 9 / 3 + 7 * 10, 10 % 3, 2 < 3" << endl << "Input: ";
+		std::cout << "Enter a number, set of numbers separated by arithmetic or comparison operations (+,-,*,/,%, <, >, <=, >=, =)" << endl << "Enter 'test' for verification or 'quit' to exit." << endl << "Examples: 2147483647, 12 * 11 + 12, three + 4 - two, 9 / 3 + 7 * 10, 10 % 3, 2 < 3" << endl << "Input: ";
 
 		strInput.clear();
 		char c;

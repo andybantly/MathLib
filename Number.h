@@ -781,6 +781,11 @@ public:
         return lhs;
     }
 
+    std::pair<Number, Number> operator , (const Number& rhs) const
+    {
+        return std::pair<Number, Number>(operator / (rhs), operator % (rhs));
+    }
+
     void SetSize(size_t uiSize)
     {
         m_Bytes.resize(uiSize, m_bNeg ? 255 : 0);

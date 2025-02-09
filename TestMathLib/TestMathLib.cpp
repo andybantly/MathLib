@@ -1196,6 +1196,19 @@ namespace TestMathLib
 			if (std::to_string(c) != s)
 				Assert::AreEqual(std::to_string(c), C.ToDisplay());
 
+			c = a % b;
+			C = A % B;
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
+			std::pair<Number, Number> QR = (A , B);
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+
 			A = a = 125;
 			B = b = 25;
 
