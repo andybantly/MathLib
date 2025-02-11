@@ -6,10 +6,25 @@
 
 #pragma warning(disable:6385)
 
-using namespace std;
+using namespace std; // get rid of this
 
 int main()
 {
+/*
+	int i = 0, j = 1;
+	std::cout << (i = j, j + i) << " i=" << i << " j=" << j << std::endl;
+
+	i = 0, j = 1;
+	std::cout << i << " " << j << std::endl;
+	while (true)
+	{
+		j = (i = j - i, j + i);
+		std::cout << i << " " << j << std::endl;
+	}
+*/
+
+	//std::cout << "0\n1\n1" << std::endl; for (int j = 1, i = 0; j = (i = j - i, j + i); std::cout << j << std::endl) {if (j == 1134903170)	break;}
+
 	CNumber::Init();
 	string strInput, strResult;
 	bool bAgain = true;
