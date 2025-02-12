@@ -10,19 +10,6 @@ using namespace std; // get rid of this
 
 int main()
 {
-	//std::cout << "0\n1\n1" << std::endl; for (int j = 1, i = 0; j = (i = j - i, j + i); std::cout << j << std::endl) {if (j == 1134903170)	break;}
-
-	{
-		CDuration FS("Fibonacci Sequence - 96 byte signed integer");
-		Number NJ = 1, NI = 0;
-		NJ.SetSize(96);
-		NI.SetSize(96);
-		while ((NJ = (NI = NJ - NI, NJ + NI)) > 0)
-		{
-			std::cout << NJ.ToDisplay() << std::endl;
-		}
-	}
-
 	CNumber::Init();
 	string strInput, strResult;
 	bool bAgain = true;

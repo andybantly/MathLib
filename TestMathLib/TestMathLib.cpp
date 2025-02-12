@@ -1178,6 +1178,50 @@ namespace TestMathLib
 				delete* it;
 		}
 
+		TEST_METHOD(FibComma)
+		{
+			// Comma operator
+			Number NJ = 1, NI = 0, NZ = 0;
+			NJ.SetSize(96);
+			NI.SetSize(96);
+
+			while ((NJ = (NI = NJ - NI, NJ + NI)) > NZ) {}
+		}
+
+		TEST_METHOD(FibObj)
+		{
+			// Traditional Swap
+			Number NJ = 1, NI = 0, NZ = 0;
+			Number Fib1 = 0, Fib2 = 1, Fib3 = 1;
+
+			Fib1.SetSize(96);
+			Fib2.SetSize(96);
+			Fib3.SetSize(96);
+			while (Fib3 > NZ)
+			{
+				Fib1 = Fib2;
+				Fib2 = Fib3;
+				Fib3 = Fib1 + Fib2;
+			}
+		}
+
+		TEST_METHOD(FibArr)
+		{
+			// Traditional Arrays Swap
+			Number NJ = 1, NI = 0, NZ = 0;
+			Number Fib[3] = { 0, 1, 1 };
+
+			Fib[0].SetSize(96);
+			Fib[1].SetSize(96);
+			Fib[2].SetSize(96);
+			while (Fib[2] > NZ)
+			{
+				Fib[0] = Fib[1];
+				Fib[1] = Fib[2];
+				Fib[2] = Fib[0] + Fib[1];
+			}
+		}
+
 		TEST_METHOD(ByteCornerCases)
 		{
 			Number A, B, C;
