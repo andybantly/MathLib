@@ -200,6 +200,27 @@ public:
 
 static uint8_t g_pow[8] = { 1,2,4,8,16,32,64,128 }; 
 
+class ByteConv
+{
+public:
+    ByteConv(int32_t U) { m_B.U = U; }
+    struct _Bytes
+    {
+        unsigned B1 : 8;
+        unsigned B2 : 8;
+        unsigned B3 : 8;
+        unsigned B4 : 8;
+    };
+
+    union BYTES
+    {
+        struct _Bytes B;
+        int32_t U;
+    };
+
+    BYTES m_B;
+};
+
 class Number
 {
 protected:
@@ -347,6 +368,19 @@ protected:
         XTRA m_x;
     };
 
+    // Helper to convert to the internal format
+    void Convert(const int32_t iNumber)
+    {
+        ByteConv BC(iNumber);
+        m_bNeg = iNumber < 0;
+        m_Bytes.resize(4, m_bNeg ? CByte(255) : CByte(0));
+        m_Bytes[0] = BC.m_B.B.B1;
+        m_Bytes[1] = BC.m_B.B.B2;
+        m_Bytes[2] = BC.m_B.B.B3;
+        m_Bytes[3] = BC.m_B.B.B4;
+        m_bNAN = false;
+    }
+
 public:
     Number() : m_bNeg(false), m_bNAN(true) {};
 
@@ -362,7 +396,7 @@ public:
 
     Number(const int32_t iNumber)
     {
-        ToBinary(std::to_string(iNumber));
+        Convert(iNumber);
     }
 
     Number(CByte ch, size_t size)
@@ -390,7 +424,7 @@ public:
 
     Number& operator = (const int32_t iNumber)
     {
-        ToBinary(std::to_string(iNumber));
+        Convert(iNumber);
         return *this;
     }
 
