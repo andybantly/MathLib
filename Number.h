@@ -236,7 +236,7 @@ protected:
         CByte operator + (const CByte& rhs) const // Full-Adder
         {
             CByte Out;
-            Out.setCB(getCB()); // Is there a better way to handle Carry?
+            Out.m_x.X0 = m_x.X0; // Is there a better way to handle Carry?
 
             Out.m_b.B.B1 = Out.m_x.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
             Out.m_x.X0 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X0) | (m_b.B.B1 & Out.m_x.X0); // CARRY: Carry-out AB OR BC OR ACin
@@ -268,7 +268,7 @@ protected:
         CByte operator - (const CByte& rhs) const // Full-Subtractor
         {
             CByte Out;
-            Out.setCB(getCB()); // Is there a better way to handle borrowing?
+            Out.m_x.X0 = m_x.X0; // Is there a better way to handle borrowing?
 
             Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.m_x.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
             Out.m_x.X0 = (~m_b.B.B1 & Out.m_x.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
@@ -295,16 +295,6 @@ protected:
             Out.m_x.X0 = (~m_b.B.B8 & Out.m_x.X0) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X0);
 
             return Out;
-        }
-
-        unsigned getCB() const
-        {
-            return m_x.X0; // X0 used to indicate a carry/borrow
-        }
-
-        void setCB(const unsigned rhs)
-        {
-            m_x.X0 = rhs;
         }
 
         struct _Bits
@@ -536,11 +526,11 @@ public:
                 rb = rhs.m_Bytes[st];
                 CByte& ob = out.m_Bytes[st];
                 if (of)
-                    lb.setCB(of);
+                    lb.m_x.X0 = of;
                 ob = lb + rb;
-                of = ob.getCB();
+                of = ob.m_x.X0;
                 if (of)
-                    ob.setCB(0);
+                    ob.m_x.X0 = 0;
             }
         }
         else
@@ -552,11 +542,11 @@ public:
                 rb = rhs.m_Bytes[st];
                 CByte& ob = out.m_Bytes[st];
                 if (of)
-                    lb.setCB(of);
+                    lb.m_x.X0 = of;
                 ob = lb + rb;
-                of = ob.getCB();
+                of = ob.m_x.X0;
                 if (of)
-                    ob.setCB(0);
+                    ob.m_x.X0 = 0;
             }
 
             CByte Neg1(255);
@@ -566,11 +556,11 @@ public:
                 rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
                 CByte& ob = out.m_Bytes[st];
                 if (of)
-                    lb.setCB(of);
+                    lb.m_x.X0 = of;
                 ob = lb + rb;
-                of = ob.getCB();
+                of = ob.m_x.X0;
                 if (of)
-                    ob.setCB(0);
+                    ob.m_x.X0 = 0;
             }
         }
 
@@ -599,11 +589,11 @@ public:
                 rb = rhs.m_Bytes[st];
                 CByte& ob = out.m_Bytes[st];
                 if (of)
-                    lb.setCB(of);
+                    lb.m_x.X0 = of;
                 ob = lb - rb;
-                of = ob.getCB();
+                of = ob.m_x.X0;
                 if (of)
-                    ob.setCB(0);
+                    ob.m_x.X0 = 0;
             }
         }
         else
@@ -615,11 +605,11 @@ public:
                 rb = rhs.m_Bytes[st];
                 CByte& ob = out.m_Bytes[st];
                 if (of)
-                    lb.setCB(of);
+                    lb.m_x.X0 = of;
                 ob = lb - rb;
-                of = ob.getCB();
+                of = ob.m_x.X0;
                 if (of)
-                    ob.setCB(0);
+                    ob.m_x.X0 = 0;
             }
 
             CByte Neg1(255);
@@ -629,11 +619,11 @@ public:
                 rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
                 CByte& ob = out.m_Bytes[st];
                 if (of)
-                    lb.setCB(of);
+                    lb.m_x.X0 = of;
                 ob = lb - rb;
-                of = ob.getCB();
+                of = ob.m_x.X0;
                 if (of)
-                    ob.setCB(0);
+                    ob.m_x.X0 = 0;
             }
         }
 
