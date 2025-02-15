@@ -65,7 +65,7 @@ int main()
 					string strBase10;
 					Number1.ToBase10(strBinary, strBase10);
 					std::cout << Number1 << " " << strBinary << endl;
-					std::cout << N.ToDisplay() << " " << N.ToBinary() << endl;
+					std::cout << N << " " << N.ToBinary() << endl;
 					std::cout << endl;
 				}
 				else if (vNumbers.size() >= 3)
@@ -153,7 +153,7 @@ int main()
 							std::cout << Number1.GetNumber() << " " + vNumbers[1] + " " << Number2.GetNumber() << " = " << (bCMP ? "TRUE" : "FALSE") << endl;
 
 							S = bCMP2 ? "1" : "0";
-							std::cout << N1.ToDisplay() << " " + vNumbers[1] + " " << N2.ToDisplay() << " = " << (bCMP2 ? "TRUE" : "FALSE") << endl;
+							std::cout << N1 << " " + vNumbers[1] + " " << N2 << " = " << (bCMP2 ? "TRUE" : "FALSE") << endl;
 						}
 
 						vNumbers2.clear();

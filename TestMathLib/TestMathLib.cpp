@@ -1222,6 +1222,30 @@ namespace TestMathLib
 			}
 		}
 
+		TEST_METHOD(ByteMixSize)
+		{
+			Number A, B, C;
+			int a, b, c;
+			std::string s;
+
+			////// TEST CASE //////
+			A = a = 1, B = b = 255;
+			A.SetSize(1);
+			C = A + B;
+			c = a + b;
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), s);
+
+			C = B + A;
+			c = b + a;
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), s);
+		}
+
 		TEST_METHOD(ByteCornerCases)
 		{
 			Number A, B, C;

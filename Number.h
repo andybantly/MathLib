@@ -227,8 +227,8 @@ protected:
         {
             if (this != &rhs)
             {
-                m_b = rhs.m_b;
-                m_x = rhs.m_x;
+                m_b.U = rhs.m_b.U;
+                m_x.X0 = rhs.m_x.X0;
             }
             return *this;
         }
@@ -1066,6 +1066,12 @@ public:
         }
 
         return strBin;
+    }
+
+    friend std::ostream& operator << (std::ostream& out, Number& rhs)
+    {
+        out << rhs.ToDisplay();
+        return out;
     }
 
 protected:
