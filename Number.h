@@ -209,13 +209,13 @@ protected:
         CByte()
         {
             m_b.U = 0;
-            m_x.U = 0;
+            m_x.X0 = 0;
         }
 
         CByte(int32_t byte)
         {
             m_b.U = byte;
-            m_x.U = 0;
+            m_x.X0 = 0;
         };
 
         CByte(const CByte& rhs)
@@ -238,29 +238,29 @@ protected:
             CByte Out;
             Out.setOF(getOF()); // Is there a better way to handle Carry?
 
-            Out.m_b.B.B1 = Out.m_x.X.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
-            Out.m_x.X.X1 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0) | (m_b.B.B1 & Out.m_x.X.X0); // CARRY: Carry-out AB OR BC OR ACin
+            Out.m_b.B.B1 = Out.m_x.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
+            Out.m_x.X0 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X0) | (m_b.B.B1 & Out.m_x.X0); // CARRY: Carry-out AB OR BC OR ACin
 
-            Out.m_b.B.B2 = Out.m_x.X.X1 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
-            Out.m_x.X.X2 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X.X1) | (m_b.B.B2 & Out.m_x.X.X1);
+            Out.m_b.B.B2 = Out.m_x.X0 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
+            Out.m_x.X0 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X0) | (m_b.B.B2 & Out.m_x.X0);
 
-            Out.m_b.B.B3 = Out.m_x.X.X2 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
-            Out.m_x.X.X3 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X.X2) | (m_b.B.B3 & Out.m_x.X.X2);
+            Out.m_b.B.B3 = Out.m_x.X0 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
+            Out.m_x.X0 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X0) | (m_b.B.B3 & Out.m_x.X0);
 
-            Out.m_b.B.B4 = Out.m_x.X.X3 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
-            Out.m_x.X.X4 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X.X3) | (m_b.B.B4 & Out.m_x.X.X3);
+            Out.m_b.B.B4 = Out.m_x.X0 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
+            Out.m_x.X0 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X0) | (m_b.B.B4 & Out.m_x.X0);
 
-            Out.m_b.B.B5 = Out.m_x.X.X4 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
-            Out.m_x.X.X5 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X.X4) | (m_b.B.B5 & Out.m_x.X.X4);
+            Out.m_b.B.B5 = Out.m_x.X0 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
+            Out.m_x.X0 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X0) | (m_b.B.B5 & Out.m_x.X0);
 
-            Out.m_b.B.B6 = Out.m_x.X.X5 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
-            Out.m_x.X.X6 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X.X5) | (m_b.B.B6 & Out.m_x.X.X5);
+            Out.m_b.B.B6 = Out.m_x.X0 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
+            Out.m_x.X0 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X0) | (m_b.B.B6 & Out.m_x.X0);
 
-            Out.m_b.B.B7 = Out.m_x.X.X6 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
-            Out.m_x.X.X7 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X.X6) | (m_b.B.B7 & Out.m_x.X.X6);
+            Out.m_b.B.B7 = Out.m_x.X0 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
+            Out.m_x.X0 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X0) | (m_b.B.B7 & Out.m_x.X0);
 
-            Out.m_b.B.B8 = Out.m_x.X.X7 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
-            Out.m_x.X.X0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X.X7) | (m_b.B.B8 & Out.m_x.X.X7);
+            Out.m_b.B.B8 = Out.m_x.X0 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
+            Out.m_x.X0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X0) | (m_b.B.B8 & Out.m_x.X0);
 
             return Out;
         }
@@ -270,41 +270,41 @@ protected:
             CByte Out;
             Out.setOF(getOF()); // Is there a better way to handle borrowing?
 
-            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.m_x.X.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
-            Out.m_x.X.X1 = (~m_b.B.B1 & Out.m_x.X.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
+            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.m_x.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
+            Out.m_x.X0 = (~m_b.B.B1 & Out.m_x.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
 
-            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ Out.m_x.X.X1;
-            Out.m_x.X.X2 = (~m_b.B.B2 & Out.m_x.X.X1) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X.X1);
+            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ Out.m_x.X0;
+            Out.m_x.X0 = (~m_b.B.B2 & Out.m_x.X0) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X0);
 
-            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ Out.m_x.X.X2;
-            Out.m_x.X.X3 = (~m_b.B.B3 & Out.m_x.X.X2) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X.X2);
+            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ Out.m_x.X0;
+            Out.m_x.X0 = (~m_b.B.B3 & Out.m_x.X0) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X0);
 
-            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ Out.m_x.X.X3;
-            Out.m_x.X.X4 = (~m_b.B.B4 & Out.m_x.X.X3) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X.X3);
+            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ Out.m_x.X0;
+            Out.m_x.X0 = (~m_b.B.B4 & Out.m_x.X0) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X0);
 
-            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ Out.m_x.X.X4;
-            Out.m_x.X.X5 = (~m_b.B.B5 & Out.m_x.X.X4) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X.X4);
+            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ Out.m_x.X0;
+            Out.m_x.X0 = (~m_b.B.B5 & Out.m_x.X0) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X0);
 
-            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ Out.m_x.X.X5;
-            Out.m_x.X.X6 = (~m_b.B.B6 & Out.m_x.X.X5) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X.X5);
+            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ Out.m_x.X0;
+            Out.m_x.X0 = (~m_b.B.B6 & Out.m_x.X0) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X0);
 
-            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ Out.m_x.X.X6;
-            Out.m_x.X.X7 = (~m_b.B.B7 & Out.m_x.X.X6) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X.X6);
+            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ Out.m_x.X0;
+            Out.m_x.X0 = (~m_b.B.B7 & Out.m_x.X0) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X0);
 
-            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ Out.m_x.X.X7;
-            Out.m_x.X.X0 = (~m_b.B.B8 & Out.m_x.X.X7) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X.X7);
+            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ Out.m_x.X0;
+            Out.m_x.X0 = (~m_b.B.B8 & Out.m_x.X0) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X0);
 
             return Out;
         }
 
         unsigned getOF() const
         {
-            return m_x.X.X0; // X0 used to indicate a carry/borrow
+            return m_x.X0; // X0 used to indicate a carry/borrow
         }
 
         void setOF(const unsigned rhs)
         {
-            m_x.X.X0 = rhs;
+            m_x.X0 = rhs;
         }
 
         struct _Bits
@@ -319,27 +319,14 @@ protected:
             unsigned B8 : 1;
         };
 
-        struct _Xtra
+        struct XTRA
         {
             unsigned X0 : 1;
-            unsigned X1 : 1;
-            unsigned X2 : 1;
-            unsigned X3 : 1;
-            unsigned X4 : 1;
-            unsigned X5 : 1;
-            unsigned X6 : 1;
-            unsigned X7 : 1;
         };
 
         union BITS
         {
             struct _Bits B;
-            uint8_t U;
-        };
-
-        union XTRA
-        {
-            struct _Xtra X;
             uint8_t U;
         };
 
