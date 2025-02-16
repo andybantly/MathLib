@@ -512,55 +512,38 @@ public:
             throw("Invalid number");
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
         CByte Zero(0);
         Number out(Zero, stMax);
         unsigned of = 0;
 
         CByte lb, rb;
-        if (l == r)
-        {
-            for (size_t st = 0; st < stMax; ++st)
-            {
-                lb = m_Bytes[st];
-                rb = rhs.m_Bytes[st];
-                CByte& ob = out.m_Bytes[st];
-                if (of)
-                    lb.m_x.X0 = of;
-                ob = lb + rb;
-                of = ob.m_x.X0;
-                if (of)
-                    ob.m_x.X0 = 0;
-            }
-        }
-        else
-        {
-            size_t stMin = l == r ? l : (l < r ? l : r);
-            for (size_t st = 0; st < stMin; ++st)
-            {
-                lb = m_Bytes[st];
-                rb = rhs.m_Bytes[st];
-                CByte& ob = out.m_Bytes[st];
-                if (of)
-                    lb.m_x.X0 = of;
-                ob = lb + rb;
-                of = ob.m_x.X0;
-                if (of)
-                    ob.m_x.X0 = 0;
-            }
+        size_t st = 0;
 
+        for (; st < stMin; ++st)
+        {
+            lb = m_Bytes[st];
+            rb = rhs.m_Bytes[st];
+            CByte& ob = out.m_Bytes[st];
+            lb.m_x.X0 = of;
+            ob = lb + rb;
+            of = ob.m_x.X0;
+            ob.m_x.X0 = 0;
+        }
+
+        if (st < stMax)
+        {
             CByte Neg1(255);
-            for (size_t st = stMin; st < stMax; ++st)
+            for (; st < stMax; ++st)
             {
                 lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
                 rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
                 CByte& ob = out.m_Bytes[st];
-                if (of)
-                    lb.m_x.X0 = of;
+                lb.m_x.X0 = of;
                 ob = lb + rb;
                 of = ob.m_x.X0;
-                if (of)
-                    ob.m_x.X0 = 0;
+                ob.m_x.X0 = 0;
             }
         }
 
@@ -575,55 +558,37 @@ public:
             throw("Invalid number");
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
         CByte Zero(0);
         Number out(Zero, stMax);
         unsigned of = 0;
 
         CByte lb, rb;
-        if (l == r)
+        size_t st;
+        for (st = 0; st < stMin; ++st)
         {
-            for (size_t st = 0; st < stMax; ++st)
-            {
-                lb = m_Bytes[st];
-                rb = rhs.m_Bytes[st];
-                CByte& ob = out.m_Bytes[st];
-                if (of)
-                    lb.m_x.X0 = of;
-                ob = lb - rb;
-                of = ob.m_x.X0;
-                if (of)
-                    ob.m_x.X0 = 0;
-            }
+            lb = m_Bytes[st];
+            rb = rhs.m_Bytes[st];
+            CByte& ob = out.m_Bytes[st];
+            lb.m_x.X0 = of;
+            ob = lb - rb;
+            of = ob.m_x.X0;
+            ob.m_x.X0 = 0;
         }
-        else
-        {
-            size_t stMin = l == r ? l : (l < r ? l : r);
-            for (size_t st = 0; st < stMin; ++st)
-            {
-                lb = m_Bytes[st];
-                rb = rhs.m_Bytes[st];
-                CByte& ob = out.m_Bytes[st];
-                if (of)
-                    lb.m_x.X0 = of;
-                ob = lb - rb;
-                of = ob.m_x.X0;
-                if (of)
-                    ob.m_x.X0 = 0;
-            }
 
+        if (st < stMax)
+        {
             CByte Neg1(255);
-            for (size_t st = stMin; st < stMax; ++st)
+            for (; st < stMax; ++st)
             {
                 lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
                 rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
                 CByte& ob = out.m_Bytes[st];
-                if (of)
-                    lb.m_x.X0 = of;
+                lb.m_x.X0 = of;
                 ob = lb - rb;
                 of = ob.m_x.X0;
-                if (of)
-                    ob.m_x.X0 = 0;
+                ob.m_x.X0 = 0;
             }
         }
 
