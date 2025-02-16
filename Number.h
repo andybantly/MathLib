@@ -339,6 +339,7 @@ protected:
     }
 
 public:
+
     Number() : m_bNeg(false), m_bNAN(true) {};
 
     Number(const char* pstrNumber)
@@ -470,39 +471,49 @@ public:
         return !(operator < (rhs));
     }
 
-    Number& operator ++ () // ++Number
+    // pre/post increment/decrement
+    
+    Number& operator ++ ()
     {
+        const static Number _1(1, 1);
+
         if (m_bNAN)
             throw("Invalid number");
 
-        *this = *this + Number(CByte(1), m_Bytes.size());
+        *this = *this + _1;
         return *this;
     }
 
     Number& operator -- ()
     {
+        const static Number _1(1, 1);
+
         if (m_bNAN)
             throw("Invalid number");
 
-        *this = *this - Number(CByte(1), m_Bytes.size());
+        *this = *this - _1;
         return *this;
     }
 
     Number& operator ++ (int)
     {
+        const static Number _1(1, 1);
+
         if (m_bNAN)
             throw("Invalid number");
 
-        *this = *this + Number(CByte(1), m_Bytes.size());
+        *this = *this + _1;
         return *this;
     }
 
     Number& operator -- (int)
     {
+        const static Number _1(1, 1);
+
         if (m_bNAN)
             throw("Invalid number");
 
-        *this = *this - Number(CByte(1), m_Bytes.size());
+        *this = *this - _1;
         return *this;
     }
 
