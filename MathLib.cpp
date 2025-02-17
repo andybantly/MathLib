@@ -10,16 +10,6 @@ using namespace std; // get rid of this
 
 int main()
 {
-	// Subtraction test case for growing
-	Number A, B, C;
-	A = -1, B = 65535, C = 0;
-	A.SetSize(1);
-	B.SetSize(2);
-	C = A - B;
-	std::cout << C << std::endl;
-
-	/////////////////////////////////////////////////
-	
 	CNumber::Init();
 	string strInput, strResult;
 	bool bAgain = true;
