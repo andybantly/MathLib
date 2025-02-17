@@ -1181,11 +1181,12 @@ namespace TestMathLib
 		TEST_METHOD(FibComma)
 		{
 			// Comma operator
-			Number NJ = 1, NI = 0, NZ = 0;
-			NJ.SetSize(96);
+			Number NI = 0, NJ = 1, NF = 1, NZ = 0;
 			NI.SetSize(96);
+			NJ.SetSize(96);
+			NF.SetSize(96);
 
-			while ((NJ = (NI = NJ - NI, NJ + NI)) > NZ) {}
+			while ((NF = (NI = NJ, NJ = NF, NI + NJ)) > NZ) { /*std::cout << NF << " " << NJ << " " << NI << std::endl;*/ }
 		}
 
 		TEST_METHOD(FibObj)
@@ -1197,6 +1198,7 @@ namespace TestMathLib
 			Fib1.SetSize(96);
 			Fib2.SetSize(96);
 			Fib3.SetSize(96);
+
 			while (Fib3 > NZ)
 			{
 				Fib1 = Fib2;
@@ -1214,6 +1216,7 @@ namespace TestMathLib
 			Fib[0].SetSize(96);
 			Fib[1].SetSize(96);
 			Fib[2].SetSize(96);
+
 			while (Fib[2] > NZ)
 			{
 				Fib[0] = Fib[1];
