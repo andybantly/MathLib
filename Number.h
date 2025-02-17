@@ -622,13 +622,10 @@ public:
             for (size_t iBit = 0; iBit < 8; ++iBit)
             {
                 if (g_pow[iBit] & rhs.m_Bytes[iByte].m_b.U)
-                    mlt.push_back(lhs);
+                    out = out + lhs;
                 lhs = lhs + lhs;
             }
         }
-
-        for (size_t im = 0; im < mlt.size(); ++im)
-            out = out + mlt[im];
 
         return out;
     }
