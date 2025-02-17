@@ -680,11 +680,14 @@ public:
             lhs = lhs - vdbl[ndbl - 1];
         }
 
+#if defined(_DEBUG)
+        // Remainder result
         if (lhs != zero && (m_bNeg || (m_bNeg && rhs.m_bNeg)))
         {
             lhs = lhs.TwosComplement();
             lhs.m_bNeg = true;
         }
+#endif
 
         if (loop != zero)
         {
@@ -751,6 +754,8 @@ public:
             lhs.m_bNeg = true;
         }
 
+#if defined(_DEBUG)
+        // Division result
         if (loop != zero)
         {
             if (m_bNeg != rhs.m_bNeg)
@@ -759,6 +764,7 @@ public:
                 loop.m_bNeg = true;
             }
         }
+#endif
 
         return lhs;
     }

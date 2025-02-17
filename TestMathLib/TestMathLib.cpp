@@ -8,6 +8,9 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
 {
+	const int iBeg = -128, iEnd = 127;
+	const int jBeg = iBeg, jEnd = iEnd;
+
 	class CRndPair
 	{
 	public:
@@ -1752,120 +1755,117 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteAddition)
 		{
-			Number N1, N2, N3;
-			int n1, n2, n3;
+			int ni, nj, nk;
+			Number NI, NJ, NK;
 
-			n1 = -32767;
-			n2 = 0;
-
-			for (N1 = -32767, N2 = 0; N1 < 32768; ++N1, ++N2)
+			for (ni = iBeg; ni < iEnd; ++ni)
 			{
-				n3 = n1 + n2;
+				for (nj = jBeg; nj < jEnd; ++nj)
+				{
+					nk = ni + nj;
 
-				N3 = N1 + N2;
+					NI = ni;
+					NJ = nj;
+					NK = NI + NJ;
 
-				if (std::to_string(n3) != N3.ToDisplay())
-					Assert::AreEqual(std::to_string(n3), N3.ToDisplay());
-
-				++n1;
-				++n2;
+					std::string strNK = NK.ToDisplay();
+					if (std::to_string(nk) != strNK)
+						Assert::AreEqual(std::to_string(nk), strNK);
+				}
 			}
 		}
 
 		TEST_METHOD(ByteSubtraction)
 		{
-			Number N1, N2, N3;
-			int n1, n2, n3;
+			int ni, nj, nk;
+			Number NI, NJ, NK;
 
-			n1 = -32767;
-			n2 = 0;
-
-			for (N1 = -32767, N2 = 0; N1 < 32768; ++N1, ++N2)
+			for (ni = iBeg; ni < iEnd; ++ni)
 			{
-				n3 = n1 - n2;
+				for (nj = jBeg; nj < jEnd; ++nj)
+				{
+					nk = ni - nj;
 
-				N3 = N1 - N2;
+					NI = ni;
+					NJ = nj;
+					NK = NI - NJ;
 
-				if (std::to_string(n3) != N3.ToDisplay())
-					Assert::AreEqual(std::to_string(n3), N3.ToDisplay());
-
-				++n1;
-				++n2;
+					std::string strNK = NK.ToDisplay();
+					if (std::to_string(nk) != strNK)
+						Assert::AreEqual(std::to_string(nk), strNK);
+				}
 			}
 		}
 
 		TEST_METHOD(ByteMultiplication)
 		{
-			Number NI, NJ, NO;
+			int ni, nj, nk;
+			Number NI, NJ, NK;
 
-			int j = -127;
-			for (NJ = -127; NJ < 128; ++NJ)
+			for (ni = iBeg; ni < iEnd; ++ni)
 			{
-				int i = -127;
-				for (NI = -127; NI < 128; ++NI)
+				for (nj = jBeg; nj < jEnd; ++nj)
 				{
-					int no = i * j;
-					NO = NI * NJ;
+					nk = ni * nj;
 
-					std::string strNO = NO.ToDisplay();
-					if (std::to_string(no) != strNO)
-						Assert::AreEqual(std::to_string(no), strNO);
+					NI = ni;
+					NJ = nj;
+					NK = NI * NJ;
 
-					i++;
+					std::string strNK = NK.ToDisplay();
+					if (std::to_string(nk) != strNK)
+						Assert::AreEqual(std::to_string(nk), strNK);
 				}
-				j++;
 			}
 		}
 
 		TEST_METHOD(ByteDivision)
 		{
-			Number NI, NJ, NO;
+			int ni, nj, nk;
+			Number NI, NJ, NK;
 
-			int j = -127;
-			for (NJ = j; NJ < 128; ++NJ)
+			for (ni = iBeg; ni < iEnd; ++ni)
 			{
-				int i = -127;
-				for (NI = -127; NI < 128; ++NI)
+				for (nj = jBeg; nj < jEnd; ++nj)
 				{
-					if (j == 0)
+					if (nj == 0)
 						continue;
 
-					int no = i / j;
-					NO = NI / NJ;
+					nk = ni / nj;
 
-					std::string strNO = NO.ToDisplay();
-					if (std::to_string(no) != strNO)
-						Assert::AreEqual(std::to_string(no), strNO);
+					NI = ni;
+					NJ = nj;
+					NK = NI / NJ;
 
-					i++;
+					std::string strNK = NK.ToDisplay();
+					if (std::to_string(nk) != strNK)
+						Assert::AreEqual(std::to_string(nk), strNK);
 				}
-				j++;
 			}
 		}
 
 		TEST_METHOD(ByteModulus)
 		{
-			Number NI, NJ, NO;
+			int ni, nj, nk;
+			Number NI, NJ, NK;
 
-			int j = -127;
-			for (NJ = j; NJ < 128; ++NJ)
+			for (ni = iBeg; ni < iEnd; ++ni)
 			{
-				int i = -127;
-				for (NI = -127; NI < 128; ++NI)
+				for (nj = jBeg; nj < jEnd; ++nj)
 				{
-					if (j == 0)
+					if (nj == 0)
 						continue;
 
-					int no = i % j;
-					NO = NI % NJ;
+					nk = ni % nj;
 
-					std::string strNO = NO.ToDisplay();
-					if (std::to_string(no) != strNO)
-						Assert::AreEqual(std::to_string(no), strNO);
+					NI = ni;
+					NJ = nj;
+					NK = NI % NJ;
 
-					i++;
+					std::string strNK = NK.ToDisplay();
+					if (std::to_string(nk) != strNK)
+						Assert::AreEqual(std::to_string(nk), strNK);
 				}
-				j++;
 			}
 		}
 
