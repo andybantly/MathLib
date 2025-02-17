@@ -613,10 +613,11 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        Number out(CByte(0), m_Bytes.size());
+        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
+        Number out(CByte(0), stMB);
         Number lhs = *this;
+        lhs.SetSize(stMB);
 
-        std::vector<Number> mlt;
         for (size_t iByte = 0, nBytes = rhs.m_Bytes.size(); iByte < nBytes; ++iByte)
         {
             for (size_t iBit = 0; iBit < 8; ++iBit)
@@ -635,12 +636,15 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        Number loop, zero(CByte(0), m_Bytes.size());
+        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
+        Number loop, zero(CByte(0), 1);
         if (rhs == zero)
             return loop;
 
         Number lhs = *this;
         Number rhsin = rhs;
+        lhs.SetSize(stMB);
+        rhsin.SetSize(stMB);
 
         if (m_bNeg)
         {
@@ -655,7 +659,7 @@ public:
         }
 
         Number dbl = rhsin;
-        Number pow(CByte(1), m_Bytes.size());
+        Number pow(CByte(1), stMB);
 
         std::vector<Number> vdbl(1, dbl);
         std::vector<Number> vpow(1, pow);
@@ -703,12 +707,15 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        Number loop, zero(CByte(0), m_Bytes.size());
+        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
+        Number loop, zero(CByte(0), stMB);
         if (rhs == zero)
             return loop;
 
         Number lhs = *this;
         Number rhsin = rhs;
+        lhs.SetSize(stMB);
+        rhsin.SetSize(stMB);
 
         if (m_bNeg)
         {
@@ -723,7 +730,7 @@ public:
         }
 
         Number dbl = rhsin;
-        Number pow(CByte(1), m_Bytes.size());
+        Number pow(CByte(1), stMB);
 
         std::vector<Number> vdbl(1, dbl);
         std::vector<Number> vpow(1, pow);
@@ -773,7 +780,8 @@ public:
 
     void SetSize(size_t uiSize)
     {
-        m_Bytes.resize(uiSize, m_bNeg ? 255 : 0);
+        if (uiSize != m_Bytes.size())
+            m_Bytes.resize(uiSize, m_bNeg ? 255 : 0);
     }
 
     size_t GetSize()
