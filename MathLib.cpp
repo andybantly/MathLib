@@ -62,72 +62,84 @@ int main()
 				{
 					do
 					{
-						Number N1(vNumbers[0]);
-						Number N2(vNumbers[2]);
-						Number S;
+						try
+						{
 
-						bool bCMP = false;
-						if (vNumbers[1] == "+")
-						{
-							S = N1 + N2;
-						}
-						else if (vNumbers[1] == "-")
-						{
-							S = N1 - N2;
-						}
-						else if (vNumbers[1] == "*")
-						{
-							S = N1 * N2;
-						}
-						else if (vNumbers[1] == "/")
-						{
-							S = N1 / N2;
-						}
-						else if (vNumbers[1] == "%")
-						{
-							S = N1 % N2;
-						}
-						else if (vNumbers[1] == ",")
-						{
-							S = (N1 , N2);
-						}
-						else if (vNumbers[1] == "<")
-						{
-							bCMP = N1 < N2;
-						}
-						else if (vNumbers[1] == ">")
-						{
-							bCMP = N1 > N2;
-						}
-						else if (vNumbers[1] == "=")
-						{
-							bCMP = N1 == N2;
-						}
-						else if (vNumbers[1] == "<=")
-						{
-							bCMP = N1 <= N2;
-						}
-						else if (vNumbers[1] == ">=")
-						{
-							bCMP = N1 >= N2;
-						}
+							Number N1(vNumbers[0]);
+							Number N2(vNumbers[2]);
 
-						if (vNumbers[1] == "+" || vNumbers[1] == "-" || vNumbers[1] == "*" || vNumbers[1] == "/" || vNumbers[1] == "%" || vNumbers[1] == ",")
-						{
-							std::cout << N1 << " " << vNumbers[1] << " " << N2 << " = " << S.ToDisplay() << std::endl << S.ToBinary() << std::endl;
-						}
-						else
-						{
-							S = bCMP ? "1" : "0";
-							std::cout << N1 << " " + vNumbers[1] + " " << N2 << " = " << (bCMP ? "TRUE" : "FALSE") << std::endl;
-						}
+							N1.SetSize(96);
+							N2.SetSize(96);
+							Number S;
 
-						vNumbers2.clear();
-						vNumbers2.push_back(S.ToDisplay());
-						for (std::vector<std::string>::iterator vit = vNumbers.begin() + 3; vit != vNumbers.end(); ++vit)
-							vNumbers2.push_back(*vit);
-						vNumbers = vNumbers2;
-						std::cout << std::endl;
+							bool bCMP = false;
+							if (vNumbers[1] == "+")
+							{
+								S = N1 + N2;
+							}
+							else if (vNumbers[1] == "-")
+							{
+								S = N1 - N2;
+							}
+							else if (vNumbers[1] == "*")
+							{
+								S = N1 * N2;
+							}
+							else if (vNumbers[1] == "/")
+							{
+								S = N1 / N2;
+							}
+							else if (vNumbers[1] == "%")
+							{
+								S = N1 % N2;
+							}
+							else if (vNumbers[1] == ",")
+							{
+								S = (N1, N2);
+							}
+							else if (vNumbers[1] == "<")
+							{
+								bCMP = N1 < N2;
+							}
+							else if (vNumbers[1] == ">")
+							{
+								bCMP = N1 > N2;
+							}
+							else if (vNumbers[1] == "=")
+							{
+								bCMP = N1 == N2;
+							}
+							else if (vNumbers[1] == "<=")
+							{
+								bCMP = N1 <= N2;
+							}
+							else if (vNumbers[1] == ">=")
+							{
+								bCMP = N1 >= N2;
+							}
+
+							if (vNumbers[1] == "+" || vNumbers[1] == "-" || vNumbers[1] == "*" || vNumbers[1] == "/" || vNumbers[1] == "%" || vNumbers[1] == ",")
+							{
+								std::cout << N1 << " " << vNumbers[1] << " " << N2 << " = " << S.ToDisplay() << std::endl << S.ToBinary() << std::endl;
+							}
+							else
+							{
+								S = bCMP ? "1" : "0";
+								std::cout << N1 << " " + vNumbers[1] + " " << N2 << " = " << (bCMP ? "TRUE" : "FALSE") << std::endl;
+							}
+
+							vNumbers2.clear();
+							vNumbers2.push_back(S.ToDisplay());
+							for (std::vector<std::string>::iterator vit = vNumbers.begin() + 3; vit != vNumbers.end(); ++vit)
+								vNumbers2.push_back(*vit);
+							vNumbers = vNumbers2;
+							std::cout << std::endl;
+						}
+						catch (std::exception ex)
+						{
+							std::cout << ex.what() << std::endl;
+							break;
+						}
 					} while (vNumbers.size() > 1);
 				}
 				else

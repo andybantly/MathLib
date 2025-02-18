@@ -669,6 +669,8 @@ public:
             while (dbl < rem)
             {
                 dbl = dbl + dbl;
+                if (dbl.m_bNeg)
+                    throw;
                 pow = pow + pow;
                 vdbl.push_back(dbl);
                 vpow.push_back(pow);
@@ -687,6 +689,8 @@ public:
             while (dbl > rem)
             {
                 dbl = dbl + dbl;
+                if (!dbl.m_bNeg)
+                    throw;
                 pow = pow + pow;
                 vdbl.push_back(dbl);
                 vpow.push_back(pow);
@@ -733,6 +737,8 @@ public:
             while (dbl < rem)
             {
                 dbl = dbl + dbl;
+                if (dbl.m_bNeg)
+                    throw;
                 vdbl.push_back(dbl);
             }
 
@@ -748,6 +754,8 @@ public:
             while (dbl > rem)
             {
                 dbl = dbl + dbl;
+                if (!dbl.m_bNeg)
+                    throw;
                 vdbl.push_back(dbl);
             }
 
@@ -767,10 +775,10 @@ public:
         return rhs;
     }
 
-    void SetSize(size_t uiSize)
+    void SetSize(size_t size)
     {
-        if (uiSize != m_Bytes.size())
-            m_Bytes.resize(uiSize, m_bNeg ? 255 : 0);
+        if (size != m_Bytes.size())
+            m_Bytes.resize(size, m_bNeg ? 255 : 0);
     }
 
     size_t GetSize()
