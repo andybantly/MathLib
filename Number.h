@@ -710,11 +710,11 @@ public:
             throw("Invalid number");
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number quot, zero(CByte(0), 1);
+        Number rem, zero(CByte(0), 1);
         if (rhs == zero)
-            return quot;
+            return rem;
 
-        Number rem = *this;
+        rem = *this;
         Number rhsin = rhs;
         rem.SetSize(stMB);
         rhsin.SetSize(stMB);
@@ -726,28 +726,20 @@ public:
         }
 
         Number dbl = rhsin;
-        Number pow(m_bNeg == rhs.m_bNeg ? CByte(1) : CByte(-1), stMB);
-
         std::vector<Number> vdbl(1, dbl);
-        std::vector<Number> vpow(1, pow);
-
-        quot = zero;
 
         if (!m_bNeg)
         {
             while (dbl < rem)
             {
                 dbl = dbl + dbl;
-                pow = pow + pow;
                 vdbl.push_back(dbl);
-                vpow.push_back(pow);
             }
 
             for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
             {
                 if (vdbl[ndbl - 1] > rem)
                     continue;
-                quot = quot + vpow[ndbl - 1];
                 rem = rem - vdbl[ndbl - 1];
             }
         }
@@ -756,16 +748,13 @@ public:
             while (dbl > rem)
             {
                 dbl = dbl + dbl;
-                pow = pow + pow;
                 vdbl.push_back(dbl);
-                vpow.push_back(pow);
             }
 
             for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
             {
                 if (vdbl[ndbl - 1] < rem)
                     continue;
-                quot = quot + vpow[ndbl - 1];
                 rem = rem - vdbl[ndbl - 1];
             }
         }

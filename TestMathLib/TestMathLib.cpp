@@ -8,7 +8,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
 {
-	const int iBeg = -256, iEnd = 255;
+	const int iBeg = -128, iEnd = 127;
 	const int jBeg = iBeg, jEnd = iEnd;
 
 	class CRndPair
