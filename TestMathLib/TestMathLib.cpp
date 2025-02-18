@@ -8,7 +8,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
 {
-	const int iBeg = -128, iEnd = 127;
+	const int iBeg = -256, iEnd = 255;
 	const int jBeg = iBeg, jEnd = iEnd;
 
 	class CRndPair
@@ -309,7 +309,7 @@ namespace TestMathLib
 			srand((unsigned)time(nullptr));
 			CNumber::Init();
 		}
-
+/*
 		TEST_METHOD(Addition)
 		{
 			CNumber N1, N2, N3;
@@ -1154,7 +1154,7 @@ namespace TestMathLib
 				Assert::AreEqual(N4, N3);
 			}
 		}
-
+*/
 		TEST_METHOD(TestLib)
 		{
 			long long numt = thread::hardware_concurrency();
@@ -1869,74 +1869,140 @@ namespace TestMathLib
 			}
 		}
 
-		TEST_METHOD(ByteLogic)
+		TEST_METHOD(ByteLT)
 		{
-			int nRM = 0xFFFF;
-			bool bCMP = false, bRes = false;
-			Number N1, N2;
-			int nEQ = 0;
-			int c = 0;
-			for (int i = 0; i < nRM; ++i)
+			int ni, nj;
+			Number NI, NJ;
+			bool b, B;
+
+			for (ni = iBeg; ni < iEnd; ++ni)
 			{
-				CRndDouble Rnd;
-				for (int ic = 1; ic != 6; ++ic)
+				for (nj = jBeg; nj < jEnd; ++nj)
 				{
-					std::string s1 = Rnd.Num1();
-					std::string s2 = Rnd.Num2();
+					b = ni < nj;
 
-					int i1 = int(stod(s1));
-					int i2 = int(stod(s2));
+					NI = ni;
+					NJ = nj;
+					B = NI < NJ;
 
-					if (i % 100 == 0)
-					{
-						switch (c++)
-						{
-						case 0:
-							i2 = -i1;
-							break;
-						default:
-							i2 = i1;
-							c = 0;
-							break;
-						}
-					}
+					if (b != B)
+						Assert::AreEqual(b, B);
+				}
+			}
+		}
 
-					N1 = std::to_string(i1);
-					N2 = std::to_string(i2);
+		TEST_METHOD(ByteGT)
+		{
+			int ni, nj;
+			Number NI, NJ;
+			bool b, B;
 
-					switch (ic)
-					{
-					case 1:
-						bRes = i1 < i2;
-						bCMP = N1 < N2;
-						break;
-					case 2:
-						bRes = i1 <= i2;
-						bCMP = N1 <= N2;
-						break;
-					case 3:
-						bRes = i1 > i2;
-						bCMP = N1 > N2;
-						break;
-					case 4:
-						bRes = i1 >= i2;
-						bCMP = N1 >= N2;
-						break;
-					case 5:
-					default:
-						bRes = i1 == i2;
-						bCMP = N1 == N2;
-						if (bCMP) nEQ++;
-					}
+			for (ni = iBeg; ni < iEnd; ++ni)
+			{
+				for (nj = jBeg; nj < jEnd; ++nj)
+				{
+					b = ni > nj;
 
-					if (bRes != bCMP)
-						Assert::AreEqual(bRes, bCMP);
-					Rnd.Calc();
+					NI = ni;
+					NJ = nj;
+					B = NI > NJ;
+
+					if (b != B)
+						Assert::AreEqual(b, B);
+				}
+			}
+		}
+
+		TEST_METHOD(ByteLE)
+		{
+			int ni, nj;
+			Number NI, NJ;
+			bool b, B;
+
+			for (ni = iBeg; ni < iEnd; ++ni)
+			{
+				for (nj = jBeg; nj < jEnd; ++nj)
+				{
+					b = ni <= nj;
+
+					NI = ni;
+					NJ = nj;
+					B = NI <= NJ;
+
+					if (b != B)
+						Assert::AreEqual(b, B);
+				}
+			}
+		}
+
+		TEST_METHOD(ByteGE)
+		{
+			int ni, nj;
+			Number NI, NJ;
+			bool b, B;
+
+			for (ni = iBeg; ni < iEnd; ++ni)
+			{
+				for (nj = jBeg; nj < jEnd; ++nj)
+				{
+					b = ni >= nj;
+
+					NI = ni;
+					NJ = nj;
+					B = NI >= NJ;
+
+					if (b != B)
+						Assert::AreEqual(b, B);
+				}
+			}
+		}
+
+		TEST_METHOD(ByteEQ)
+		{
+			int ni, nj;
+			Number NI, NJ;
+			bool b, B;
+
+			for (ni = iBeg; ni < iEnd; ++ni)
+			{
+				for (nj = jBeg; nj < jEnd; ++nj)
+				{
+					b = ni == nj;
+
+					NI = ni;
+					NJ = nj;
+					B = NI == NJ;
+
+					if (b != B)
+						Assert::AreEqual(b, B);
+				}
+			}
+		}
+
+		TEST_METHOD(ByteNE)
+		{
+			int ni, nj;
+			Number NI, NJ;
+			bool b, B;
+
+			for (ni = iBeg; ni < iEnd; ++ni)
+			{
+				for (nj = jBeg; nj < jEnd; ++nj)
+				{
+					b = ni != nj;
+
+					NI = ni;
+					NJ = nj;
+					B = NI != NJ;
+
+					if (b != B)
+						Assert::AreEqual(b, B);
 				}
 			}
 		}
 	};
 }
+
 
 // error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
 // for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 

@@ -327,8 +327,10 @@ protected:
     // Helper to convert to the internal format
     void Convert(const int32_t iNumber)
     {
+        static CByte _0(0), _255(255);
+
         m_bNeg = iNumber < 0;
-        m_Bytes.resize(4, m_bNeg ? CByte(255) : CByte(0));
+        m_Bytes.resize(4, m_bNeg ? _255 : _0);
 
         m_Bytes[0] = (uint32_t)(iNumber) & 0xFF;
         m_Bytes[1] = ((uint32_t)(iNumber) >> 8) & 0xFF;
@@ -359,8 +361,10 @@ public:
 
     Number(CByte ch, size_t size)
     {
+        static CByte _0(0), _255(255);
+
         m_bNeg = ch.m_b.B.B8;
-        m_Bytes.resize(size, m_bNeg ? CByte(255) : CByte(0));
+        m_Bytes.resize(size, m_bNeg ? _255 : _0);
         m_Bytes[0] = ch;
         m_bNAN = false;
     }
@@ -637,69 +641,67 @@ public:
             throw("Invalid number");
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number loop, zero(CByte(0), 1);
+        Number quot, zero(CByte(0), 1);
         if (rhs == zero)
-            return loop;
+            return quot;
 
-        Number lhs = *this;
+        Number rem = *this;
         Number rhsin = rhs;
-        lhs.SetSize(stMB);
+        rem.SetSize(stMB);
         rhsin.SetSize(stMB);
 
-        if (m_bNeg)
-        {
-            lhs = lhs.TwosComplement();
-            lhs.m_bNeg = false;
-        }
-
-        if (rhs.m_bNeg)
+        if (m_bNeg != rhs.m_bNeg)
         {
             rhsin = rhsin.TwosComplement();
-            rhsin.m_bNeg = false;
+            rhsin.m_bNeg = m_bNeg;
         }
 
         Number dbl = rhsin;
-        Number pow(CByte(1), stMB);
+        Number pow(m_bNeg == rhs.m_bNeg ? CByte(1) : CByte(-1), stMB);
 
         std::vector<Number> vdbl(1, dbl);
         std::vector<Number> vpow(1, pow);
 
-        while (dbl < lhs)
-        {
-            dbl = dbl + dbl;
-            pow = pow + pow;
-            vdbl.push_back(dbl);
-            vpow.push_back(pow);
-        }
+        quot = zero;
 
-        loop = zero;
-        for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+        if (!m_bNeg)
         {
-            if (vdbl[ndbl - 1] > lhs)
-                continue;
-            loop = loop + vpow[ndbl - 1];
-            lhs = lhs - vdbl[ndbl - 1];
-        }
-
-#if defined(_DEBUG)
-        // Remainder result
-        if (lhs != zero && (m_bNeg || (m_bNeg && rhs.m_bNeg)))
-        {
-            lhs = lhs.TwosComplement();
-            lhs.m_bNeg = true;
-        }
-#endif
-
-        if (loop != zero)
-        {
-            if (m_bNeg != rhs.m_bNeg)
+            while (dbl < rem)
             {
-                loop = loop.TwosComplement();
-                loop.m_bNeg = true;
+                dbl = dbl + dbl;
+                pow = pow + pow;
+                vdbl.push_back(dbl);
+                vpow.push_back(pow);
+            }
+
+            for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+            {
+                if (vdbl[ndbl - 1] > rem)
+                    continue;
+                quot = quot + vpow[ndbl - 1];
+                rem = rem - vdbl[ndbl - 1];
+            }
+        }
+        else
+        {
+            while (dbl > rem)
+            {
+                dbl = dbl + dbl;
+                pow = pow + pow;
+                vdbl.push_back(dbl);
+                vpow.push_back(pow);
+            }
+
+            for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+            {
+                if (vdbl[ndbl - 1] < rem)
+                    continue;
+                quot = quot + vpow[ndbl - 1];
+                rem = rem - vdbl[ndbl - 1];
             }
         }
 
-        return loop;
+        return quot;
     }
 
     Number operator % (const Number& rhs) const
@@ -708,69 +710,67 @@ public:
             throw("Invalid number");
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number loop, zero(CByte(0), stMB);
+        Number quot, zero(CByte(0), 1);
         if (rhs == zero)
-            return loop;
+            return quot;
 
-        Number lhs = *this;
+        Number rem = *this;
         Number rhsin = rhs;
-        lhs.SetSize(stMB);
+        rem.SetSize(stMB);
         rhsin.SetSize(stMB);
 
-        if (m_bNeg)
-        {
-            lhs = lhs.TwosComplement();
-            lhs.m_bNeg = false;
-        }
-
-        if (rhs.m_bNeg)
+        if (m_bNeg != rhs.m_bNeg)
         {
             rhsin = rhsin.TwosComplement();
-            rhsin.m_bNeg = false;
+            rhsin.m_bNeg = m_bNeg;
         }
 
         Number dbl = rhsin;
-        Number pow(CByte(1), stMB);
+        Number pow(m_bNeg == rhs.m_bNeg ? CByte(1) : CByte(-1), stMB);
 
         std::vector<Number> vdbl(1, dbl);
         std::vector<Number> vpow(1, pow);
 
-        while (dbl < lhs)
-        {
-            dbl = dbl + dbl;
-            pow = pow + pow;
-            vdbl.push_back(dbl);
-            vpow.push_back(pow);
-        }
+        quot = zero;
 
-        loop = zero;
-        for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+        if (!m_bNeg)
         {
-            if (vdbl[ndbl - 1] > lhs)
-                continue;
-            loop = loop + vpow[ndbl - 1];
-            lhs = lhs - vdbl[ndbl - 1];
-        }
-
-        if (lhs != zero && (m_bNeg || (m_bNeg && rhs.m_bNeg)))
-        {
-            lhs = lhs.TwosComplement();
-            lhs.m_bNeg = true;
-        }
-
-#if defined(_DEBUG)
-        // Division result
-        if (loop != zero)
-        {
-            if (m_bNeg != rhs.m_bNeg)
+            while (dbl < rem)
             {
-                loop = loop.TwosComplement();
-                loop.m_bNeg = true;
+                dbl = dbl + dbl;
+                pow = pow + pow;
+                vdbl.push_back(dbl);
+                vpow.push_back(pow);
+            }
+
+            for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+            {
+                if (vdbl[ndbl - 1] > rem)
+                    continue;
+                quot = quot + vpow[ndbl - 1];
+                rem = rem - vdbl[ndbl - 1];
             }
         }
-#endif
+        else
+        {
+            while (dbl > rem)
+            {
+                dbl = dbl + dbl;
+                pow = pow + pow;
+                vdbl.push_back(dbl);
+                vpow.push_back(pow);
+            }
 
-        return lhs;
+            for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+            {
+                if (vdbl[ndbl - 1] < rem)
+                    continue;
+                quot = quot + vpow[ndbl - 1];
+                rem = rem - vdbl[ndbl - 1];
+            }
+        }
+
+        return rem;
     }
 
     Number operator , (const Number& rhs) const
