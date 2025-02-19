@@ -488,7 +488,7 @@ public:
         if (m_bNAN)
             throw("Invalid number");
 
-        *this = *this + _1;
+        *this += _1;
         return *this;
     }
 
@@ -499,7 +499,7 @@ public:
         if (m_bNAN)
             throw("Invalid number");
 
-        *this = *this - _1;
+        *this -= 1;
         return *this;
     }
 
@@ -511,7 +511,7 @@ public:
             throw("Invalid number");
 
         Number rhs = *this;
-        *this = *this + _1;
+        *this += _1;
         return rhs;
     }
 
@@ -523,8 +523,42 @@ public:
             throw("Invalid number");
 
         Number rhs = *this;
-        *this = *this - _1;
+        *this += _1;
         return rhs;
+    }
+
+//////////////////////////////////////////////////////////
+//     +=, -=, *=, /=, %=
+//////////////////////////////////////////////////////////
+
+    Number operator += (const Number& rhs)
+    {
+        *this = *this + rhs;
+        return *this;
+    }
+
+    Number operator -= (const Number& rhs)
+    {
+        *this = *this - rhs;
+        return *this;
+    }
+
+    Number operator *= (const Number& rhs)
+    {
+        *this = *this * rhs;
+        return *this;
+    }
+
+    Number operator /= (const Number& rhs)
+    {
+        *this = *this / rhs;
+        return *this;
+    }
+
+    Number operator %= (const Number& rhs)
+    {
+        *this = *this % rhs;
+        return *this;
     }
 
     Number operator + (const Number& rhs) const

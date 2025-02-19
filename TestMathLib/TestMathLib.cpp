@@ -1263,6 +1263,48 @@ namespace TestMathLib
 
 			////// TEST CASE //////
 
+
+			B = b = 5;
+			
+			b *= b;
+			B *= B;
+
+			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
+
+			b /= b;
+			B /= B;
+
+			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
+
+			b %= b;
+			B %= B;
+
+			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
+
+			b += b;
+			B += B;
+
+			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
+
+			b -= b;
+			B -= B;
+
+			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
+
+			////// TEST CASE //////
+
+			////// TEST CASE //////
+
 			A = a = 127;
 			B = b = 25;
 
@@ -1271,14 +1313,14 @@ namespace TestMathLib
 
 			s = C.ToDisplay();
 			if (std::to_string(c) != s)
-				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+				Assert::AreEqual(std::to_string(c), s);
 
 			c = a % b;
 			C = A % B;
 
 			s = C.ToDisplay();
 			if (std::to_string(c) != s)
-				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+				Assert::AreEqual(std::to_string(c), s);
 
 			A = a = 125;
 			B = b = 25;
@@ -1288,7 +1330,7 @@ namespace TestMathLib
 
 			s = C.ToDisplay();
 			if (std::to_string(c) != s)
-				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+				Assert::AreEqual(std::to_string(c), s);
 
 			A = a = -361;
 			B = b = 53;
@@ -1298,7 +1340,7 @@ namespace TestMathLib
 
 			s = C.ToDisplay();
 			if (std::to_string(c) != s)
-				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+				Assert::AreEqual(std::to_string(c), s);
 
 			A = a = 361;
 			B = b = -53;
@@ -1308,7 +1350,7 @@ namespace TestMathLib
 
 			s = C.ToDisplay();
 			if (std::to_string(c) != s)
-				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+				Assert::AreEqual(std::to_string(c), s);
 
 			A = a = -361;
 			B = b = -53;
@@ -1318,7 +1360,7 @@ namespace TestMathLib
 
 			s = C.ToDisplay();
 			if (std::to_string(c) != s)
-				Assert::AreEqual(std::to_string(c), C.ToDisplay());
+				Assert::AreEqual(std::to_string(c), s);
 
 			///////////////////////////////////////////////////////////////////////////////////////////////
 
