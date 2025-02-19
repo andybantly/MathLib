@@ -1327,7 +1327,7 @@ namespace TestMathLib
 			B = 1;
 			while (B > 0)
 			{
-				B = B.Shl();
+				B.Shl();
 				s = B.ToDisplay();
 			}
 

@@ -786,7 +786,7 @@ public:
         return m_Bytes.size();
     }
 
-    Number& Shl() // Shift Left (double)
+    void Shl() // Shift Left (double)
     {
         size_t iByte = m_Bytes.size() - 1;
         for (; iByte != 0; iByte--)
@@ -811,8 +811,6 @@ public:
         m_Bytes[iByte].m_b.B.B1 = 0;
 
         m_bNeg = m_Bytes[m_Bytes.size() - 1].m_b.B.B8;
-
-        return *this;
     }
 
     // Conversion functions
