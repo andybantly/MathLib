@@ -17,7 +17,7 @@ int main()
 		strInput.clear();
 		char c;
 		while ((c = getchar()) != '\n')
-			strInput += c;
+			strInput.append(1, c);
 		if (!TextEqual(strInput, "quit") && !TextEqual(strInput, "test"))
 		{
 			try
@@ -62,84 +62,76 @@ int main()
 				{
 					do
 					{
-						try
+						Number N1(vNumbers[0]);
+						Number N2(vNumbers[2]);
+
+						size_t mb = N1.GetSize() > N2.GetSize() ? N1.GetSize() : N2.GetSize();
+						N1.SetSize(mb + 1);
+						N2.SetSize(mb + 1);
+						Number S;
+
+						bool bCMP = false;
+						if (vNumbers[1] == "+")
 						{
-
-							Number N1(vNumbers[0]);
-							Number N2(vNumbers[2]);
-
-							N1.SetSize(96);
-							N2.SetSize(96);
-							Number S;
-
-							bool bCMP = false;
-							if (vNumbers[1] == "+")
-							{
-								S = N1 + N2;
-							}
-							else if (vNumbers[1] == "-")
-							{
-								S = N1 - N2;
-							}
-							else if (vNumbers[1] == "*")
-							{
-								S = N1 * N2;
-							}
-							else if (vNumbers[1] == "/")
-							{
-								S = N1 / N2;
-							}
-							else if (vNumbers[1] == "%")
-							{
-								S = N1 % N2;
-							}
-							else if (vNumbers[1] == ",")
-							{
-								S = (N1, N2);
-							}
-							else if (vNumbers[1] == "<")
-							{
-								bCMP = N1 < N2;
-							}
-							else if (vNumbers[1] == ">")
-							{
-								bCMP = N1 > N2;
-							}
-							else if (vNumbers[1] == "=")
-							{
-								bCMP = N1 == N2;
-							}
-							else if (vNumbers[1] == "<=")
-							{
-								bCMP = N1 <= N2;
-							}
-							else if (vNumbers[1] == ">=")
-							{
-								bCMP = N1 >= N2;
-							}
-
-							if (vNumbers[1] == "+" || vNumbers[1] == "-" || vNumbers[1] == "*" || vNumbers[1] == "/" || vNumbers[1] == "%" || vNumbers[1] == ",")
-							{
-								std::cout << N1 << " " << vNumbers[1] << " " << N2 << " = " << S.ToDisplay() << std::endl << S.ToBinary() << std::endl;
-							}
-							else
-							{
-								S = bCMP ? "1" : "0";
-								std::cout << N1 << " " + vNumbers[1] + " " << N2 << " = " << (bCMP ? "TRUE" : "FALSE") << std::endl;
-							}
-
-							vNumbers2.clear();
-							vNumbers2.push_back(S.ToDisplay());
-							for (std::vector<std::string>::iterator vit = vNumbers.begin() + 3; vit != vNumbers.end(); ++vit)
-								vNumbers2.push_back(*vit);
-							vNumbers = vNumbers2;
-							std::cout << std::endl;
+							S = N1 + N2;
 						}
-						catch (std::exception ex)
+						else if (vNumbers[1] == "-")
 						{
-							std::cout << ex.what() << std::endl;
-							break;
+							S = N1 - N2;
 						}
+						else if (vNumbers[1] == "*")
+						{
+							S = N1 * N2;
+						}
+						else if (vNumbers[1] == "/")
+						{
+							S = N1 / N2;
+						}
+						else if (vNumbers[1] == "%")
+						{
+							S = N1 % N2;
+						}
+						else if (vNumbers[1] == ",")
+						{
+							S = (N1, N2);
+						}
+						else if (vNumbers[1] == "<")
+						{
+							bCMP = N1 < N2;
+						}
+						else if (vNumbers[1] == ">")
+						{
+							bCMP = N1 > N2;
+						}
+						else if (vNumbers[1] == "=")
+						{
+							bCMP = N1 == N2;
+						}
+						else if (vNumbers[1] == "<=")
+						{
+							bCMP = N1 <= N2;
+						}
+						else if (vNumbers[1] == ">=")
+						{
+							bCMP = N1 >= N2;
+						}
+
+						if (vNumbers[1] == "+" || vNumbers[1] == "-" || vNumbers[1] == "*" || vNumbers[1] == "/" || vNumbers[1] == "%" || vNumbers[1] == ",")
+						{
+							std::cout << N1 << " " << vNumbers[1] << " " << N2 << " = " << std::endl << S.ToDisplay() << std::endl;
+						}
+						else
+						{
+							S = bCMP ? "1" : "0";
+							std::cout << N1 << " " + vNumbers[1] + " " << N2 << " = " << (bCMP ? "TRUE" : "FALSE") << std::endl;
+						}
+
+						vNumbers2.clear();
+						vNumbers2.push_back(S.ToDisplay());
+						for (std::vector<std::string>::iterator vit = vNumbers.begin() + 3; vit != vNumbers.end(); ++vit)
+							vNumbers2.push_back(*vit);
+						vNumbers = vNumbers2;
+						std::cout << std::endl;
 					} while (vNumbers.size() > 1);
 				}
 				else
