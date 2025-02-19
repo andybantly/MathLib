@@ -1999,6 +1999,53 @@ namespace TestMathLib
 				}
 			}
 		}
+
+		TEST_METHOD(BytePrePost)
+		{
+			int ni, nj;
+			Number NI, NJ;
+			std::string si, sj;
+
+			ni = iBeg;
+			for (NI = iBeg; NI < iEnd; ++NI)
+			{
+				nj = jBeg;
+				for (NJ = jBeg; NJ < jEnd; ++NJ)
+				{
+					sj = NJ.ToDisplay();
+					if (std::to_string(nj) != sj)
+						Assert::AreEqual(std::to_string(nj), sj);
+
+					++nj;
+				}
+
+				si = NI.ToDisplay();
+				if (std::to_string(ni) != si)
+					Assert::AreEqual(std::to_string(ni), si);
+
+				++ni;
+			}
+
+			ni = iBeg;
+			for (NI = iBeg; NI < iEnd; NI++)
+			{
+				nj = jBeg;
+				for (NJ = jBeg; NJ < jEnd; NJ++)
+				{
+					sj = NJ.ToDisplay();
+					if (std::to_string(nj) != sj)
+						Assert::AreEqual(std::to_string(nj), sj);
+
+					++nj;
+				}
+
+				si = NI.ToDisplay();
+				if (std::to_string(ni) != si)
+					Assert::AreEqual(std::to_string(ni), si);
+
+				++ni;
+			}
+		}
 	};
 }
 

@@ -476,8 +476,12 @@ public:
     }
 
     // pre/post increment/decrement
+    /*
+    The prefix increment/decrement operator (++/--) adds/subs one to its operand and this incremented value is the result of the expression.
+    The postfix increment/decrement operator (++/--)(int) adds/subs one to its operand and the previous value is the result of the expression
+    */
     
-    Number& operator ++ ()
+    Number operator ++ ()
     {
         const static Number _1(1, 1);
 
@@ -488,7 +492,7 @@ public:
         return *this;
     }
 
-    Number& operator -- ()
+    Number operator -- ()
     {
         const static Number _1(1, 1);
 
@@ -499,26 +503,28 @@ public:
         return *this;
     }
 
-    Number& operator ++ (int)
+    Number operator ++ (int)
     {
         const static Number _1(1, 1);
 
         if (m_bNAN)
             throw("Invalid number");
 
+        Number rhs = *this;
         *this = *this + _1;
-        return *this;
+        return rhs;
     }
 
-    Number& operator -- (int)
+    Number operator -- (int)
     {
         const static Number _1(1, 1);
 
         if (m_bNAN)
             throw("Invalid number");
 
+        Number rhs = *this;
         *this = *this - _1;
-        return *this;
+        return rhs;
     }
 
     Number operator + (const Number& rhs) const
