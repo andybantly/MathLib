@@ -628,7 +628,7 @@ public:
             {
                 if (g_pow[iBit] & rhs.m_Bytes[iByte].m_b.U)
                     out = out + lhs;
-                lhs = lhs + lhs;
+                lhs.Shl();
             }
         }
 
@@ -662,20 +662,19 @@ public:
         std::vector<Number> vdbl(1, dbl);
         std::vector<Number> vpow(1, pow);
 
-        quot = zero;
-
         if (!m_bNeg)
         {
             while (dbl < rem)
             {
-                dbl = dbl + dbl;
+                dbl.Shl();
                 if (dbl.m_bNeg)
-                    throw;
-                pow = pow + pow;
+                    return quot;
+                pow.Shl();
                 vdbl.push_back(dbl);
                 vpow.push_back(pow);
             }
 
+            quot = zero;
             for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
             {
                 if (vdbl[ndbl - 1] > rem)
@@ -688,14 +687,15 @@ public:
         {
             while (dbl > rem)
             {
-                dbl = dbl + dbl;
+                dbl.Shl();
                 if (!dbl.m_bNeg)
-                    throw;
-                pow = pow + pow;
+                    return quot;
+                pow.Shl();
                 vdbl.push_back(dbl);
                 vpow.push_back(pow);
             }
 
+            quot = zero;
             for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
             {
                 if (vdbl[ndbl - 1] < rem)
@@ -714,7 +714,7 @@ public:
             throw("Invalid number");
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number rem, zero(CByte(0), 1);
+        Number Nan, rem, zero(CByte(0), 1);
         if (rhs == zero)
             return rem;
 
@@ -736,9 +736,9 @@ public:
         {
             while (dbl < rem)
             {
-                dbl = dbl + dbl;
+                dbl.Shl();
                 if (dbl.m_bNeg)
-                    throw;
+                    return Nan;
                 vdbl.push_back(dbl);
             }
 
@@ -753,9 +753,9 @@ public:
         {
             while (dbl > rem)
             {
-                dbl = dbl + dbl;
+                dbl.Shl();
                 if (!dbl.m_bNeg)
-                    throw;
+                    return Nan;
                 vdbl.push_back(dbl);
             }
 
@@ -786,118 +786,33 @@ public:
         return m_Bytes.size();
     }
 
-    Number Shr() // Shift Right
+    Number& Shl() // Shift Left (double)
     {
-        Number out = *this;
-
-        size_t iByte = 0;
-        for (size_t nBytes = out.m_Bytes.size() - 1; iByte < nBytes; iByte++)
-        {
-            out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte].m_b.B.B2;
-            out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B3;
-            out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B4;
-            out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B5;
-            out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B6;
-            out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B7;
-            out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B8;
-            out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte + 1].m_b.B.B1;
-        }
-
-        out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte].m_b.B.B2;
-        out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B3;
-        out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B4;
-        out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B5;
-        out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B6;
-        out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B7;
-        out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B8;
-        out.m_Bytes[iByte].m_b.B.B8 = m_bNeg;
-
-        return out;
-    }
-
-    Number Shl() // Shift Left
-    {
-        Number out = *this;
-
-        size_t iByte = out.m_Bytes.size() - 1;
+        size_t iByte = m_Bytes.size() - 1;
         for (; iByte != 0; iByte--)
         {
-            out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte].m_b.B.B7;
-            out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B6;
-            out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B5;
-            out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B4;
-            out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B3;
-            out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B2;
-            out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B1;
-            out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte - 1].m_b.B.B8;
+            m_Bytes[iByte].m_b.B.B8 = m_Bytes[iByte].m_b.B.B7;
+            m_Bytes[iByte].m_b.B.B7 = m_Bytes[iByte].m_b.B.B6;
+            m_Bytes[iByte].m_b.B.B6 = m_Bytes[iByte].m_b.B.B5;
+            m_Bytes[iByte].m_b.B.B5 = m_Bytes[iByte].m_b.B.B4;
+            m_Bytes[iByte].m_b.B.B4 = m_Bytes[iByte].m_b.B.B3;
+            m_Bytes[iByte].m_b.B.B3 = m_Bytes[iByte].m_b.B.B2;
+            m_Bytes[iByte].m_b.B.B2 = m_Bytes[iByte].m_b.B.B1;
+            m_Bytes[iByte].m_b.B.B1 = m_Bytes[iByte - 1].m_b.B.B8;
         }
 
-        out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte].m_b.B.B7;
-        out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B6;
-        out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B5;
-        out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B4;
-        out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B3;
-        out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B2;
-        out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B1;
-        out.m_Bytes[iByte].m_b.B.B1 = m_bNeg;
+        m_Bytes[iByte].m_b.B.B8 = m_Bytes[iByte].m_b.B.B7;
+        m_Bytes[iByte].m_b.B.B7 = m_Bytes[iByte].m_b.B.B6;
+        m_Bytes[iByte].m_b.B.B6 = m_Bytes[iByte].m_b.B.B5;
+        m_Bytes[iByte].m_b.B.B5 = m_Bytes[iByte].m_b.B.B4;
+        m_Bytes[iByte].m_b.B.B4 = m_Bytes[iByte].m_b.B.B3;
+        m_Bytes[iByte].m_b.B.B3 = m_Bytes[iByte].m_b.B.B2;
+        m_Bytes[iByte].m_b.B.B2 = m_Bytes[iByte].m_b.B.B1;
+        m_Bytes[iByte].m_b.B.B1 = 0;
 
-        return out;
-    }
+        m_bNeg = m_Bytes[m_Bytes.size() - 1].m_b.B.B8;
 
-    Number Ror() // Roll Right
-    {
-        Number out = *this;
-        unsigned bit = out.m_Bytes[0].m_b.B.B1;
-        size_t iByte = 0;
-        for (size_t nBytes = out.m_Bytes.size() - 1; iByte < nBytes; iByte++)
-        {
-            out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte].m_b.B.B2;
-            out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B3;
-            out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B4;
-            out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B5;
-            out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B6;
-            out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B7;
-            out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B8;
-            out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte + 1].m_b.B.B1;
-        }
-        out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte].m_b.B.B2;
-        out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B3;
-        out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B4;
-        out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B5;
-        out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B6;
-        out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B7;
-        out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B8;
-        out.m_Bytes[iByte].m_b.B.B8 = bit;
-        return out;
-    }
-
-    Number Rol() // Roll Left
-    {
-        Number out = *this;
-        unsigned bit = out.m_Bytes[0].m_b.B.B8;
-        size_t iByte = out.m_Bytes.size() - 1;
-        for (; iByte != 0; iByte--)
-        {
-            out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte].m_b.B.B7;
-            out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B6;
-            out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B5;
-            out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B4;
-            out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B3;
-            out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B2;
-            out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B1;
-            out.m_Bytes[iByte].m_b.B.B1 = out.m_Bytes[iByte - 1].m_b.B.B8;
-        }
-
-        out.m_Bytes[iByte].m_b.B.B8 = out.m_Bytes[iByte].m_b.B.B7;
-        out.m_Bytes[iByte].m_b.B.B7 = out.m_Bytes[iByte].m_b.B.B6;
-        out.m_Bytes[iByte].m_b.B.B6 = out.m_Bytes[iByte].m_b.B.B5;
-        out.m_Bytes[iByte].m_b.B.B5 = out.m_Bytes[iByte].m_b.B.B4;
-        out.m_Bytes[iByte].m_b.B.B4 = out.m_Bytes[iByte].m_b.B.B3;
-        out.m_Bytes[iByte].m_b.B.B3 = out.m_Bytes[iByte].m_b.B.B2;
-        out.m_Bytes[iByte].m_b.B.B2 = out.m_Bytes[iByte].m_b.B.B1;
-        out.m_Bytes[iByte].m_b.B.B1 = bit;
-
-        return out;
+        return *this;
     }
 
     // Conversion functions

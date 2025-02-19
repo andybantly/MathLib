@@ -1325,12 +1325,11 @@ namespace TestMathLib
 			////// TEST CASE //////
 
 			B = 1;
-			B = B.Shl();
-			s = B.ToDisplay();
-
-			B = 1;
-			B = B.Rol();
-			s = B.ToDisplay();
+			while (B > 0)
+			{
+				B = B.Shl();
+				s = B.ToDisplay();
+			}
 
 			A = 56;
 			B = 7;
