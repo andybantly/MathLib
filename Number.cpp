@@ -8,6 +8,19 @@ static std::map<std::string, std::string, CILT> g_mapWordTo99;
 static std::map<std::string, std::string, CILT> g_mapWordTo100;
 static const std::string g_one("1");
 
+std::string Number::ToPhrase() const
+{
+	static bool bInit = false;
+	if (!bInit)
+	{
+		bInit = true;
+		CNumber::Init();
+	}
+
+	CNumber N(ToDisplay());
+	return N.GetPhrase();
+}
+
 CNumber::CNumber() : m_bNegative(false)
 {
 	m_strNumber.clear();
@@ -16,7 +29,7 @@ CNumber::CNumber() : m_bNegative(false)
 
 CNumber::CNumber(const std::string& strInput, bool bNum)
 {
-	SetNumber(bNum ? strInput : Contract(m_strPhrase));
+	SetNumber(bNum ? strInput : Contract(strInput));
 }
 
 void CNumber::SetNumber(const std::string& strInput)
@@ -359,12 +372,12 @@ void CNumber::Split(const std::string& strInput, std::vector<std::string>& vstrT
 	} while (ipos != std::string::npos);
 }
 
-const std::string& CNumber::GetNumber()
+const std::string& CNumber::GetNumber() const
 {
 	return m_strNumber;
 }
 
-const std::string& CNumber::GetPhrase()
+const std::string& CNumber::GetPhrase() const
 {
 	return m_strPhrase;
 }

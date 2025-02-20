@@ -8,7 +8,44 @@
 #include <thread>
 #include <functional>
 
-static uint8_t g_pow[8] = { 1,2,4,8,16,32,64,128 }; 
+class CNumber
+{
+public:
+    CNumber();
+    CNumber(const std::string& strInput, bool bNum = true);
+
+    ~CNumber() {};
+
+public:
+    void SetNumber(const std::string& strInput);
+
+    std::string Contract(const std::string& strInput);
+    std::string Expand(const std::string& strInput);
+
+    static std::string WB();
+    const std::string& GetNumber() const;
+    const std::string& GetPhrase() const;
+
+    static void Init();
+    static bool TextEqual(const std::string& strLHS, const std::string& strRHS);
+    friend std::ostream& operator<<(std::ostream& out, const CNumber& Number);
+
+    // error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
+    // for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
+    // __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
+    static std::wstring ToString(const CNumber& Number);
+
+protected:
+    void Convert();
+    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
+
+    bool m_bNegative;
+
+    std::string m_strNumber;
+    std::string m_strPhrase;
+};
+
+static uint8_t g_pow[8] = { 1,2,4,8,16,32,64,128 };
 
 class Number
 {
@@ -177,6 +214,11 @@ public:
         m_Bytes.resize(size, m_bNeg ? _255 : _0);
         m_Bytes[0] = ch;
         m_bNAN = false;
+    }
+
+    Number(const CNumber rhs)
+    {
+        ToBinary(rhs.GetNumber());
     }
 
     ~Number()
@@ -664,7 +706,7 @@ public:
     }
 
     // Conversion functions
-    Number TwosComplement()
+    Number TwosComplement() const
     {
         if (m_bNAN)
             throw("Invalid number");
@@ -687,7 +729,7 @@ public:
         return Out;
     }
 
-    std::string ToDisplay()
+    std::string ToDisplay() const
     {
         if (m_bNAN)
             return "NAN";
@@ -814,6 +856,8 @@ public:
 
         return strBin;
     }
+
+    std::string ToPhrase() const;
 
     friend std::ostream& operator << (std::ostream& out, Number& rhs)
     {
@@ -960,43 +1004,6 @@ protected:
         std::vector<CByte> m_Bytes;
         bool m_bNeg;
         bool m_bNAN;
-};
-
-class CNumber
-{
-public:
-    CNumber();
-    CNumber(const std::string& strInput, bool bNum = true);
-
-    ~CNumber() {};
-
-public:
-    void SetNumber(const std::string& strInput);
-
-    std::string Contract(const std::string& strInput);
-    std::string Expand(const std::string& strInput);
-
-    static std::string WB();
-    const std::string& GetNumber();
-    const std::string& GetPhrase();
-
-    static void Init();
-    static bool TextEqual(const std::string& strLHS, const std::string& strRHS);
-    friend std::ostream& operator<<(std::ostream& out, const CNumber& Number);
-
-    // error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
-    // for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
-    // __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
-    static std::wstring ToString(const CNumber& Number);
-
-protected:
-    void Convert();
-    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
-
-    bool m_bNegative;
-
-    std::string m_strNumber;
-    std::string m_strPhrase;
 };
 
 struct CILT

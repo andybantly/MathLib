@@ -8,8 +8,6 @@
 
 int main()
 {
-	CNumber::Init();
-
 	std::string strInput, strResult;
 	bool bAgain = true;
 	do
@@ -59,8 +57,7 @@ int main()
 				{
 					Number N(strInput);
 					std::cout << N << " " << std::endl << N.ToBinary() << std::endl;
-					CNumber ND(N.ToDisplay());
-					std::cout << ND.GetPhrase() << std::endl << ND.Contract(ND.GetPhrase()) << std::endl;
+					std::cout << N.ToPhrase() << std::endl;
 				}
 				else if (vNumbers.size() >= 3)
 				{
@@ -159,6 +156,7 @@ int main()
 
 static void ttest(unsigned long long ullb, unsigned long long ulle)
 {
+	CNumber::Init();
 	CNumber Number;
 
 	std::string s, sr, sv;
@@ -177,7 +175,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 	{
 		s = std::to_string(ull++);
 		sr = Number.Expand(s);
-		if (sr.length() > 0)
+		if (sr.empty())
 		{
 			std::lock_guard<std::mutex> guard(g_io_mutex);
 			std::cout << s << " did not expand" << std::endl;
@@ -186,7 +184,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 		else
 		{
 			sv = Number.Contract(sr);
-			if (sv.length() > 0)
+			if (sv.empty())
 			{
 				std::lock_guard<std::mutex> guard(g_io_mutex);
 				std::cout << sr << " did not contract" << std::endl;
