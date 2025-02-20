@@ -8,6 +8,8 @@
 
 int main()
 {
+	CNumber::Init();
+
 	std::string strInput, strResult;
 	bool bAgain = true;
 	do
@@ -18,7 +20,7 @@ int main()
 		char c;
 		while ((c = getchar()) != '\n')
 			strInput.append(1, c);
-		if (!TextEqual(strInput, "quit") && !TextEqual(strInput, "test"))
+		if (!CNumber::TextEqual(strInput, "quit") && !CNumber::TextEqual(strInput, "test"))
 		{
 			try
 			{
@@ -56,7 +58,9 @@ int main()
 				if (vNumbers.size() == 1)
 				{
 					Number N(strInput);
-					std::cout << N << " " << N.ToBinary() << std::endl;
+					std::cout << N << " " << std::endl << N.ToBinary() << std::endl;
+					CNumber ND(N.ToDisplay());
+					std::cout << ND.GetPhrase() << std::endl << ND.Contract(ND.GetPhrase()) << std::endl;
 				}
 				else if (vNumbers.size() >= 3)
 				{
@@ -144,7 +148,7 @@ int main()
 		}
 		else
 		{
-			if (TextEqual(strInput, "quit"))
+			if (CNumber::TextEqual(strInput, "quit"))
 				bAgain = false;
 			else
 				test(); // Manual testing, automatic testing in TestMathLib project
@@ -172,7 +176,8 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 	do
 	{
 		s = std::to_string(ull++);
-		if (Number.Expand(s, sr) != 0)
+		sr = Number.Expand(s);
+		if (sr.length() > 0)
 		{
 			std::lock_guard<std::mutex> guard(g_io_mutex);
 			std::cout << s << " did not expand" << std::endl;
@@ -180,7 +185,8 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 		}
 		else
 		{
-			if (Number.Contract(sr, sv) != 0)
+			sv = Number.Contract(sr);
+			if (sv.length() > 0)
 			{
 				std::lock_guard<std::mutex> guard(g_io_mutex);
 				std::cout << sr << " did not contract" << std::endl;

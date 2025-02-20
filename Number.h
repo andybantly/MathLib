@@ -8,196 +8,6 @@
 #include <thread>
 #include <functional>
 
-bool TextEqual(const std::string& strLHS, const std::string& strRHS);
-
-class CNumber
-{
-    enum GT { Regular, Absolute};
-
-public:
-    // Constructor and copy constructors
-    CNumber();
-    CNumber(const char* pInput);
-    CNumber(const std::string& strInput);
-    CNumber(const CNumber& rhs);
-
-    // Destructor
-    ~CNumber();
-
-public:
-    // Assignment operators
-    CNumber& operator = (const CNumber& rhs);
-    CNumber& operator = (const std::string& rhs);
-    CNumber& operator = (const char* prhs);
-
-    // Arithmetic operators
-    CNumber operator + (const CNumber& rhs);
-    CNumber operator - (const CNumber& rhs);
-    CNumber operator * (const CNumber& rhs);
-    CNumber operator / (const CNumber& rhs);
-    CNumber operator % (const CNumber& rhs);
-
-    // Comparison operators
-    const bool operator < (const CNumber& rhs) const;
-    const bool operator <= (const CNumber& rhs) const;
-    const bool operator > (const CNumber& rhs) const;
-    const bool operator >= (const CNumber& rhs) const;
-    const bool operator == (const CNumber& rhs) const;
-    const bool operator != (const CNumber& rhs) const;
-
-public:
-    void SetNumber(const std::string& strInput);
-    void SetPrecision(const int iPrecision);
-    int Contract(const std::string& strInput, std::string& strResult);
-	int Expand(const std::string& strInput, std::string& strResult);
-    int ToBase2(const std::string& strInput, std::string& strResult);
-    int ToBase10(const std::string& strInput, std::string& strResult);
-    static std::string WB();
-    const std::string& GetNumber();
-    const std::string& GetPhrase();
-    const std::string& GetBinary();
-    static void Init();
-    friend std::ostream& operator<<(std::ostream& out, const CNumber& Number);
-
-    // error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
-    // for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
-    // __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
-    static std::wstring ToString(const CNumber& Number);
-
-protected:
-    int Convert();
-    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
-    void Add(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void Sub(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void Mul(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out);
-    void Div(const CNumber& Num1, const CNumber& Num2, bool bNeg, CNumber& Out, CNumber& Rem, bool bMod = false);
-    const int Greater(const CNumber& LHS, const CNumber& RHS, const GT Type = Regular) const;
-
-    bool m_bNegative;
-    bool m_bZero;
-    size_t m_iDecPos; // 0 = Integer, > 0 = Floating Point
-    int m_iFracRpt; // 0 = beginning of fractional part which means the whole fraction repeats vs. a subset of it, or -1 for does not repeat
-    int m_iPrecision; // -1 to set the cutoff at 32, 0 for fractional part, > 0 for setting the number of decimals of precision
-
-    std::string m_strNumber;
-    std::string m_strPhrase;
-    std::string m_strBinary;
-};
-
-struct CILT
-{
-    struct Compare
-    {
-        bool operator() (const unsigned char& c1, const unsigned char& c2) const
-        {
-            return tolower(c1) < tolower(c2);
-        }
-    };
-
-    bool operator() (const std::string& strLhs, const std::string& strRhs) const
-    {
-        return std::lexicographical_compare
-        (
-            strLhs.begin(), strLhs.end(),
-            strRhs.begin(), strRhs.end(),
-            Compare()
-        );
-    }
-};
-
-class CDuration
-{
-	std::string m_str;
-	clock_t start;
-	clock_t finish;
-
-public:
-	CDuration(std::string str) : m_str(str), start(clock()), finish(start) {	}
-
-	~CDuration()
-	{
-		finish = clock();
-		double d = (double)(finish - start) / CLOCKS_PER_SEC;
-		std::cout << m_str << " " << d << " seconds" << std::endl;
-	}
-};
-
-class CStatistics
-{
-public:
-    CStatistics() : m_nobs(0), m_dmean(0.0), m_s(0.0), m_dvar(0.0), m_dstddev(0.0) {};
-    ~CStatistics() {};
-
-protected:
-    unsigned long m_nobs;
-    long double m_dmean;
-    long double m_s;
-    long double m_dvar;
-    long double m_dstddev;
-
-    void update()
-    {
-        if (m_nobs > 1)
-        {
-            m_dvar = m_s / (m_nobs - 1);
-            m_dstddev = sqrt(m_dvar);
-        }
-        else if (m_nobs == 0)
-        {
-            m_dmean = 0;
-            m_dvar = 0;
-            m_dstddev = 0;
-        }
-        else
-        {
-            m_dstddev = 0;
-            m_dvar = 0;
-        }
-    }
-
-public:
-    bool RemObs(unsigned long iwght, long double dval, unsigned long nobs)
-    {
-        long double dlmean = (m_dmean * m_nobs - dval * iwght) / (m_nobs - iwght);
-        if (m_nobs > nobs)
-        {
-            long double dls = m_s - iwght * (dval - dlmean) * (dval - (dlmean + iwght * (dval - dlmean) / m_nobs));
-            if (dls > 0)
-            {
-                m_s = dls;
-                m_dvar = m_s / (m_nobs - iwght - 1);
-                m_dstddev = sqrt(m_dvar);
-                m_dmean = dlmean;
-                m_nobs -= iwght;
-
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void AddObs(unsigned long iwght, double dv)
-    {
-        unsigned long uin = m_nobs + iwght;
-        long double dx = iwght * (dv - m_dmean);
-        long double dmean = m_dmean + dx / uin;
-        long double ds = m_s + dx * (dv - dmean);
-
-        if (_finite(ds))
-        {
-            m_nobs = uin;
-            m_dmean = dmean;
-            m_s = ds;
-            update();
-        }
-    }
-
-    void print() const
-    {
-        std::cout << "mean=" << m_dmean << " variance=" << m_dvar << " stddev=" << m_dstddev << std::endl;
-    }
-};
-
 static uint8_t g_pow[8] = { 1,2,4,8,16,32,64,128 }; 
 
 class Number
@@ -1150,4 +960,155 @@ protected:
         std::vector<CByte> m_Bytes;
         bool m_bNeg;
         bool m_bNAN;
+};
+
+class CNumber
+{
+public:
+    CNumber();
+    CNumber(const std::string& strInput, bool bNum = true);
+
+    ~CNumber() {};
+
+public:
+    void SetNumber(const std::string& strInput);
+
+    std::string Contract(const std::string& strInput);
+    std::string Expand(const std::string& strInput);
+
+    static std::string WB();
+    const std::string& GetNumber();
+    const std::string& GetPhrase();
+
+    static void Init();
+    static bool TextEqual(const std::string& strLHS, const std::string& strRHS);
+    friend std::ostream& operator<<(std::ostream& out, const CNumber& Number);
+
+    // error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
+    // for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
+    // __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
+    static std::wstring ToString(const CNumber& Number);
+
+protected:
+    void Convert();
+    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
+
+    bool m_bNegative;
+
+    std::string m_strNumber;
+    std::string m_strPhrase;
+};
+
+struct CILT
+{
+    struct Compare
+    {
+        bool operator() (const unsigned char& c1, const unsigned char& c2) const
+        {
+            return tolower(c1) < tolower(c2);
+        }
+    };
+
+    bool operator() (const std::string& strLhs, const std::string& strRhs) const
+    {
+        return std::lexicographical_compare
+        (
+            strLhs.begin(), strLhs.end(),
+            strRhs.begin(), strRhs.end(),
+            Compare()
+        );
+    }
+};
+
+class CDuration
+{
+    std::string m_str;
+    clock_t start;
+    clock_t finish;
+
+public:
+    CDuration(std::string str) : m_str(str), start(clock()), finish(start) {}
+
+    ~CDuration()
+    {
+        finish = clock();
+        double d = (double)(finish - start) / CLOCKS_PER_SEC;
+        std::cout << m_str << " " << d << " seconds" << std::endl;
+    }
+};
+
+class CStatistics
+{
+public:
+    CStatistics() : m_nobs(0), m_dmean(0.0), m_s(0.0), m_dvar(0.0), m_dstddev(0.0) {};
+    ~CStatistics() {};
+
+protected:
+    unsigned long m_nobs;
+    long double m_dmean;
+    long double m_s;
+    long double m_dvar;
+    long double m_dstddev;
+
+    void update()
+    {
+        if (m_nobs > 1)
+        {
+            m_dvar = m_s / (m_nobs - 1);
+            m_dstddev = sqrt(m_dvar);
+        }
+        else if (m_nobs == 0)
+        {
+            m_dmean = 0;
+            m_dvar = 0;
+            m_dstddev = 0;
+        }
+        else
+        {
+            m_dstddev = 0;
+            m_dvar = 0;
+        }
+    }
+
+public:
+    bool RemObs(unsigned long iwght, long double dval, unsigned long nobs)
+    {
+        long double dlmean = (m_dmean * m_nobs - dval * iwght) / (m_nobs - iwght);
+        if (m_nobs > nobs)
+        {
+            long double dls = m_s - iwght * (dval - dlmean) * (dval - (dlmean + iwght * (dval - dlmean) / m_nobs));
+            if (dls > 0)
+            {
+                m_s = dls;
+                m_dvar = m_s / (m_nobs - iwght - 1);
+                m_dstddev = sqrt(m_dvar);
+                m_dmean = dlmean;
+                m_nobs -= iwght;
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void AddObs(unsigned long iwght, double dv)
+    {
+        unsigned long uin = m_nobs + iwght;
+        long double dx = iwght * (dv - m_dmean);
+        long double dmean = m_dmean + dx / uin;
+        long double ds = m_s + dx * (dv - dmean);
+
+        if (_finite(ds))
+        {
+            m_nobs = uin;
+            m_dmean = dmean;
+            m_s = ds;
+            update();
+        }
+    }
+
+    void print() const
+    {
+        std::cout << "mean=" << m_dmean << " variance=" << m_dvar << " stddev=" << m_dstddev << std::endl;
+    }
 };
