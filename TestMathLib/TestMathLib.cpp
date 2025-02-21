@@ -119,6 +119,9 @@ namespace TestMathLib
 			Number A, B, C;
 			int a, b, c;
 			std::string s;
+			
+			B = 256;
+			B.Shr();
 
 			////// TEST CASE //////
 			A = a = 1, B = b = 255;
@@ -143,6 +146,18 @@ namespace TestMathLib
 			Number A, B, C;
 			int a, b, c;
 			std::string s;
+
+			////// TEST CASE //////
+
+			A = a = 127;
+			B = b = 25;
+
+			c = a / b;
+			C = A / B;
+
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), s);
 
 			////// TEST CASE //////
 
@@ -976,6 +991,30 @@ namespace TestMathLib
 
 				++ni;
 			}
+		}
+
+		TEST_METHOD(ByteBigDiv)
+		{
+			Number N = "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
+			Number D = 180;
+			Number Q;
+
+			N.SetSize(N.GetSize() + 1);
+
+			for (unsigned int i = 0; i < 65536; ++i)
+				Q = N / D;
+		}
+
+		TEST_METHOD(ByteBigMul)
+		{
+			Number N = "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
+			Number D = 180;
+			Number Q;
+
+			N.SetSize(N.GetSize() + 2);
+
+			for (unsigned int i = 0; i < 65536; ++i)
+				Q = N * D;
 		}
 	};
 }

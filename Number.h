@@ -550,9 +550,7 @@ public:
 
         Number dbl = rhsin;
         Number pow(m_bNeg == rhs.m_bNeg ? CByte(1) : CByte(-1), stMB);
-
-        std::vector<Number> vdbl(1, dbl);
-        std::vector<Number> vpow(1, pow);
+        size_t stn = 1;
 
         if (!m_bNeg)
         {
@@ -562,17 +560,22 @@ public:
                 if (dbl.m_bNeg)
                     return quot;
                 pow.Shl();
-                vdbl.push_back(dbl);
-                vpow.push_back(pow);
+                ++stn;
             }
 
             quot = zero;
-            for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+            for (size_t ndbl = stn; ndbl > 0; --ndbl)
             {
-                if (vdbl[ndbl - 1] > rem)
+                if (dbl > rem)
+                {
+                    dbl.Shr();
+                    pow.Shr();
                     continue;
-                quot = quot + vpow[ndbl - 1];
-                rem = rem - vdbl[ndbl - 1];
+                }
+                quot += pow;
+                rem -= dbl;
+                dbl.Shr();
+                pow.Shr();
             }
         }
         else
@@ -583,17 +586,22 @@ public:
                 if (!dbl.m_bNeg)
                     return quot;
                 pow.Shl();
-                vdbl.push_back(dbl);
-                vpow.push_back(pow);
+                ++stn;
             }
 
             quot = zero;
-            for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+            for (size_t ndbl = stn; ndbl > 0; --ndbl)
             {
-                if (vdbl[ndbl - 1] < rem)
+                if (dbl < rem)
+                {
+                    dbl.Shr();
+                    pow.Shr();
                     continue;
-                quot = quot + vpow[ndbl - 1];
-                rem = rem - vdbl[ndbl - 1];
+                }
+                quot += pow;
+                rem -= dbl;
+                dbl.Shr();
+                pow.Shr();
             }
         }
 
@@ -606,11 +614,11 @@ public:
             throw("Invalid number");
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number Nan, rem, zero(CByte(0), 1);
+        Number quot, zero(CByte(0), 1);
         if (rhs == zero)
-            return rem;
+            return quot;
 
-        rem = *this;
+        Number rem = *this;
         Number rhsin = rhs;
         rem.SetSize(stMB);
         rhsin.SetSize(stMB);
@@ -622,7 +630,7 @@ public:
         }
 
         Number dbl = rhsin;
-        std::vector<Number> vdbl(1, dbl);
+        size_t stn = 1;
 
         if (!m_bNeg)
         {
@@ -630,15 +638,20 @@ public:
             {
                 dbl.Shl();
                 if (dbl.m_bNeg)
-                    return Nan;
-                vdbl.push_back(dbl);
+                    return quot;
+                ++stn;
             }
 
-            for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+            quot = zero;
+            for (size_t ndbl = stn; ndbl > 0; --ndbl)
             {
-                if (vdbl[ndbl - 1] > rem)
+                if (dbl > rem)
+                {
+                    dbl.Shr();
                     continue;
-                rem = rem - vdbl[ndbl - 1];
+                }
+                rem -= dbl;
+                dbl.Shr();
             }
         }
         else
@@ -647,15 +660,20 @@ public:
             {
                 dbl.Shl();
                 if (!dbl.m_bNeg)
-                    return Nan;
-                vdbl.push_back(dbl);
+                    return quot;
+                ++stn;
             }
 
-            for (size_t ndbl = vdbl.size(); ndbl > 0; ndbl--)
+            quot = zero;
+            for (size_t ndbl = stn; ndbl > 0; --ndbl)
             {
-                if (vdbl[ndbl - 1] < rem)
+                if (dbl < rem)
+                {
+                    dbl.Shr();
                     continue;
-                rem = rem - vdbl[ndbl - 1];
+                }
+                rem -= dbl;
+                dbl.Shr();
             }
         }
 
@@ -705,6 +723,33 @@ public:
         m_bNeg = m_Bytes[m_Bytes.size() - 1].m_b.B.B8;
     }
 
+    void Shr() // Shift Right (halve)
+    {
+        size_t iByte = 0;;
+        for (; iByte != m_Bytes.size() - 1; iByte++)
+        {
+            m_Bytes[iByte].m_b.B.B1 = m_Bytes[iByte].m_b.B.B2;
+            m_Bytes[iByte].m_b.B.B2 = m_Bytes[iByte].m_b.B.B3;
+            m_Bytes[iByte].m_b.B.B3 = m_Bytes[iByte].m_b.B.B4;
+            m_Bytes[iByte].m_b.B.B4 = m_Bytes[iByte].m_b.B.B5;
+            m_Bytes[iByte].m_b.B.B5 = m_Bytes[iByte].m_b.B.B6;
+            m_Bytes[iByte].m_b.B.B6 = m_Bytes[iByte].m_b.B.B7;
+            m_Bytes[iByte].m_b.B.B7 = m_Bytes[iByte].m_b.B.B8;
+            m_Bytes[iByte].m_b.B.B8 = m_Bytes[iByte + 1].m_b.B.B1;
+        }
+
+        m_Bytes[iByte].m_b.B.B1 = m_Bytes[iByte].m_b.B.B2;
+        m_Bytes[iByte].m_b.B.B2 = m_Bytes[iByte].m_b.B.B3;
+        m_Bytes[iByte].m_b.B.B3 = m_Bytes[iByte].m_b.B.B4;
+        m_Bytes[iByte].m_b.B.B4 = m_Bytes[iByte].m_b.B.B5;
+        m_Bytes[iByte].m_b.B.B5 = m_Bytes[iByte].m_b.B.B6;
+        m_Bytes[iByte].m_b.B.B6 = m_Bytes[iByte].m_b.B.B7;
+        m_Bytes[iByte].m_b.B.B7 = m_Bytes[iByte].m_b.B.B8;
+        m_Bytes[iByte].m_b.B.B8 = m_bNeg;
+
+        m_bNeg = m_Bytes[iByte].m_b.B.B8;
+    }
+    
     // Conversion functions
     Number TwosComplement() const
     {
