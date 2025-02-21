@@ -614,11 +614,11 @@ public:
             throw("Invalid number");
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number quot, zero(CByte(0), 1);
+        Number rem, zero(CByte(0), 1);
         if (rhs == zero)
-            return quot;
+            return rem;
 
-        Number rem = *this;
+        rem = *this;
         Number rhsin = rhs;
         rem.SetSize(stMB);
         rhsin.SetSize(stMB);
@@ -638,11 +638,10 @@ public:
             {
                 dbl.Shl();
                 if (dbl.m_bNeg)
-                    return quot;
+                    return Number();
                 ++stn;
             }
 
-            quot = zero;
             for (size_t ndbl = stn; ndbl > 0; --ndbl)
             {
                 if (dbl > rem)
@@ -660,11 +659,10 @@ public:
             {
                 dbl.Shl();
                 if (!dbl.m_bNeg)
-                    return quot;
+                    return Number();
                 ++stn;
             }
 
-            quot = zero;
             for (size_t ndbl = stn; ndbl > 0; --ndbl)
             {
                 if (dbl < rem)
