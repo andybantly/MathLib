@@ -188,6 +188,40 @@ protected:
     }
 
 public:
+    unsigned int Shl() // Shift Left (double)
+    {
+        size_t iByte = m_Bytes.size() - 1;
+        unsigned int iRet = m_Bytes[iByte].m_b.B.B8;
+        for (; iByte != 0; --iByte)
+        {
+            m_Bytes[iByte].m_b.U <<= 1;
+            m_Bytes[iByte].m_b.U |= m_Bytes[iByte - 1].m_b.U & 128 ? 1 : 0;
+        }
+        m_Bytes[iByte].m_b.U <<= 1;
+        m_bNeg = m_Bytes[m_Bytes.size() - 1].m_b.U && 128;
+
+        return iRet;
+    }
+
+    unsigned int Shr() // Shift Right (halve)
+    {
+        size_t iByte = 0;
+        unsigned int iRet = m_Bytes[iByte].m_b.B.B1;
+        for (; iByte != m_Bytes.size() - 1; ++iByte)
+        {
+            m_Bytes[iByte].m_b.U >>= 1;
+            if (m_Bytes[iByte + 1].m_b.U & 1)
+                m_Bytes[iByte].m_b.U |= 128;
+        }
+
+        m_Bytes[iByte].m_b.U >>= 1;
+        if (m_bNeg)
+            m_Bytes[iByte].m_b.U |= 128;
+
+        return iRet;
+    }
+
+public:
 
     Number() : m_bNeg(false), m_bNAN(true) {};
 
@@ -694,60 +728,6 @@ public:
         return m_Bytes.size();
     }
 
-    void Shl() // Shift Left (double)
-    {
-        size_t iByte = m_Bytes.size() - 1;
-        for (; iByte != 0; iByte--)
-        {
-            m_Bytes[iByte].m_b.B.B8 = m_Bytes[iByte].m_b.B.B7;
-            m_Bytes[iByte].m_b.B.B7 = m_Bytes[iByte].m_b.B.B6;
-            m_Bytes[iByte].m_b.B.B6 = m_Bytes[iByte].m_b.B.B5;
-            m_Bytes[iByte].m_b.B.B5 = m_Bytes[iByte].m_b.B.B4;
-            m_Bytes[iByte].m_b.B.B4 = m_Bytes[iByte].m_b.B.B3;
-            m_Bytes[iByte].m_b.B.B3 = m_Bytes[iByte].m_b.B.B2;
-            m_Bytes[iByte].m_b.B.B2 = m_Bytes[iByte].m_b.B.B1;
-            m_Bytes[iByte].m_b.B.B1 = m_Bytes[iByte - 1].m_b.B.B8;
-        }
-
-        m_Bytes[iByte].m_b.B.B8 = m_Bytes[iByte].m_b.B.B7;
-        m_Bytes[iByte].m_b.B.B7 = m_Bytes[iByte].m_b.B.B6;
-        m_Bytes[iByte].m_b.B.B6 = m_Bytes[iByte].m_b.B.B5;
-        m_Bytes[iByte].m_b.B.B5 = m_Bytes[iByte].m_b.B.B4;
-        m_Bytes[iByte].m_b.B.B4 = m_Bytes[iByte].m_b.B.B3;
-        m_Bytes[iByte].m_b.B.B3 = m_Bytes[iByte].m_b.B.B2;
-        m_Bytes[iByte].m_b.B.B2 = m_Bytes[iByte].m_b.B.B1;
-        m_Bytes[iByte].m_b.B.B1 = 0;
-
-        m_bNeg = m_Bytes[m_Bytes.size() - 1].m_b.B.B8;
-    }
-
-    void Shr() // Shift Right (halve)
-    {
-        size_t iByte = 0;;
-        for (; iByte != m_Bytes.size() - 1; iByte++)
-        {
-            m_Bytes[iByte].m_b.B.B1 = m_Bytes[iByte].m_b.B.B2;
-            m_Bytes[iByte].m_b.B.B2 = m_Bytes[iByte].m_b.B.B3;
-            m_Bytes[iByte].m_b.B.B3 = m_Bytes[iByte].m_b.B.B4;
-            m_Bytes[iByte].m_b.B.B4 = m_Bytes[iByte].m_b.B.B5;
-            m_Bytes[iByte].m_b.B.B5 = m_Bytes[iByte].m_b.B.B6;
-            m_Bytes[iByte].m_b.B.B6 = m_Bytes[iByte].m_b.B.B7;
-            m_Bytes[iByte].m_b.B.B7 = m_Bytes[iByte].m_b.B.B8;
-            m_Bytes[iByte].m_b.B.B8 = m_Bytes[iByte + 1].m_b.B.B1;
-        }
-
-        m_Bytes[iByte].m_b.B.B1 = m_Bytes[iByte].m_b.B.B2;
-        m_Bytes[iByte].m_b.B.B2 = m_Bytes[iByte].m_b.B.B3;
-        m_Bytes[iByte].m_b.B.B3 = m_Bytes[iByte].m_b.B.B4;
-        m_Bytes[iByte].m_b.B.B4 = m_Bytes[iByte].m_b.B.B5;
-        m_Bytes[iByte].m_b.B.B5 = m_Bytes[iByte].m_b.B.B6;
-        m_Bytes[iByte].m_b.B.B6 = m_Bytes[iByte].m_b.B.B7;
-        m_Bytes[iByte].m_b.B.B7 = m_Bytes[iByte].m_b.B.B8;
-        m_Bytes[iByte].m_b.B.B8 = m_bNeg;
-
-        m_bNeg = m_Bytes[iByte].m_b.B.B8;
-    }
-    
     // Conversion functions
     Number TwosComplement() const
     {

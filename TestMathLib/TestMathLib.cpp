@@ -119,9 +119,33 @@ namespace TestMathLib
 			Number A, B, C;
 			int a, b, c;
 			std::string s;
+
+			uint8_t U = 255;
 			
 			B = 256;
 			B.Shr();
+			s = B.ToDisplay();
+			B = 0;
+			s = B.ToBinary();
+			s = B.ToDisplay();
+			B = -1;
+			s = B.ToBinary();
+			s = B.ToDisplay();
+			B = -2;
+			s = B.ToBinary();
+			s = B.ToDisplay();
+			B.Shl();
+			s = B.ToBinary();
+			s = B.ToDisplay();
+			B.Shr();
+			s = B.ToBinary();
+			s = B.ToDisplay();
+			B = -3;
+			s = B.ToBinary();
+			s = B.ToDisplay();
+			B = -127;
+			s = B.ToBinary();
+			s = B.ToDisplay();
 
 			////// TEST CASE //////
 			A = a = 1, B = b = 255;
