@@ -85,61 +85,61 @@ protected:
             CByte Out;
             Out.OF = OF; // Handle Carry
 
-            Out.m_b.B.B1 = Out.OF ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
-            Out.OF = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.OF) | (m_b.B.B1 & Out.OF); // CARRY: Carry-out AB OR BC OR ACin
+            Out.m_b.U |= Out.OF ^ ((m_b.U & 1) ^ (rhs.m_b.U & 1));  // SUM: Carry-in XOR (A XOR B)
+            Out.OF = ((m_b.U & 1) & (rhs.m_b.U & 1)) | ((rhs.m_b.U & 1) & Out.OF) | ((m_b.U & 1) & Out.OF); // CARRY: Carry-out AB OR BC OR ACin
 
-            Out.m_b.B.B2 = Out.OF ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
-            Out.OF = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.OF) | (m_b.B.B2 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 2) >> 1) ^ ((rhs.m_b.U & 2) >> 1))) << 1;
+            Out.OF = (((m_b.U & 2) >> 1) & ((rhs.m_b.U & 2) >> 1)) | (((rhs.m_b.U & 2) >> 1) & Out.OF) | (((m_b.U & 2) >> 1) & Out.OF);
 
-            Out.m_b.B.B3 = Out.OF ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
-            Out.OF = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.OF) | (m_b.B.B3 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 4) >> 2) ^ ((rhs.m_b.U & 4) >> 2))) << 2;
+            Out.OF = (((m_b.U & 4) >> 2) & ((rhs.m_b.U & 4) >> 2)) | (((rhs.m_b.U & 4) >> 2) & Out.OF) | (((m_b.U & 4) >> 2) & Out.OF);
 
-            Out.m_b.B.B4 = Out.OF ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
-            Out.OF = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.OF) | (m_b.B.B4 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 8) >> 3) ^ ((rhs.m_b.U & 8) >> 3))) << 3;
+            Out.OF = (((m_b.U & 8) >> 3) & ((rhs.m_b.U & 8) >> 3)) | (((rhs.m_b.U & 8) >> 3) & Out.OF) | (((m_b.U & 8) >> 3) & Out.OF);
 
-            Out.m_b.B.B5 = Out.OF ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
-            Out.OF = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.OF) | (m_b.B.B5 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 16) >> 4) ^ ((rhs.m_b.U & 16) >> 4))) << 4;
+            Out.OF = (((m_b.U & 16) >> 4) & ((rhs.m_b.U & 16) >> 4)) | (((rhs.m_b.U & 16) >> 4) & Out.OF) | (((m_b.U & 16) >> 4) & Out.OF);
 
-            Out.m_b.B.B6 = Out.OF ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
-            Out.OF = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.OF) | (m_b.B.B6 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 32) >> 5) ^ ((rhs.m_b.U & 32) >> 5))) << 5;
+            Out.OF = (((m_b.U & 32) >> 5) & ((rhs.m_b.U & 32) >> 5)) | (((rhs.m_b.U & 32) >> 5) & Out.OF) | (((m_b.U & 32) >> 5) & Out.OF);
 
-            Out.m_b.B.B7 = Out.OF ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
-            Out.OF = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.OF) | (m_b.B.B7 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 64) >> 6) ^ ((rhs.m_b.U & 64) >> 6))) << 6;
+            Out.OF = (((m_b.U & 64) >> 6) & ((rhs.m_b.U & 64) >> 6)) | (((rhs.m_b.U & 64) >> 6) & Out.OF) | (((m_b.U & 64) >> 6) & Out.OF);
 
-            Out.m_b.B.B8 = Out.OF ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
-            Out.OF = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.OF) | (m_b.B.B8 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 128) >> 7) ^ ((rhs.m_b.U & 128) >> 7))) << 7;
+            Out.OF = (((m_b.U & 128) >> 7) & ((rhs.m_b.U & 128) >> 7)) | (((rhs.m_b.U & 128) >> 7) & Out.OF) | (((m_b.U & 128) >> 7) & Out.OF);
 
             return Out;
         }
-
+        
         CByte operator - (const CByte& rhs) const // Full-Subtractor
         {
             CByte Out;
             Out.OF = OF; // Handle borrowing
 
-            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.OF; // DIFFERENCE: (A XOR B) XOR Borrow-in
+            Out.m_b.U |= Out.OF ^ ((m_b.U & 1) ^ (rhs.m_b.U & 1));  // DIFFERENCE: (A XOR B) XOR Borrow-in
             Out.OF = (~m_b.B.B1 & Out.OF) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
 
-            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ Out.OF;
-            Out.OF = (~m_b.B.B2 & Out.OF) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 2) >> 1) ^ ((rhs.m_b.U & 2) >> 1))) << 1;
+            Out.OF = (~((m_b.U & 2) >> 1) & Out.OF) | (~((m_b.U & 2) >> 1) & ((rhs.m_b.U & 2) >> 1)) | (((rhs.m_b.U & 2) >> 1) & Out.OF);
 
-            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ Out.OF;
-            Out.OF = (~m_b.B.B3 & Out.OF) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 4) >> 2) ^ ((rhs.m_b.U & 4) >> 2))) << 2;
+            Out.OF = (~((m_b.U & 4) >> 2) & Out.OF) | (~((m_b.U & 4) >> 2) & ((rhs.m_b.U & 4) >> 2)) | (((rhs.m_b.U & 4) >> 2) & Out.OF);
 
-            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ Out.OF;
-            Out.OF = (~m_b.B.B4 & Out.OF) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 8) >> 3) ^ ((rhs.m_b.U & 8) >> 3))) << 3;
+            Out.OF = (~((m_b.U & 8) >> 3) & Out.OF) | (~((m_b.U & 8) >> 3) & ((rhs.m_b.U & 8) >> 3)) | (((rhs.m_b.U & 8) >> 3) & Out.OF);
 
-            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ Out.OF;
-            Out.OF = (~m_b.B.B5 & Out.OF) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 16) >> 4) ^ ((rhs.m_b.U & 16) >> 4))) << 4;
+            Out.OF = (~((m_b.U & 16) >> 4) & Out.OF) | (~((m_b.U & 16) >> 4) & ((rhs.m_b.U & 16) >> 4)) | (((rhs.m_b.U & 16) >> 4) & Out.OF);
 
-            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ Out.OF;
-            Out.OF = (~m_b.B.B6 & Out.OF) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 32) >> 5) ^ ((rhs.m_b.U & 32) >> 5))) << 5;
+            Out.OF = (~((m_b.U & 32) >> 5) & Out.OF) | (~((m_b.U & 32) >> 5) & ((rhs.m_b.U & 32) >> 5)) | (((rhs.m_b.U & 32) >> 5) & Out.OF);
 
-            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ Out.OF;
-            Out.OF = (~m_b.B.B7 & Out.OF) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 64) >> 6) ^ ((rhs.m_b.U & 64) >> 6))) << 6;
+            Out.OF = (~((m_b.U & 64) >> 6) & Out.OF) | (~((m_b.U & 64) >> 6) & ((rhs.m_b.U & 64) >> 6)) | (((rhs.m_b.U & 64) >> 6) & Out.OF);
 
-            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ Out.OF;
-            Out.OF = (~m_b.B.B8 & Out.OF) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.OF);
+            Out.m_b.U |= (Out.OF ^ (((m_b.U & 128) >> 7) ^ ((rhs.m_b.U & 128) >> 7))) << 7;
+            Out.OF = (~((m_b.U & 128) >> 7) & Out.OF) | (~((m_b.U & 128) >> 7) & ((rhs.m_b.U & 128) >> 7)) | (((rhs.m_b.U & 128) >> 7) & Out.OF);
 
             return Out;
         }
