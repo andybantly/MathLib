@@ -118,7 +118,7 @@ protected:
             Out.OF = OF; // Handle borrowing
 
             Out.m_b.U |= Out.OF ^ ((m_b.U & 1) ^ (rhs.m_b.U & 1));  // DIFFERENCE: (A XOR B) XOR Borrow-in
-            Out.OF = (~m_b.B.B1 & Out.OF) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
+            Out.OF = (~(m_b.U & 1) & Out.OF) | (~(m_b.U & 1) & (rhs.m_b.U & 1)) | ((rhs.m_b.U & 1) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
 
             Out.m_b.U |= (Out.OF ^ (((m_b.U & 2) >> 1) ^ ((rhs.m_b.U & 2) >> 1))) << 1;
             Out.OF = (~((m_b.U & 2) >> 1) & Out.OF) | (~((m_b.U & 2) >> 1) & ((rhs.m_b.U & 2) >> 1)) | (((rhs.m_b.U & 2) >> 1) & Out.OF);
