@@ -56,13 +56,13 @@ protected:
         CByte()
         {
             m_b.U = 0;
-            m_x.X0 = 0;
+            OF = 0;
         }
 
         CByte(int32_t byte)
         {
             m_b.U = byte;
-            m_x.X0 = 0;
+            OF = 0;
         };
 
         CByte(const CByte& rhs)
@@ -75,7 +75,7 @@ protected:
             if (this != &rhs)
             {
                 m_b.U = rhs.m_b.U;
-                m_x.X0 = rhs.m_x.X0;
+                OF = rhs.OF;
             }
             return *this;
         }
@@ -83,31 +83,31 @@ protected:
         CByte operator + (const CByte& rhs) const // Full-Adder
         {
             CByte Out;
-            Out.m_x.X0 = m_x.X0; // Is there a better way to handle Carry?
+            Out.OF = OF; // Handle Carry
 
-            Out.m_b.B.B1 = Out.m_x.X0 ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
-            Out.m_x.X0 = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X0) | (m_b.B.B1 & Out.m_x.X0); // CARRY: Carry-out AB OR BC OR ACin
+            Out.m_b.B.B1 = Out.OF ^ (m_b.B.B1 ^ rhs.m_b.B.B1);  // SUM: Carry-in XOR (A XOR B)
+            Out.OF = (m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.OF) | (m_b.B.B1 & Out.OF); // CARRY: Carry-out AB OR BC OR ACin
 
-            Out.m_b.B.B2 = Out.m_x.X0 ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
-            Out.m_x.X0 = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X0) | (m_b.B.B2 & Out.m_x.X0);
+            Out.m_b.B.B2 = Out.OF ^ (m_b.B.B2 ^ rhs.m_b.B.B2);
+            Out.OF = (m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.OF) | (m_b.B.B2 & Out.OF);
 
-            Out.m_b.B.B3 = Out.m_x.X0 ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
-            Out.m_x.X0 = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X0) | (m_b.B.B3 & Out.m_x.X0);
+            Out.m_b.B.B3 = Out.OF ^ (m_b.B.B3 ^ rhs.m_b.B.B3);
+            Out.OF = (m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.OF) | (m_b.B.B3 & Out.OF);
 
-            Out.m_b.B.B4 = Out.m_x.X0 ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
-            Out.m_x.X0 = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X0) | (m_b.B.B4 & Out.m_x.X0);
+            Out.m_b.B.B4 = Out.OF ^ (m_b.B.B4 ^ rhs.m_b.B.B4);
+            Out.OF = (m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.OF) | (m_b.B.B4 & Out.OF);
 
-            Out.m_b.B.B5 = Out.m_x.X0 ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
-            Out.m_x.X0 = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X0) | (m_b.B.B5 & Out.m_x.X0);
+            Out.m_b.B.B5 = Out.OF ^ (m_b.B.B5 ^ rhs.m_b.B.B5);
+            Out.OF = (m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.OF) | (m_b.B.B5 & Out.OF);
 
-            Out.m_b.B.B6 = Out.m_x.X0 ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
-            Out.m_x.X0 = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X0) | (m_b.B.B6 & Out.m_x.X0);
+            Out.m_b.B.B6 = Out.OF ^ (m_b.B.B6 ^ rhs.m_b.B.B6);
+            Out.OF = (m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.OF) | (m_b.B.B6 & Out.OF);
 
-            Out.m_b.B.B7 = Out.m_x.X0 ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
-            Out.m_x.X0 = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X0) | (m_b.B.B7 & Out.m_x.X0);
+            Out.m_b.B.B7 = Out.OF ^ (m_b.B.B7 ^ rhs.m_b.B.B7);
+            Out.OF = (m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.OF) | (m_b.B.B7 & Out.OF);
 
-            Out.m_b.B.B8 = Out.m_x.X0 ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
-            Out.m_x.X0 = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X0) | (m_b.B.B8 & Out.m_x.X0);
+            Out.m_b.B.B8 = Out.OF ^ (m_b.B.B8 ^ rhs.m_b.B.B8);
+            Out.OF = (m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.OF) | (m_b.B.B8 & Out.OF);
 
             return Out;
         }
@@ -115,31 +115,31 @@ protected:
         CByte operator - (const CByte& rhs) const // Full-Subtractor
         {
             CByte Out;
-            Out.m_x.X0 = m_x.X0; // Is there a better way to handle borrowing?
+            Out.OF = OF; // Handle borrowing
 
-            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.m_x.X0; // DIFFERENCE: (A XOR B) XOR Borrow-in
-            Out.m_x.X0 = (~m_b.B.B1 & Out.m_x.X0) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.m_x.X0); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
+            Out.m_b.B.B1 = (m_b.B.B1 ^ rhs.m_b.B.B1) ^ Out.OF; // DIFFERENCE: (A XOR B) XOR Borrow-in
+            Out.OF = (~m_b.B.B1 & Out.OF) | (~m_b.B.B1 & rhs.m_b.B.B1) | (rhs.m_b.B.B1 & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
 
-            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ Out.m_x.X0;
-            Out.m_x.X0 = (~m_b.B.B2 & Out.m_x.X0) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.m_x.X0);
+            Out.m_b.B.B2 = (m_b.B.B2 ^ rhs.m_b.B.B2) ^ Out.OF;
+            Out.OF = (~m_b.B.B2 & Out.OF) | (~m_b.B.B2 & rhs.m_b.B.B2) | (rhs.m_b.B.B2 & Out.OF);
 
-            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ Out.m_x.X0;
-            Out.m_x.X0 = (~m_b.B.B3 & Out.m_x.X0) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.m_x.X0);
+            Out.m_b.B.B3 = (m_b.B.B3 ^ rhs.m_b.B.B3) ^ Out.OF;
+            Out.OF = (~m_b.B.B3 & Out.OF) | (~m_b.B.B3 & rhs.m_b.B.B3) | (rhs.m_b.B.B3 & Out.OF);
 
-            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ Out.m_x.X0;
-            Out.m_x.X0 = (~m_b.B.B4 & Out.m_x.X0) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.m_x.X0);
+            Out.m_b.B.B4 = (m_b.B.B4 ^ rhs.m_b.B.B4) ^ Out.OF;
+            Out.OF = (~m_b.B.B4 & Out.OF) | (~m_b.B.B4 & rhs.m_b.B.B4) | (rhs.m_b.B.B4 & Out.OF);
 
-            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ Out.m_x.X0;
-            Out.m_x.X0 = (~m_b.B.B5 & Out.m_x.X0) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.m_x.X0);
+            Out.m_b.B.B5 = (m_b.B.B5 ^ rhs.m_b.B.B5) ^ Out.OF;
+            Out.OF = (~m_b.B.B5 & Out.OF) | (~m_b.B.B5 & rhs.m_b.B.B5) | (rhs.m_b.B.B5 & Out.OF);
 
-            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ Out.m_x.X0;
-            Out.m_x.X0 = (~m_b.B.B6 & Out.m_x.X0) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.m_x.X0);
+            Out.m_b.B.B6 = (m_b.B.B6 ^ rhs.m_b.B.B6) ^ Out.OF;
+            Out.OF = (~m_b.B.B6 & Out.OF) | (~m_b.B.B6 & rhs.m_b.B.B6) | (rhs.m_b.B.B6 & Out.OF);
 
-            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ Out.m_x.X0;
-            Out.m_x.X0 = (~m_b.B.B7 & Out.m_x.X0) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.m_x.X0);
+            Out.m_b.B.B7 = (m_b.B.B7 ^ rhs.m_b.B.B7) ^ Out.OF;
+            Out.OF = (~m_b.B.B7 & Out.OF) | (~m_b.B.B7 & rhs.m_b.B.B7) | (rhs.m_b.B.B7 & Out.OF);
 
-            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ Out.m_x.X0;
-            Out.m_x.X0 = (~m_b.B.B8 & Out.m_x.X0) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.m_x.X0);
+            Out.m_b.B.B8 = (m_b.B.B8 ^ rhs.m_b.B.B8) ^ Out.OF;
+            Out.OF = (~m_b.B.B8 & Out.OF) | (~m_b.B.B8 & rhs.m_b.B.B8) | (rhs.m_b.B.B8 & Out.OF);
 
             return Out;
         }
@@ -156,11 +156,6 @@ protected:
             unsigned B8 : 1;
         };
 
-        struct XTRA
-        {
-            unsigned X0 : 1;
-        };
-
         union BITS
         {
             struct _Bits B;
@@ -168,7 +163,7 @@ protected:
         };
 
         BITS m_b;
-        XTRA m_x;
+        unsigned OF;
     };
 
     // Helper to convert to the internal format
@@ -467,10 +462,10 @@ public:
             lb = m_Bytes[st];
             rb = rhs.m_Bytes[st];
             CByte& ob = out.m_Bytes[st];
-            lb.m_x.X0 = of;
+            lb.OF = of;
             ob = lb + rb;
-            of = ob.m_x.X0;
-            ob.m_x.X0 = 0;
+            of = ob.OF;
+            ob.OF = 0;
         }
 
         if (st < stMax)
@@ -481,10 +476,10 @@ public:
                 lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
                 rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
                 CByte& ob = out.m_Bytes[st];
-                lb.m_x.X0 = of;
+                lb.OF = of;
                 ob = lb + rb;
-                of = ob.m_x.X0;
-                ob.m_x.X0 = 0;
+                of = ob.OF;
+                ob.OF = 0;
             }
         }
 
@@ -512,10 +507,10 @@ public:
             lb = m_Bytes[st];
             rb = rhs.m_Bytes[st];
             CByte& ob = out.m_Bytes[st];
-            lb.m_x.X0 = of;
+            lb.OF = of;
             ob = lb - rb;
-            of = ob.m_x.X0;
-            ob.m_x.X0 = 0;
+            of = ob.OF;
+            ob.OF = 0;
         }
 
         if (st < stMax)
@@ -526,10 +521,10 @@ public:
                 lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
                 rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
                 CByte& ob = out.m_Bytes[st];
-                lb.m_x.X0 = of;
+                lb.OF = of;
                 ob = lb - rb;
-                of = ob.m_x.X0;
-                ob.m_x.X0 = 0;
+                of = ob.OF;
+                ob.OF = 0;
             }
         }
 
