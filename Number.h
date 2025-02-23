@@ -55,13 +55,13 @@ protected:
     public:
         CByte()
         {
-            m_b.U = 0;
+            U = 0;
             OF = 0;
         }
 
         CByte(int32_t byte)
         {
-            m_b.U = byte;
+            U = byte;
             OF = 0;
         };
 
@@ -74,7 +74,7 @@ protected:
         {
             if (this != &rhs)
             {
-                m_b.U = rhs.m_b.U;
+                U = rhs.U;
                 OF = rhs.OF;
             }
             return *this;
@@ -83,31 +83,31 @@ protected:
         CByte operator + (const CByte& rhs) const // Full-Adder
         {
             CByte Out;
-            Out.OF = OF; // Handle Carry
+            Out.OF = OF; // Kerry In
 
-            Out.m_b.U |= Out.OF ^ ((m_b.U & 1) ^ (rhs.m_b.U & 1));  // SUM: Carry-in XOR (A XOR B)
-            Out.OF = ((m_b.U & 1) & (rhs.m_b.U & 1)) | ((rhs.m_b.U & 1) & Out.OF) | ((m_b.U & 1) & Out.OF); // CARRY: Carry-out AB OR BC OR ACin
+            Out.U |= Out.OF ^ ((U & 1) ^ (rhs.U & 1));  // SUM: Carry-in XOR (A XOR B)
+            Out.OF = ((U & 1) & Out.OF) | ((U & 1) & (rhs.U & 1)) | ((rhs.U & 1) & Out.OF); // CARRY: Carry-out AB OR BC OR ACin
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 2) >> 1) ^ ((rhs.m_b.U & 2) >> 1))) << 1;
-            Out.OF = (((m_b.U & 2) >> 1) & ((rhs.m_b.U & 2) >> 1)) | (((rhs.m_b.U & 2) >> 1) & Out.OF) | (((m_b.U & 2) >> 1) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 2) >> 1) ^ ((rhs.U & 2) >> 1))) << 1;
+            Out.OF = (((U & 2) >> 1) & Out.OF) | (((U & 2) >> 1) & ((rhs.U & 2) >> 1)) | (((rhs.U & 2) >> 1) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 4) >> 2) ^ ((rhs.m_b.U & 4) >> 2))) << 2;
-            Out.OF = (((m_b.U & 4) >> 2) & ((rhs.m_b.U & 4) >> 2)) | (((rhs.m_b.U & 4) >> 2) & Out.OF) | (((m_b.U & 4) >> 2) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 4) >> 2) ^ ((rhs.U & 4) >> 2))) << 2;
+            Out.OF = (((U & 4) >> 2) & Out.OF) | (((U & 4) >> 2) & ((rhs.U & 4) >> 2)) | (((rhs.U & 4) >> 2) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 8) >> 3) ^ ((rhs.m_b.U & 8) >> 3))) << 3;
-            Out.OF = (((m_b.U & 8) >> 3) & ((rhs.m_b.U & 8) >> 3)) | (((rhs.m_b.U & 8) >> 3) & Out.OF) | (((m_b.U & 8) >> 3) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 8) >> 3) ^ ((rhs.U & 8) >> 3))) << 3;
+            Out.OF = (((U & 8) >> 3) & Out.OF) | (((U & 8) >> 3) & ((rhs.U & 8) >> 3)) | (((rhs.U & 8) >> 3) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 16) >> 4) ^ ((rhs.m_b.U & 16) >> 4))) << 4;
-            Out.OF = (((m_b.U & 16) >> 4) & ((rhs.m_b.U & 16) >> 4)) | (((rhs.m_b.U & 16) >> 4) & Out.OF) | (((m_b.U & 16) >> 4) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 16) >> 4) ^ ((rhs.U & 16) >> 4))) << 4;
+            Out.OF = (((U & 16) >> 4) & Out.OF) | (((U & 16) >> 4) & ((rhs.U & 16) >> 4)) | (((rhs.U & 16) >> 4) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 32) >> 5) ^ ((rhs.m_b.U & 32) >> 5))) << 5;
-            Out.OF = (((m_b.U & 32) >> 5) & ((rhs.m_b.U & 32) >> 5)) | (((rhs.m_b.U & 32) >> 5) & Out.OF) | (((m_b.U & 32) >> 5) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 32) >> 5) ^ ((rhs.U & 32) >> 5))) << 5;
+            Out.OF = (((U & 32) >> 5) & Out.OF) | (((U & 32) >> 5) & ((rhs.U & 32) >> 5)) | (((rhs.U & 32) >> 5) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 64) >> 6) ^ ((rhs.m_b.U & 64) >> 6))) << 6;
-            Out.OF = (((m_b.U & 64) >> 6) & ((rhs.m_b.U & 64) >> 6)) | (((rhs.m_b.U & 64) >> 6) & Out.OF) | (((m_b.U & 64) >> 6) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 64) >> 6) ^ ((rhs.U & 64) >> 6))) << 6;
+            Out.OF = (((U & 64) >> 6) & Out.OF) | (((U & 64) >> 6) & ((rhs.U & 64) >> 6)) | (((rhs.U & 64) >> 6) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 128) >> 7) ^ ((rhs.m_b.U & 128) >> 7))) << 7;
-            Out.OF = (((m_b.U & 128) >> 7) & ((rhs.m_b.U & 128) >> 7)) | (((rhs.m_b.U & 128) >> 7) & Out.OF) | (((m_b.U & 128) >> 7) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 128) >> 7) ^ ((rhs.U & 128) >> 7))) << 7;
+            Out.OF = (((U & 128) >> 7) & Out.OF) | (((U & 128) >> 7) & ((rhs.U & 128) >> 7)) | (((rhs.U & 128) >> 7) & Out.OF);
 
             return Out;
         }
@@ -115,54 +115,36 @@ protected:
         CByte operator - (const CByte& rhs) const // Full-Subtractor
         {
             CByte Out;
-            Out.OF = OF; // Handle borrowing
+            Out.OF = OF; // Borrow In
 
-            Out.m_b.U |= Out.OF ^ ((m_b.U & 1) ^ (rhs.m_b.U & 1));  // DIFFERENCE: (A XOR B) XOR Borrow-in
-            Out.OF = (~(m_b.U & 1) & Out.OF) | (~(m_b.U & 1) & (rhs.m_b.U & 1)) | ((rhs.m_b.U & 1) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
+            Out.U |= Out.OF ^ ((U & 1) ^ (rhs.U & 1));  // DIFFERENCE: (A XOR B) XOR Borrow-in
+            Out.OF = (~(U & 1) & Out.OF) | (~(U & 1) & (rhs.U & 1)) | ((rhs.U & 1) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 2) >> 1) ^ ((rhs.m_b.U & 2) >> 1))) << 1;
-            Out.OF = (~((m_b.U & 2) >> 1) & Out.OF) | (~((m_b.U & 2) >> 1) & ((rhs.m_b.U & 2) >> 1)) | (((rhs.m_b.U & 2) >> 1) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 2) >> 1) ^ ((rhs.U & 2) >> 1))) << 1;
+            Out.OF = (~((U & 2) >> 1) & Out.OF) | (~((U & 2) >> 1) & ((rhs.U & 2) >> 1)) | (((rhs.U & 2) >> 1) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 4) >> 2) ^ ((rhs.m_b.U & 4) >> 2))) << 2;
-            Out.OF = (~((m_b.U & 4) >> 2) & Out.OF) | (~((m_b.U & 4) >> 2) & ((rhs.m_b.U & 4) >> 2)) | (((rhs.m_b.U & 4) >> 2) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 4) >> 2) ^ ((rhs.U & 4) >> 2))) << 2;
+            Out.OF = (~((U & 4) >> 2) & Out.OF) | (~((U & 4) >> 2) & ((rhs.U & 4) >> 2)) | (((rhs.U & 4) >> 2) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 8) >> 3) ^ ((rhs.m_b.U & 8) >> 3))) << 3;
-            Out.OF = (~((m_b.U & 8) >> 3) & Out.OF) | (~((m_b.U & 8) >> 3) & ((rhs.m_b.U & 8) >> 3)) | (((rhs.m_b.U & 8) >> 3) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 8) >> 3) ^ ((rhs.U & 8) >> 3))) << 3;
+            Out.OF = (~((U & 8) >> 3) & Out.OF) | (~((U & 8) >> 3) & ((rhs.U & 8) >> 3)) | (((rhs.U & 8) >> 3) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 16) >> 4) ^ ((rhs.m_b.U & 16) >> 4))) << 4;
-            Out.OF = (~((m_b.U & 16) >> 4) & Out.OF) | (~((m_b.U & 16) >> 4) & ((rhs.m_b.U & 16) >> 4)) | (((rhs.m_b.U & 16) >> 4) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 16) >> 4) ^ ((rhs.U & 16) >> 4))) << 4;
+            Out.OF = (~((U & 16) >> 4) & Out.OF) | (~((U & 16) >> 4) & ((rhs.U & 16) >> 4)) | (((rhs.U & 16) >> 4) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 32) >> 5) ^ ((rhs.m_b.U & 32) >> 5))) << 5;
-            Out.OF = (~((m_b.U & 32) >> 5) & Out.OF) | (~((m_b.U & 32) >> 5) & ((rhs.m_b.U & 32) >> 5)) | (((rhs.m_b.U & 32) >> 5) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 32) >> 5) ^ ((rhs.U & 32) >> 5))) << 5;
+            Out.OF = (~((U & 32) >> 5) & Out.OF) | (~((U & 32) >> 5) & ((rhs.U & 32) >> 5)) | (((rhs.U & 32) >> 5) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 64) >> 6) ^ ((rhs.m_b.U & 64) >> 6))) << 6;
-            Out.OF = (~((m_b.U & 64) >> 6) & Out.OF) | (~((m_b.U & 64) >> 6) & ((rhs.m_b.U & 64) >> 6)) | (((rhs.m_b.U & 64) >> 6) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 64) >> 6) ^ ((rhs.U & 64) >> 6))) << 6;
+            Out.OF = (~((U & 64) >> 6) & Out.OF) | (~((U & 64) >> 6) & ((rhs.U & 64) >> 6)) | (((rhs.U & 64) >> 6) & Out.OF);
 
-            Out.m_b.U |= (Out.OF ^ (((m_b.U & 128) >> 7) ^ ((rhs.m_b.U & 128) >> 7))) << 7;
-            Out.OF = (~((m_b.U & 128) >> 7) & Out.OF) | (~((m_b.U & 128) >> 7) & ((rhs.m_b.U & 128) >> 7)) | (((rhs.m_b.U & 128) >> 7) & Out.OF);
+            Out.U |= (Out.OF ^ (((U & 128) >> 7) ^ ((rhs.U & 128) >> 7))) << 7;
+            Out.OF = (~((U & 128) >> 7) & Out.OF) | (~((U & 128) >> 7) & ((rhs.U & 128) >> 7)) | (((rhs.U & 128) >> 7) & Out.OF);
 
             return Out;
         }
 
-        struct _Bits
-        {
-            unsigned B1 : 1;
-            unsigned B2 : 1;
-            unsigned B3 : 1;
-            unsigned B4 : 1;
-            unsigned B5 : 1;
-            unsigned B6 : 1;
-            unsigned B7 : 1;
-            unsigned B8 : 1;
-        };
-
-        union BITS
-        {
-            struct _Bits B;
-            uint8_t U;
-        };
-
-        BITS m_b;
+        uint8_t U;
         unsigned OF;
     };
 
@@ -183,41 +165,34 @@ protected:
     }
 
 public:
-    unsigned int Shl() // Shift Left (double)
+    void Shl() // Shift Left (double)
     {
         size_t iByte = m_Bytes.size() - 1;
-        unsigned int iRet = m_Bytes[iByte].m_b.B.B8;
         for (; iByte != 0; --iByte)
         {
-            m_Bytes[iByte].m_b.U <<= 1;
-            m_Bytes[iByte].m_b.U |= m_Bytes[iByte - 1].m_b.U & 128 ? 1 : 0;
+            m_Bytes[iByte].U <<= 1;
+            m_Bytes[iByte].U |= m_Bytes[iByte - 1].U & 128 ? 1 : 0;
         }
-        m_Bytes[iByte].m_b.U <<= 1;
-        m_bNeg = m_Bytes[m_Bytes.size() - 1].m_b.U && 128;
-
-        return iRet;
+        m_Bytes[iByte].U <<= 1;
+        m_bNeg = m_Bytes[m_Bytes.size() - 1].U && 128;
     }
 
-    unsigned int Shr() // Shift Right (halve)
+    void Shr() // Shift Right (halve)
     {
         size_t iByte = 0;
-        unsigned int iRet = m_Bytes[iByte].m_b.B.B1;
         for (; iByte != m_Bytes.size() - 1; ++iByte)
         {
-            m_Bytes[iByte].m_b.U >>= 1;
-            if (m_Bytes[iByte + 1].m_b.U & 1)
-                m_Bytes[iByte].m_b.U |= 128;
+            m_Bytes[iByte].U >>= 1;
+            if (m_Bytes[iByte + 1].U & 1)
+                m_Bytes[iByte].U |= 128;
         }
 
-        m_Bytes[iByte].m_b.U >>= 1;
+        m_Bytes[iByte].U >>= 1;
         if (m_bNeg)
-            m_Bytes[iByte].m_b.U |= 128;
-
-        return iRet;
+            m_Bytes[iByte].U |= 128;
     }
 
 public:
-
     Number() : m_bNeg(false), m_bNAN(true) {};
 
     Number(const char* pstrNumber)
@@ -239,7 +214,7 @@ public:
     {
         static CByte _0(0), _255(255);
 
-        m_bNeg = ch.m_b.B.B8;
+        m_bNeg = (ch.U & 128) >> 7 ? true : false;
         m_Bytes.resize(size, m_bNeg ? _255 : _0);
         m_Bytes[0] = ch;
         m_bNAN = false;
@@ -304,7 +279,7 @@ public:
         {
             CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            if (lb.m_b.U != rb.m_b.U)
+            if (lb.U != rb.U)
                 return false;
         }
 
@@ -334,8 +309,8 @@ public:
         {
             CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            if (lb.m_b.U != rb.m_b.U)
-                return m_bNeg ? lb.m_b.U < rb.m_b.U : lb.m_b.U < rb.m_b.U;
+            if (lb.U != rb.U)
+                return m_bNeg ? lb.U < rb.U : lb.U < rb.U;
         }
 
         return false;
@@ -483,7 +458,7 @@ public:
             }
         }
 
-        out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
+        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & 128) >> 7 ? true : false;
 
         return out;
     }
@@ -528,7 +503,7 @@ public:
             }
         }
 
-        out.m_bNeg = out.m_Bytes[out.GetSize() - 1].m_b.B.B8;
+        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & 128) >> 7 ? true : false;
 
         return out;
     }
@@ -547,7 +522,7 @@ public:
         {
             for (size_t iBit = 0; iBit < 8; ++iBit)
             {
-                if (g_pow[iBit] & rhs.m_Bytes[iByte].m_b.U)
+                if (g_pow[iBit] & rhs.m_Bytes[iByte].U)
                     out = out + lhs;
                 lhs.Shl();
             }
@@ -735,7 +710,7 @@ public:
         uint8_t iByte = 0;
         do
         {
-            Out.m_Bytes[iByte].m_b.U = ~m_Bytes[iByte].m_b.U;
+            Out.m_Bytes[iByte].U = ~m_Bytes[iByte].U;
             iByte++;
         } while (iByte != size);
 
@@ -793,7 +768,7 @@ public:
             if (bCarry)
                 mout.push_front(cOne);
 
-            if (m_Bytes[iByte].m_b.U & g_pow[iBit++]) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,66,128
+            if (m_Bytes[iByte].U & g_pow[iBit++]) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,66,128
             {
                 const std::string& strS1 = strNum;
                 const std::string& strS2 = strResult;
@@ -867,7 +842,7 @@ public:
         {
             for (size_t iBit = 0; iBit < 8; ++iBit)
             {
-                if (g_pow[iBit] & m_Bytes[iByte].m_b.U)
+                if (g_pow[iBit] & m_Bytes[iByte].U)
                     strBin[nBin - iBit - 1] = '1';
             }
         }
@@ -1004,12 +979,12 @@ protected:
         {
             m_Bytes.resize(size);
             for (size_t iByte = 0; iByte < size; ++iByte)
-                m_Bytes[iByte].m_b.U = vbytes[iByte];
+                m_Bytes[iByte].U = vbytes[iByte];
         }
         else
         {
             m_Bytes.resize(1);
-            m_Bytes[0].m_b.U = 0;
+            m_Bytes[0].U = 0;
         }
 
         if (m_bNeg)
