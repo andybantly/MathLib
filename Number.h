@@ -173,22 +173,20 @@ public:
         {
             lb = m_Bytes[st];
             rb = rhs.m_Bytes[st];
-            CByte& ob = out.m_Bytes[st];
-            lb.OF = of;
-            ob = lb + rb;
-            of = ob.OF;
-            ob.OF = 0;
+            if (of == 0 && lb.U == 0 && rb.U == 0)
+                continue;
+            
+            of = (lb.OF = of, out.m_Bytes[st] = lb + rb, out.m_Bytes[st].OF);
         }
 
         for (; st < stMax; ++st)
         {
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            CByte& ob = out.m_Bytes[st];
-            lb.OF = of;
-            ob = lb + rb;
-            of = ob.OF;
-            ob.OF = 0;
+            if (of == 0 && lb.U == 0 && rb.U == 0)
+                continue;
+
+            of = (lb.OF = of, out.m_Bytes[st] = lb + rb, out.m_Bytes[st].OF);
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & 128) >> 7 ? true : false;
@@ -213,22 +211,20 @@ public:
         {
             lb = m_Bytes[st];
             rb = rhs.m_Bytes[st];
-            CByte& ob = out.m_Bytes[st];
-            lb.OF = of;
-            ob = lb - rb;
-            of = ob.OF;
-            ob.OF = 0;
+            if (of == 0 && lb.U == 0 && rb.U == 0)
+                continue;
+
+            of = (lb.OF = of, out.m_Bytes[st] = lb - rb, out.m_Bytes[st].OF);
         }
 
         for (; st < stMax; ++st)
         {
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            CByte& ob = out.m_Bytes[st];
-            lb.OF = of;
-            ob = lb - rb;
-            of = ob.OF;
-            ob.OF = 0;
+            if (of == 0 && lb.U == 0 && rb.U == 0)
+                continue;
+
+            of = (lb.OF = of, out.m_Bytes[st] = lb - rb, out.m_Bytes[st].OF);
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & 128) >> 7 ? true : false;
