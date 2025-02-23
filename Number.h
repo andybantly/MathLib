@@ -85,13 +85,10 @@ protected:
             CByte Out;
             Out.OF = OF; // Kerry-In
 
-            for (uint8_t ui = 1, uj = 0, uk, ul; ui != 0; ui <<= 1, ++uj)
+            for (uint8_t ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
-                uk = ((U & ui) >> uj);
-                ul = ((rhs.U & ui) >> uj);
-
-                Out.U |= (Out.OF ^ (uk ^ ul)) << uj;                // SUM:   Kerry-in XOR (A XOR B)
-                Out.OF = (uk & Out.OF) | (uk & ul) | (ul & Out.OF); // CARRY: Kerry-out AB OR BC OR ACin
+                Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((rhs.U & ui) >> uj))) << uj;                                                // SUM:   Kerry-in XOR (A XOR B)
+                Out.OF = (((U & ui) >> uj) & Out.OF) | (((U & ui) >> uj) & ((rhs.U & ui) >> uj)) | (((rhs.U & ui) >> uj) & Out.OF); // CARRY: Kerry-out AB OR BC OR ACin
             }
 
             return Out;
@@ -102,14 +99,10 @@ protected:
             CByte Out;
             Out.OF = OF; // Borrow-In
 
-            for (uint8_t ui = 1, uj = 0, uk, ukn, ul; ui != 0; ui <<= 1, ++uj)
+            for (uint8_t ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
-                uk = ((U & ui) >> uj);
-                ukn = ~uk;
-                ul = ((rhs.U & ui) >> uj);
-
-                Out.U |= (Out.OF ^ (uk ^ ul)) << uj;                  // DIFFERENCE: (A XOR B) XOR Borrow-in
-                Out.OF = (ukn & Out.OF) | (ukn & ul) | (ul & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
+                Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((rhs.U & ui) >> uj))) << uj;                                                  // DIFFERENCE: (A XOR B) XOR Borrow-in
+                Out.OF = (~((U & ui) >> uj) & Out.OF) | (~((U & ui) >> uj) & ((rhs.U & ui) >> uj)) | (((rhs.U & ui) >> uj) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
             }
 
             return Out;
