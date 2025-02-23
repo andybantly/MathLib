@@ -83,31 +83,16 @@ protected:
         CByte operator + (const CByte& rhs) const // Full-Adder
         {
             CByte Out;
-            Out.OF = OF; // Kerry In
+            Out.OF = OF; // Kerry-In
 
-            Out.U |= Out.OF ^ ((U & 1) ^ (rhs.U & 1));  // SUM: Carry-in XOR (A XOR B)
-            Out.OF = ((U & 1) & Out.OF) | ((U & 1) & (rhs.U & 1)) | ((rhs.U & 1) & Out.OF); // CARRY: Carry-out AB OR BC OR ACin
+            for (uint8_t ui = 1, uj = 0, uk, ul; ui != 0; ui <<= 1, ++uj)
+            {
+                uk = ((U & ui) >> uj);
+                ul = ((rhs.U & ui) >> uj);
 
-            Out.U |= (Out.OF ^ (((U & 2) >> 1) ^ ((rhs.U & 2) >> 1))) << 1;
-            Out.OF = (((U & 2) >> 1) & Out.OF) | (((U & 2) >> 1) & ((rhs.U & 2) >> 1)) | (((rhs.U & 2) >> 1) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 4) >> 2) ^ ((rhs.U & 4) >> 2))) << 2;
-            Out.OF = (((U & 4) >> 2) & Out.OF) | (((U & 4) >> 2) & ((rhs.U & 4) >> 2)) | (((rhs.U & 4) >> 2) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 8) >> 3) ^ ((rhs.U & 8) >> 3))) << 3;
-            Out.OF = (((U & 8) >> 3) & Out.OF) | (((U & 8) >> 3) & ((rhs.U & 8) >> 3)) | (((rhs.U & 8) >> 3) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 16) >> 4) ^ ((rhs.U & 16) >> 4))) << 4;
-            Out.OF = (((U & 16) >> 4) & Out.OF) | (((U & 16) >> 4) & ((rhs.U & 16) >> 4)) | (((rhs.U & 16) >> 4) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 32) >> 5) ^ ((rhs.U & 32) >> 5))) << 5;
-            Out.OF = (((U & 32) >> 5) & Out.OF) | (((U & 32) >> 5) & ((rhs.U & 32) >> 5)) | (((rhs.U & 32) >> 5) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 64) >> 6) ^ ((rhs.U & 64) >> 6))) << 6;
-            Out.OF = (((U & 64) >> 6) & Out.OF) | (((U & 64) >> 6) & ((rhs.U & 64) >> 6)) | (((rhs.U & 64) >> 6) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 128) >> 7) ^ ((rhs.U & 128) >> 7))) << 7;
-            Out.OF = (((U & 128) >> 7) & Out.OF) | (((U & 128) >> 7) & ((rhs.U & 128) >> 7)) | (((rhs.U & 128) >> 7) & Out.OF);
+                Out.U |= (Out.OF ^ (uk ^ ul)) << uj;                // SUM:   Kerry-in XOR (A XOR B)
+                Out.OF = (uk & Out.OF) | (uk & ul) | (ul & Out.OF); // CARRY: Kerry-out AB OR BC OR ACin
+            }
 
             return Out;
         }
@@ -115,31 +100,17 @@ protected:
         CByte operator - (const CByte& rhs) const // Full-Subtractor
         {
             CByte Out;
-            Out.OF = OF; // Borrow In
+            Out.OF = OF; // Borrow-In
 
-            Out.U |= Out.OF ^ ((U & 1) ^ (rhs.U & 1));  // DIFFERENCE: (A XOR B) XOR Borrow-in
-            Out.OF = (~(U & 1) & Out.OF) | (~(U & 1) & (rhs.U & 1)) | ((rhs.U & 1) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2's complement)
+            for (uint8_t ui = 1, uj = 0, uk, ukn, ul; ui != 0; ui <<= 1, ++uj)
+            {
+                uk = ((U & ui) >> uj);
+                ukn = ~uk;
+                ul = ((rhs.U & ui) >> uj);
 
-            Out.U |= (Out.OF ^ (((U & 2) >> 1) ^ ((rhs.U & 2) >> 1))) << 1;
-            Out.OF = (~((U & 2) >> 1) & Out.OF) | (~((U & 2) >> 1) & ((rhs.U & 2) >> 1)) | (((rhs.U & 2) >> 1) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 4) >> 2) ^ ((rhs.U & 4) >> 2))) << 2;
-            Out.OF = (~((U & 4) >> 2) & Out.OF) | (~((U & 4) >> 2) & ((rhs.U & 4) >> 2)) | (((rhs.U & 4) >> 2) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 8) >> 3) ^ ((rhs.U & 8) >> 3))) << 3;
-            Out.OF = (~((U & 8) >> 3) & Out.OF) | (~((U & 8) >> 3) & ((rhs.U & 8) >> 3)) | (((rhs.U & 8) >> 3) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 16) >> 4) ^ ((rhs.U & 16) >> 4))) << 4;
-            Out.OF = (~((U & 16) >> 4) & Out.OF) | (~((U & 16) >> 4) & ((rhs.U & 16) >> 4)) | (((rhs.U & 16) >> 4) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 32) >> 5) ^ ((rhs.U & 32) >> 5))) << 5;
-            Out.OF = (~((U & 32) >> 5) & Out.OF) | (~((U & 32) >> 5) & ((rhs.U & 32) >> 5)) | (((rhs.U & 32) >> 5) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 64) >> 6) ^ ((rhs.U & 64) >> 6))) << 6;
-            Out.OF = (~((U & 64) >> 6) & Out.OF) | (~((U & 64) >> 6) & ((rhs.U & 64) >> 6)) | (((rhs.U & 64) >> 6) & Out.OF);
-
-            Out.U |= (Out.OF ^ (((U & 128) >> 7) ^ ((rhs.U & 128) >> 7))) << 7;
-            Out.OF = (~((U & 128) >> 7) & Out.OF) | (~((U & 128) >> 7) & ((rhs.U & 128) >> 7)) | (((rhs.U & 128) >> 7) & Out.OF);
+                Out.U |= (Out.OF ^ (uk ^ ul)) << uj;                  // DIFFERENCE: (A XOR B) XOR Borrow-in
+                Out.OF = (ukn & Out.OF) | (ukn & ul) | (ul & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
+            }
 
             return Out;
         }
