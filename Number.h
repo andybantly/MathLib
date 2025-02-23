@@ -491,10 +491,10 @@ public:
 
         for (size_t iByte = 0, nBytes = rhs.m_Bytes.size(); iByte < nBytes; ++iByte)
         {
-            for (size_t iBit = 0; iBit < 8; ++iBit)
+            for (uint8_t ui = 1; ui != 0; ui <<= 1)
             {
-                if (g_pow[iBit] & rhs.m_Bytes[iByte].U)
-                    out = out + lhs;
+                if (ui & rhs.m_Bytes[iByte].U)
+                    out += lhs;
                 lhs.Shl();
             }
         }
@@ -798,7 +798,6 @@ public:
                 iByte++;
                 iBit = 0;
             }
-
         } while (iByte != size);
 
         return strResult;
