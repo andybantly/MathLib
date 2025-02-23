@@ -145,7 +145,7 @@ protected:
         }
 
         uint8_t U;
-        unsigned OF;
+        uint8_t OF;
     };
 
     // Helper to convert to the internal format
@@ -427,7 +427,7 @@ public:
         size_t stMax = l == r ? l : (l < r ? r : l);
         CByte Zero(0);
         Number out(Zero, stMax);
-        unsigned of = 0;
+        uint8_t of = 0;
 
         CByte lb, rb;
         size_t st = 0;
@@ -473,7 +473,7 @@ public:
         size_t stMax = l == r ? l : (l < r ? r : l);
         CByte Zero(0);
         Number out(Zero, stMax);
-        unsigned of = 0;
+        uint8_t of = 0;
 
         CByte lb, rb;
         size_t st;
