@@ -120,8 +120,12 @@ namespace TestMathLib
 			int a, b, c;
 			std::string s;
 
-			uint8_t U = 255;
-			
+			A = "9999999999999";
+			B = 180;
+			A.SetSize(24);
+			B.SetSize(24);
+			C = A / B;
+
 			B = 256;
 			B.Shr();
 			s = B.ToDisplay();

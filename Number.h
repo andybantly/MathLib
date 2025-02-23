@@ -59,7 +59,7 @@ protected:
             OF = 0;
         }
 
-        CByte(int32_t byte)
+        CByte(uint8_t byte)
         {
             U = byte;
             OF = 0;
@@ -238,7 +238,7 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        CByte Zero(0), Neg1(255);
+        const static CByte Zero(0), Neg1(255);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
             CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
@@ -268,7 +268,7 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        CByte Zero(0), Neg1(255);
+        const static CByte Zero(0), Neg1(255);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
             CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
@@ -295,93 +295,7 @@ public:
         return !(operator < (rhs));
     }
 
-    // pre/post increment/decrement
-    /*
-    The prefix increment/decrement operator (++/--) adds/subs one to its operand and this incremented value is the result of the expression.
-    The postfix increment/decrement operator (++/--)(int) adds/subs one to its operand and the previous value is the result of the expression
-    */
-    
-    Number operator ++ ()
-    {
-        const static Number _1(1, 1);
-
-        if (m_bNAN)
-            throw("Invalid number");
-
-        *this += _1;
-        return *this;
-    }
-
-    Number operator -- ()
-    {
-        const static Number _1(1, 1);
-
-        if (m_bNAN)
-            throw("Invalid number");
-
-        *this -= 1;
-        return *this;
-    }
-
-    Number operator ++ (int)
-    {
-        const static Number _1(1, 1);
-
-        if (m_bNAN)
-            throw("Invalid number");
-
-        Number rhs = *this;
-        *this += _1;
-        return rhs;
-    }
-
-    Number operator -- (int)
-    {
-        const static Number _1(1, 1);
-
-        if (m_bNAN)
-            throw("Invalid number");
-
-        Number rhs = *this;
-        *this += _1;
-        return rhs;
-    }
-
-//////////////////////////////////////////////////////////
-//     +=, -=, *=, /=, %=
-//////////////////////////////////////////////////////////
-
-    Number operator += (const Number& rhs)
-    {
-        *this = *this + rhs;
-        return *this;
-    }
-
-    Number operator -= (const Number& rhs)
-    {
-        *this = *this - rhs;
-        return *this;
-    }
-
-    Number operator *= (const Number& rhs)
-    {
-        *this = *this * rhs;
-        return *this;
-    }
-
-    Number operator /= (const Number& rhs)
-    {
-        *this = *this / rhs;
-        return *this;
-    }
-
-    Number operator %= (const Number& rhs)
-    {
-        *this = *this % rhs;
-        return *this;
-    }
-
-    Number operator + (const Number& rhs) const
+    Number Add(const Number& rhs, size_t st = 0) const
     {
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
@@ -389,13 +303,11 @@ public:
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        CByte Zero(0);
+        const static CByte Zero(0), Neg1(255);
         Number out(Zero, stMax);
         uint8_t of = 0;
 
         CByte lb, rb;
-        size_t st = 0;
-
         for (; st < stMin; ++st)
         {
             lb = m_Bytes[st];
@@ -409,7 +321,6 @@ public:
 
         if (st < stMax)
         {
-            CByte Neg1(255);
             for (; st < stMax; ++st)
             {
                 lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
@@ -427,7 +338,7 @@ public:
         return out;
     }
 
-    Number operator - (const Number& rhs) const
+    Number Sub(const Number& rhs, size_t st = 0) const
     {
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
@@ -435,13 +346,12 @@ public:
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        CByte Zero(0);
+        const static CByte Zero(0), Neg1(255);
         Number out(Zero, stMax);
         uint8_t of = 0;
 
         CByte lb, rb;
-        size_t st;
-        for (st = 0; st < stMin; ++st)
+        for (; st < stMin; ++st)
         {
             lb = m_Bytes[st];
             rb = rhs.m_Bytes[st];
@@ -454,7 +364,6 @@ public:
 
         if (st < stMax)
         {
-            CByte Neg1(255);
             for (; st < stMax; ++st)
             {
                 lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
@@ -470,6 +379,16 @@ public:
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & 128) >> 7 ? true : false;
 
         return out;
+    }
+
+    Number operator + (const Number& rhs) const
+    {
+        return Add(rhs);
+    }
+
+    Number operator - (const Number& rhs) const
+    {
+        return Sub(rhs);
     }
 
     Number operator * (const Number& rhs) const
@@ -500,11 +419,12 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number quot, zero(CByte(0), 1);
-        if (rhs == zero)
+        const static Number _0(CByte(0), 1);
+        Number quot;
+        if (rhs == _0)
             return quot;
 
+        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
         Number rem = *this;
         Number rhsin = rhs;
         rem.SetSize(stMB);
@@ -531,7 +451,7 @@ public:
                 ++stn;
             }
 
-            quot = zero;
+            quot = _0;
             for (size_t ndbl = stn; ndbl > 0; --ndbl)
             {
                 if (dbl > rem)
@@ -540,8 +460,10 @@ public:
                     pow.Shr();
                     continue;
                 }
+
                 quot += pow;
                 rem -= dbl;
+
                 dbl.Shr();
                 pow.Shr();
             }
@@ -557,7 +479,7 @@ public:
                 ++stn;
             }
 
-            quot = zero;
+            quot = _0;
             for (size_t ndbl = stn; ndbl > 0; --ndbl)
             {
                 if (dbl < rem)
@@ -566,8 +488,10 @@ public:
                     pow.Shr();
                     continue;
                 }
+
                 quot += pow;
                 rem -= dbl;
+
                 dbl.Shr();
                 pow.Shr();
             }
@@ -580,12 +504,12 @@ public:
     {
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
-
-        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number rem, zero(CByte(0), 1);
-        if (rhs == zero)
+        const static Number _0(CByte(0), 1);
+        Number rem;
+        if (rhs == _0)
             return rem;
 
+        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
         rem = *this;
         Number rhsin = rhs;
         rem.SetSize(stMB);
@@ -646,9 +570,91 @@ public:
         return rem;
     }
 
+    // pre/post increment/decrement
+    /*
+    The prefix increment/decrement operator (++/--) adds/subs one to its operand and this incremented value is the result of the expression.
+    The postfix increment/decrement operator (++/--)(int) adds/subs one to its operand and the previous value is the result of the expression
+    */
+
+    Number operator ++ ()
+    {
+        const static Number _1(1, 1);
+
+        if (m_bNAN)
+            throw("Invalid number");
+
+        *this += _1;
+        return *this;
+    }
+
+    Number operator -- ()
+    {
+        const static Number _1(1, 1);
+
+        if (m_bNAN)
+            throw("Invalid number");
+
+        *this -= 1;
+        return *this;
+    }
+
+    Number operator ++ (int)
+    {
+        const static Number _1(1, 1);
+
+        if (m_bNAN)
+            throw("Invalid number");
+
+        Number rhs = *this;
+        *this += _1;
+        return rhs;
+    }
+
+    Number operator -- (int)
+    {
+        const static Number _1(1, 1);
+
+        if (m_bNAN)
+            throw("Invalid number");
+
+        Number rhs = *this;
+        *this += _1;
+        return rhs;
+    }
+
     Number operator , (const Number& rhs) const
     {
         return rhs;
+    }
+
+    Number operator += (const Number& rhs)
+    {
+        *this = *this + rhs;
+        return *this;
+    }
+
+    Number operator -= (const Number& rhs)
+    {
+        *this = *this - rhs;
+        return *this;
+    }
+
+    Number operator *= (const Number& rhs)
+    {
+        *this = *this * rhs;
+        return *this;
+    }
+
+    Number operator /= (const Number& rhs)
+    {
+        *this = *this / rhs;
+        return *this;
+    }
+
+    Number operator %= (const Number& rhs)
+    {
+        *this = *this % rhs;
+        return *this;
     }
 
     void SetSize(size_t size)
@@ -657,7 +663,7 @@ public:
             m_Bytes.resize(size, m_bNeg ? 255 : 0);
     }
 
-    size_t GetSize()
+    size_t GetSize() const
     {
         return m_Bytes.size();
     }
