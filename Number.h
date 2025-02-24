@@ -616,14 +616,16 @@ public:
                 {
                     dbl.Shr();
                     pow.Shr();
+                    --stn;
                     continue;
                 }
 
-                quot += pow;
+                quot = quot.Add(pow, (stn - 1) >> 3);
                 rem -= dbl;
 
                 dbl.Shr();
                 pow.Shr();
+                --stn;
             }
         }
         else
@@ -644,14 +646,16 @@ public:
                 {
                     dbl.Shr();
                     pow.Shr();
+                    --stn;
                     continue;
                 }
 
-                quot += pow;
+                quot = quot.Add(pow, (stn - 1) >> 3);
                 rem -= dbl;
 
                 dbl.Shr();
                 pow.Shr();
+                --stn;
             }
         }
 
