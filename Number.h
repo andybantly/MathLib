@@ -53,22 +53,9 @@ protected:
     class CByte
     {
     public:
-        CByte()
-        {
-            U = 0;
-            OF = 0;
-        }
+        CByte(uint8_t byte = 0) : U(byte), OF(0) { };
 
-        CByte(uint8_t byte)
-        {
-            U = byte;
-            OF = 0;
-        };
-
-        CByte(const CByte& rhs)
-        {
-            *this = rhs;
-        }
+        CByte(const CByte& rhs) { *this = rhs; }
 
         CByte& operator = (const CByte& rhs)
         {
@@ -129,10 +116,18 @@ protected:
     }
 
 public:
-    void Shl() // Shift Left (double)
+    // Left Bit Shift <- double value
+    void Shl(size_t stbit = size_t(-1))
     {
+        size_t stn = 0;
         size_t iByte = m_Bytes.size() - 1;
-        for (; iByte != 0; --iByte)
+        if (stbit != size_t(-1))
+        {
+            iByte = (stbit >> 3) + 1;
+            if (iByte)
+                stn = iByte - 1;
+        }
+        for (; iByte != stn; --iByte)
         {
             m_Bytes[iByte].U <<= 1;
             m_Bytes[iByte].U |= m_Bytes[iByte - 1].U & 128 ? 1 : 0;
@@ -141,16 +136,23 @@ public:
         m_bNeg = m_Bytes[m_Bytes.size() - 1].U && 128;
     }
 
-    void Shr() // Shift Right (halve)
+    // Right Bit Shift -> halve value
+    void Shr(size_t stbit = size_t(-1))
     {
+        size_t stn = m_Bytes.size() - 1;
         size_t iByte = 0;
-        for (; iByte != m_Bytes.size() - 1; ++iByte)
+        if (stbit != size_t(-1))
+        {
+            stn = stbit >> 3;
+            iByte = stn;
+            if (iByte) --iByte;
+        }
+        for (; iByte != stn; ++iByte)
         {
             m_Bytes[iByte].U >>= 1;
             if (m_Bytes[iByte + 1].U & 1)
                 m_Bytes[iByte].U |= 128;
         }
-
         m_Bytes[iByte].U >>= 1;
         if (m_bNeg)
             m_Bytes[iByte].U |= 128;
@@ -173,9 +175,7 @@ public:
         {
             lb = m_Bytes[st];
             rb = rhs.m_Bytes[st];
-            if (of == 0 && lb.U == 0 && rb.U == 0)
-                continue;
-            
+            if (of == 0 && lb.U == 0 && rb.U == 0) continue;
             of = (lb.OF = of, out.m_Bytes[st] = lb + rb, out.m_Bytes[st].OF);
         }
 
@@ -183,9 +183,7 @@ public:
         {
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            if (of == 0 && lb.U == 0 && rb.U == 0)
-                continue;
-
+            if (of == 0 && lb.U == 0 && rb.U == 0) continue;
             of = (lb.OF = of, out.m_Bytes[st] = lb + rb, out.m_Bytes[st].OF);
         }
 
@@ -211,9 +209,7 @@ public:
         {
             lb = m_Bytes[st];
             rb = rhs.m_Bytes[st];
-            if (of == 0 && lb.U == 0 && rb.U == 0)
-                continue;
-
+            if (of == 0 && lb.U == 0 && rb.U == 0) continue;
             of = (lb.OF = of, out.m_Bytes[st] = lb - rb, out.m_Bytes[st].OF);
         }
 
@@ -221,9 +217,7 @@ public:
         {
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            if (of == 0 && lb.U == 0 && rb.U == 0)
-                continue;
-
+            if (of == 0 && lb.U == 0 && rb.U == 0) continue;
             of = (lb.OF = of, out.m_Bytes[st] = lb - rb, out.m_Bytes[st].OF);
         }
 
@@ -596,7 +590,7 @@ public:
 
         Number dbl = rhsin;
         Number pow(m_bNeg == rhs.m_bNeg ? CByte(1) : CByte(-1), stMB);
-        size_t stn = 1;
+        size_t stn = 0;
 
         if (!m_bNeg)
         {
@@ -605,27 +599,24 @@ public:
                 dbl.Shl();
                 if (dbl.m_bNeg)
                     return quot;
-                pow.Shl();
-                ++stn;
+                pow.Shl(stn++);
             }
 
             quot = _0;
-            for (size_t ndbl = stn; ndbl > 0; --ndbl)
+            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
             {
                 if (dbl > rem)
                 {
                     dbl.Shr();
-                    pow.Shr();
-                    --stn;
+                    pow.Shr(stn--);
                     continue;
                 }
 
-                quot = quot.Add(pow, (stn - 1) >> 3);
+                quot = quot.Add(pow, stn >> 3);
                 rem -= dbl;
 
                 dbl.Shr();
-                pow.Shr();
-                --stn;
+                pow.Shr(stn--);
             }
         }
         else
@@ -635,27 +626,24 @@ public:
                 dbl.Shl();
                 if (!dbl.m_bNeg)
                     return quot;
-                pow.Shl();
-                ++stn;
+                pow.Shl(stn++);
             }
 
             quot = _0;
-            for (size_t ndbl = stn; ndbl > 0; --ndbl)
+            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
             {
                 if (dbl < rem)
                 {
                     dbl.Shr();
-                    pow.Shr();
-                    --stn;
+                    pow.Shr(stn--);
                     continue;
                 }
 
-                quot = quot.Add(pow, (stn - 1) >> 3);
+                quot = quot.Add(pow, stn >> 3);
                 rem -= dbl;
 
                 dbl.Shr();
-                pow.Shr();
-                --stn;
+                pow.Shr(stn--);
             }
         }
 
