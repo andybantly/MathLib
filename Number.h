@@ -266,6 +266,162 @@ public:
         return prod;
     }
 
+    Number Div(const Number& rhs) const
+    {
+
+        if (m_bNAN || rhs.m_bNAN)
+            throw("Invalid number");
+
+        const static Number _0(CByte(0), 1);
+        Number quot;
+        if (rhs == _0)
+            return quot;
+
+        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
+        Number rem = *this;
+        Number rhsin = rhs;
+        rem.SetSize(stMB);
+        rhsin.SetSize(stMB);
+
+        if (m_bNeg != rhs.m_bNeg)
+        {
+            rhsin = rhsin.TwosComplement();
+            rhsin.m_bNeg = m_bNeg;
+        }
+
+        Number dbl = rhsin;
+        Number pow(m_bNeg == rhs.m_bNeg ? CByte(1) : CByte(-1), stMB);
+        size_t stn = 0;
+
+        if (!m_bNeg)
+        {
+            while (dbl < rem)
+            {
+                dbl.Shl();
+                if (dbl.m_bNeg)
+                    return quot;
+                pow.Shl(stn++);
+            }
+
+            quot = _0;
+            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
+            {
+                if (dbl > rem)
+                {
+                    dbl.Shr();
+                    pow.Shr(stn--);
+                    continue;
+                }
+
+                quot = quot.Add(pow, stn >> 3);
+                rem -= dbl;
+
+                dbl.Shr();
+                pow.Shr(stn--);
+            }
+        }
+        else
+        {
+            while (dbl > rem)
+            {
+                dbl.Shl();
+                if (!dbl.m_bNeg)
+                    return quot;
+                pow.Shl(stn++);
+            }
+
+            quot = _0;
+            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
+            {
+                if (dbl < rem)
+                {
+                    dbl.Shr();
+                    pow.Shr(stn--);
+                    continue;
+                }
+
+                quot = quot.Add(pow, stn >> 3);
+                rem -= dbl;
+
+                dbl.Shr();
+                pow.Shr(stn--);
+            }
+        }
+
+        return quot;
+    }
+
+    Number Mod(const Number& rhs) const
+    {
+        if (m_bNAN || rhs.m_bNAN)
+            throw("Invalid number");
+
+        const static Number _0(CByte(0), 1);
+        Number rem;
+        if (rhs == _0)
+            return rem;
+
+        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
+        rem = *this;
+        Number rhsin = rhs;
+        rem.SetSize(stMB);
+        rhsin.SetSize(stMB);
+
+        if (m_bNeg != rhs.m_bNeg)
+        {
+            rhsin = rhsin.TwosComplement();
+            rhsin.m_bNeg = m_bNeg;
+        }
+
+        Number dbl = rhsin;
+        size_t stn = 1;
+
+        if (!m_bNeg)
+        {
+            while (dbl < rem)
+            {
+                dbl.Shl();
+                if (dbl.m_bNeg)
+                    return Number();
+                ++stn;
+            }
+
+            for (size_t ndbl = stn; ndbl > 0; --ndbl)
+            {
+                if (dbl > rem)
+                {
+                    dbl.Shr();
+                    continue;
+                }
+                rem -= dbl;
+                dbl.Shr();
+            }
+        }
+        else
+        {
+            while (dbl > rem)
+            {
+                dbl.Shl();
+                if (!dbl.m_bNeg)
+                    return Number();
+                ++stn;
+            }
+
+            for (size_t ndbl = stn; ndbl > 0; --ndbl)
+            {
+                if (dbl < rem)
+                {
+                    dbl.Shr();
+                    continue;
+                }
+                rem -= dbl;
+                dbl.Shr();
+            }
+        }
+
+        return rem;
+    }
+
     bool Equals(const Number& rhs) const
     {
         if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
@@ -325,7 +481,8 @@ public:
             throw("Invalid number");
 
         size_t size = m_Bytes.size();
-        Number Out(CByte(0), size), One(CByte(1), size);
+        Number Out(CByte(0), size);
+        const static Number _1(CByte(1), 1);
 
         uint8_t iByte = 0;
         do
@@ -334,9 +491,7 @@ public:
             iByte++;
         } while (iByte != size);
 
-        size_t sz = Out.m_Bytes.size();
-        Out = Out + One;
-        Out.m_Bytes.resize(sz);
+        Out = Out + _1;
         Out.m_bNeg = m_bNeg;
 
         return Out;
@@ -344,8 +499,9 @@ public:
 
     std::string ToDisplay() const
     {
+        const static std::string strNAN = "NAN";
         if (m_bNAN)
-            return "NAN";
+            return strNAN;
 
         if (m_bNeg)
         {
@@ -478,7 +634,7 @@ public:
     }
 
 public:
-    Number() : m_bNeg(false), m_bNAN(true) {};
+    Number() : m_bNeg(false), m_bNAN(true), m_st(0) {};
 
     Number(const char* pstrNumber)
     {
@@ -503,6 +659,7 @@ public:
         m_Bytes.resize(size, m_bNeg ? _255 : _0);
         m_Bytes[0] = ch;
         m_bNAN = false;
+        m_st = 0;
     }
 
     Number(const CNumber rhs)
@@ -521,6 +678,7 @@ public:
             m_Bytes = rhs.m_Bytes;
             m_bNeg = rhs.m_bNeg;
             m_bNAN = rhs.m_bNAN;
+            m_st = rhs.m_st;
         }
         return *this;
     }
@@ -590,156 +748,12 @@ public:
 
     Number operator / (const Number& rhs) const
     {
-        if (m_bNAN || rhs.m_bNAN)
-            throw("Invalid number");
-
-        const static Number _0(CByte(0), 1);
-        Number quot;
-        if (rhs == _0)
-            return quot;
-
-        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number rem = *this;
-        Number rhsin = rhs;
-        rem.SetSize(stMB);
-        rhsin.SetSize(stMB);
-
-        if (m_bNeg != rhs.m_bNeg)
-        {
-            rhsin = rhsin.TwosComplement();
-            rhsin.m_bNeg = m_bNeg;
-        }
-
-        Number dbl = rhsin;
-        Number pow(m_bNeg == rhs.m_bNeg ? CByte(1) : CByte(-1), stMB);
-        size_t stn = 0;
-
-        if (!m_bNeg)
-        {
-            while (dbl < rem)
-            {
-                dbl.Shl();
-                if (dbl.m_bNeg)
-                    return quot;
-                pow.Shl(stn++);
-            }
-
-            quot = _0;
-            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
-            {
-                if (dbl > rem)
-                {
-                    dbl.Shr();
-                    pow.Shr(stn--);
-                    continue;
-                }
-
-                quot = quot.Add(pow, stn >> 3);
-                rem -= dbl;
-
-                dbl.Shr();
-                pow.Shr(stn--);
-            }
-        }
-        else
-        {
-            while (dbl > rem)
-            {
-                dbl.Shl();
-                if (!dbl.m_bNeg)
-                    return quot;
-                pow.Shl(stn++);
-            }
-
-            quot = _0;
-            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
-            {
-                if (dbl < rem)
-                {
-                    dbl.Shr();
-                    pow.Shr(stn--);
-                    continue;
-                }
-
-                quot = quot.Add(pow, stn >> 3);
-                rem -= dbl;
-
-                dbl.Shr();
-                pow.Shr(stn--);
-            }
-        }
-
-        return quot;
+        return Div(rhs);
     }
 
     Number operator % (const Number& rhs) const
     {
-        if (m_bNAN || rhs.m_bNAN)
-            throw("Invalid number");
-        const static Number _0(CByte(0), 1);
-        Number rem;
-        if (rhs == _0)
-            return rem;
-
-        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        rem = *this;
-        Number rhsin = rhs;
-        rem.SetSize(stMB);
-        rhsin.SetSize(stMB);
-
-        if (m_bNeg != rhs.m_bNeg)
-        {
-            rhsin = rhsin.TwosComplement();
-            rhsin.m_bNeg = m_bNeg;
-        }
-
-        Number dbl = rhsin;
-        size_t stn = 1;
-
-        if (!m_bNeg)
-        {
-            while (dbl < rem)
-            {
-                dbl.Shl();
-                if (dbl.m_bNeg)
-                    return Number();
-                ++stn;
-            }
-
-            for (size_t ndbl = stn; ndbl > 0; --ndbl)
-            {
-                if (dbl > rem)
-                {
-                    dbl.Shr();
-                    continue;
-                }
-                rem -= dbl;
-                dbl.Shr();
-            }
-        }
-        else
-        {
-            while (dbl > rem)
-            {
-                dbl.Shl();
-                if (!dbl.m_bNeg)
-                    return Number();
-                ++stn;
-            }
-
-            for (size_t ndbl = stn; ndbl > 0; --ndbl)
-            {
-                if (dbl < rem)
-                {
-                    dbl.Shr();
-                    continue;
-                }
-                rem -= dbl;
-                dbl.Shr();
-            }
-        }
-
-        return rem;
+        return Mod(rhs);
     }
 
     // pre/post increment/decrement
@@ -864,11 +878,9 @@ protected:
 
         std::string strOut;
         uint8_t idnm = 0;
-        std::deque<char> binary;
-
-        uint8_t bVal = 0;
-        uint8_t bPos = 0;
-        uint8_t bSiz = 0;
+        uint8_t val = 0;
+        uint8_t pos = 0;
+        uint8_t siz = 0;
         std::vector<uint8_t> vbytes;
 
         std::string::const_iterator cit = strInput.begin();
@@ -894,22 +906,17 @@ protected:
                 if (strInput.length() == 1 && idnm < 2)
                 {
                     /////////////////////////////////////
-                    // Binary stream 0s and 1s
-
-                    binary.push_front('0' + idnm);
-
-                    /////////////////////////////////////
                     // Byte stream 0-255
 
-                    bSiz++;
+                    siz++;
                     if (idnm)
-                        bVal += g_pow[bPos];
-                    bPos++;
-                    if (bPos > 7)
+                        val += g_pow[pos];  // pos could be a uint8_t that shifts left for ++, then g_pow is not needed for lookup
+                    pos++;
+                    if (pos > 7)
                     {
-                        vbytes.push_back(bVal);
-                        bVal = 0;
-                        bPos = 0;
+                        vbytes.push_back(val);
+                        val = 0;
+                        pos = 0;
                     }
 
                     /////////////////////////////////////
@@ -928,20 +935,18 @@ protected:
             // Has the input been processed
             if (cit == strInput.end())
             {
-                // Add the remainder of 0 or 1 to the binary string
-                binary.push_front('0' + idnm);
-
                 /////////////////////////////////////
+                // Byte stream 0-255
 
-                bSiz++;
+                siz++;
                 if (idnm)
-                    bVal += g_pow[bPos];
-                bPos++;
-                if (bPos > 7)
+                    val += g_pow[pos];
+                pos++;
+                if (pos > 7)
                 {
-                    vbytes.push_back(bVal);
-                    bVal = 0;
-                    bPos = 0;
+                    vbytes.push_back(val);
+                    val = 0;
+                    pos = 0;
                 }
 
                 /////////////////////////////////////
@@ -953,8 +958,9 @@ protected:
                 cit = strInput.begin();
             }
         }
-        if (bVal)
-            vbytes.push_back(bVal);
+
+        if (val)
+            vbytes.push_back(val);
 
         size_t size = uint8_t(vbytes.size());
         if (size)
@@ -973,33 +979,14 @@ protected:
             *this = TwosComplement();
 
         SetSize(std::max(GetSize(), size_t(4)));
+        m_st = 0;
     }
     
     protected:
         std::vector<CByte> m_Bytes;
         bool m_bNeg;
         bool m_bNAN;
-};
-
-struct CILT
-{
-    struct Compare
-    {
-        bool operator() (const unsigned char& c1, const unsigned char& c2) const
-        {
-            return tolower(c1) < tolower(c2);
-        }
-    };
-
-    bool operator() (const std::string& strLhs, const std::string& strRhs) const
-    {
-        return std::lexicographical_compare
-        (
-            strLhs.begin(), strLhs.end(),
-            strRhs.begin(), strRhs.end(),
-            Compare()
-        );
-    }
+        size_t m_st;
 };
 
 class CDuration

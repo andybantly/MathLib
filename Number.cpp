@@ -4,6 +4,27 @@
 #include <map>
 #pragma warning(disable:6385)
 
+struct CILT
+{
+	struct Compare
+	{
+		bool operator() (const unsigned char& c1, const unsigned char& c2) const
+		{
+			return tolower(c1) < tolower(c2);
+		}
+	};
+
+	bool operator() (const std::string& strLhs, const std::string& strRhs) const
+	{
+		return std::lexicographical_compare
+		(
+			strLhs.begin(), strLhs.end(),
+			strRhs.begin(), strRhs.end(),
+			Compare()
+		);
+	}
+};
+
 static std::map<std::string, std::string, CILT> g_mapWordTo99;
 static std::map<std::string, std::string, CILT> g_mapWordTo100;
 static const std::string g_one("1");
