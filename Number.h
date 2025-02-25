@@ -104,20 +104,14 @@ protected:
     // Helper to convert to the internal format
     void Convert(const int32_t iNumber)
     {
-        static CByte _0(0), _255(255);
-
-        m_bNeg = iNumber < 0;
         m_bNAN = false;
 
-        const size_t stn = 4;
-        m_Bytes.resize(stn, m_bNeg ? _255 : _0);
-
+        m_Bytes.resize(5);
         m_Bytes[0] = (uint32_t)(iNumber) & 0xFF;
         m_Bytes[1] = ((uint32_t)(iNumber) >> 8) & 0xFF;
         m_Bytes[2] = ((uint32_t)(iNumber) >> 16) & 0xFF;
         m_Bytes[3] = (uint32_t)(iNumber) >> 24;
-
-        SetSize(GetSize() + 1);
+        m_Bytes[4] = (m_bNeg = iNumber < 0) ? 255 : 0;
     }
 
 public:
