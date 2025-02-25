@@ -1044,6 +1044,18 @@ namespace TestMathLib
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = N * D;
 		}
+
+		TEST_METHOD(ByteBigMul2)
+		{
+			Number N = "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
+			Number D = 180;
+			Number Q;
+
+			N.SetSize(N.GetSize() + 2);
+
+			for (unsigned int i = 0; i < 65536; ++i)
+				Q = D * N;
+		}
 	};
 }
 

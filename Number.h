@@ -226,6 +226,46 @@ public:
         return out;
     }
 
+    Number Mul(const Number& rhs) const
+    {
+        if (m_bNAN || rhs.m_bNAN)
+            throw("Invalid number");
+
+        bool bND = m_Bytes.size() >= rhs.m_Bytes.size();
+
+        size_t stMB = bND ? m_Bytes.size() : rhs.m_Bytes.size();
+        Number prod(CByte(0), stMB);
+        Number mulp = *this;
+        Number mulc = rhs;
+
+        if (bND) // N =>= D
+        {
+            for (size_t iByte = 0, nBytes = mulc.m_Bytes.size(); iByte < nBytes; ++iByte)
+            {
+                for (uint8_t ui = 1; ui != 0; ui <<= 1)
+                {
+                    if (ui & mulc.m_Bytes[iByte].U)
+                        prod += mulp;
+                    mulp.Shl();
+                }
+            }
+        }
+        else // D > N
+        {
+            for (size_t iByte = 0, nBytes = mulp.m_Bytes.size(); iByte < nBytes; ++iByte)
+            {
+                for (uint8_t ui = 1; ui != 0; ui <<= 1)
+                {
+                    if (ui & mulp.m_Bytes[iByte].U)
+                        prod += mulc;
+                    mulc.Shl();
+                }
+            }
+        }
+
+        return prod;
+    }
+
     bool Equals(const Number& rhs) const
     {
         if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
@@ -545,25 +585,7 @@ public:
 
     Number operator * (const Number& rhs) const
     {
-        if (m_bNAN || rhs.m_bNAN)
-            throw("Invalid number");
-
-        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number out(CByte(0), stMB);
-        Number lhs = *this;
-        lhs.SetSize(stMB);
-
-        for (size_t iByte = 0, nBytes = rhs.m_Bytes.size(); iByte < nBytes; ++iByte)
-        {
-            for (uint8_t ui = 1; ui != 0; ui <<= 1)
-            {
-                if (ui & rhs.m_Bytes[iByte].U)
-                    out += lhs;
-                lhs.Shl();
-            }
-        }
-
-        return out;
+        return Mul(rhs);
     }
 
     Number operator / (const Number& rhs) const
