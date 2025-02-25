@@ -879,8 +879,7 @@ protected:
         std::string strOut;
         uint8_t idnm = 0;
         uint8_t val = 0;
-        uint8_t pos = 0;
-        uint8_t siz = 0;
+        uint8_t pow = 1;
         std::vector<uint8_t> vbytes;
 
         std::string::const_iterator cit = strInput.begin();
@@ -908,15 +907,14 @@ protected:
                     /////////////////////////////////////
                     // Byte stream 0-255
 
-                    siz++;
                     if (idnm)
-                        val += g_pow[pos];  // pos could be a uint8_t that shifts left for ++, then g_pow is not needed for lookup
-                    pos++;
-                    if (pos > 7)
+                        val += pow;
+                    pow <<= 1;
+                    if (!pow)
                     {
                         vbytes.push_back(val);
                         val = 0;
-                        pos = 0;
+                        pow = 1;
                     }
 
                     /////////////////////////////////////
@@ -938,15 +936,14 @@ protected:
                 /////////////////////////////////////
                 // Byte stream 0-255
 
-                siz++;
                 if (idnm)
-                    val += g_pow[pos];
-                pos++;
-                if (pos > 7)
+                    val += pow;
+                pow <<= 1;
+                if (!pow)
                 {
                     vbytes.push_back(val);
                     val = 0;
-                    pos = 0;
+                    pow = 1;
                 }
 
                 /////////////////////////////////////
