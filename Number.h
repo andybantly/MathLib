@@ -71,13 +71,11 @@ protected:
         {
             CByte Out;
             Out.OF = OF; // Kerry-In
-
             for (uint8_t ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
                 Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((rhs.U & ui) >> uj))) << uj;                                                // SUM:   Kerry-in XOR (A XOR B)
                 Out.OF = (((U & ui) >> uj) & Out.OF) | (((U & ui) >> uj) & ((rhs.U & ui) >> uj)) | (((rhs.U & ui) >> uj) & Out.OF); // CARRY: Kerry-out AB OR BC OR ACin
             }
-
             return Out;
         }
         
@@ -85,13 +83,11 @@ protected:
         {
             CByte Out;
             Out.OF = OF; // Borrow-In
-
             for (uint8_t ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
                 Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((rhs.U & ui) >> uj))) << uj;                                                  // DIFFERENCE: (A XOR B) XOR Borrow-in
                 Out.OF = (~((U & ui) >> uj) & Out.OF) | (~((U & ui) >> uj) & ((rhs.U & ui) >> uj)) | (((rhs.U & ui) >> uj) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
             }
-
             return Out;
         }
 
@@ -99,20 +95,27 @@ protected:
         uint8_t OF;
     };
 
+    //bool ispow2(const int32_t n) const
+    //{
+        // The bitwise AND of n and n - 1 will be 0 for powers of 2
+    //    return (n > 0) && (n & (n - 1)) == 0;
+    //}
+
     // Helper to convert to the internal format
     void Convert(const int32_t iNumber)
     {
         static CByte _0(0), _255(255);
 
         m_bNeg = iNumber < 0;
-        m_Bytes.resize(4, m_bNeg ? _255 : _0);
+        m_bNAN = false;
+
+        const size_t stn = 4;
+        m_Bytes.resize(stn, m_bNeg ? _255 : _0);
 
         m_Bytes[0] = (uint32_t)(iNumber) & 0xFF;
         m_Bytes[1] = ((uint32_t)(iNumber) >> 8) & 0xFF;
         m_Bytes[2] = ((uint32_t)(iNumber) >> 16) & 0xFF;
         m_Bytes[3] = (uint32_t)(iNumber) >> 24;
-
-        m_bNAN = false;
     }
 
 public:
@@ -145,7 +148,8 @@ public:
         {
             stn = stbit >> 3;
             iByte = stn;
-            if (iByte) --iByte;
+            if (iByte)
+                --iByte;
         }
         for (; iByte != stn; ++iByte)
         {
@@ -268,7 +272,6 @@ public:
 
     Number Div(const Number& rhs) const
     {
-
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
@@ -634,7 +637,7 @@ public:
     }
 
 public:
-    Number() : m_bNeg(false), m_bNAN(true), m_st(0) {};
+    Number() : m_bNeg(false), m_bNAN(true) {};
 
     Number(const char* pstrNumber)
     {
@@ -659,7 +662,6 @@ public:
         m_Bytes.resize(size, m_bNeg ? _255 : _0);
         m_Bytes[0] = ch;
         m_bNAN = false;
-        m_st = 0;
     }
 
     Number(const CNumber rhs)
@@ -678,7 +680,6 @@ public:
             m_Bytes = rhs.m_Bytes;
             m_bNeg = rhs.m_bNeg;
             m_bNAN = rhs.m_bNAN;
-            m_st = rhs.m_st;
         }
         return *this;
     }
@@ -976,14 +977,12 @@ protected:
             *this = TwosComplement();
 
         SetSize(std::max(GetSize(), size_t(4)));
-        m_st = 0;
     }
     
     protected:
         std::vector<CByte> m_Bytes;
         bool m_bNeg;
         bool m_bNAN;
-        size_t m_st;
 };
 
 class CDuration
