@@ -65,10 +65,6 @@ int main()
 					{
 						Number N1(vNumbers[0]);
 						Number N2(vNumbers[2]);
-
-						size_t mb = N1.GetSize() > N2.GetSize() ? N1.GetSize() : N2.GetSize();
-						N1.SetSize(mb + 1);
-						N2.SetSize(mb + 1);
 						Number S;
 
 						bool bCMP = false;

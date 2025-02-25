@@ -120,11 +120,14 @@ namespace TestMathLib
 			int a, b, c;
 			std::string s;
 
-			A = "9999999999999";
-			B = 180;
-			A.SetSize(24);
-			B.SetSize(24);
+			A = "999999";
+			a = 999999;
+			B = b = 180;
 			C = A / B;
+			c = a / b;
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), s);
 
 			B = 256;
 			B.Shr();
@@ -1027,8 +1030,6 @@ namespace TestMathLib
 			Number D = 180;
 			Number Q;
 
-			N.SetSize(N.GetSize() + 1);
-
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = N / D;
 		}
@@ -1039,8 +1040,6 @@ namespace TestMathLib
 			Number D = 180;
 			Number Q;
 
-			N.SetSize(N.GetSize() + 2);
-
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = N * D;
 		}
@@ -1050,8 +1049,6 @@ namespace TestMathLib
 			Number N = "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
 			Number D = 180;
 			Number Q;
-
-			N.SetSize(N.GetSize() + 2);
 
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = D * N;

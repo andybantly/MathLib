@@ -976,7 +976,7 @@ protected:
         if (m_bNeg)
             *this = TwosComplement();
 
-        SetSize(std::max(GetSize(), size_t(4)));
+        SetSize(GetSize() + 1);
     }
     
     protected:
