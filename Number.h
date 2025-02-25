@@ -116,6 +116,8 @@ protected:
         m_Bytes[1] = ((uint32_t)(iNumber) >> 8) & 0xFF;
         m_Bytes[2] = ((uint32_t)(iNumber) >> 16) & 0xFF;
         m_Bytes[3] = (uint32_t)(iNumber) >> 24;
+
+        SetSize(GetSize() + 1);
     }
 
 public:
