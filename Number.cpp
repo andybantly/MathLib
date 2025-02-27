@@ -35,25 +35,25 @@ std::string Number::ToPhrase() const
 	if (!bInit)
 	{
 		bInit = true;
-		CNumber::Init();
+		DescNumber::Init();
 	}
 
-	CNumber N(ToDisplay());
+	DescNumber N(ToDisplay());
 	return N.GetPhrase();
 }
 
-CNumber::CNumber() : m_bNegative(false)
+DescNumber::DescNumber() : m_bNegative(false)
 {
 	m_strNumber.clear();
 	m_strPhrase.clear();
 }
 
-CNumber::CNumber(const std::string& strInput, bool bNum)
+DescNumber::DescNumber(const std::string& strInput, bool bNum)
 {
 	SetNumber(bNum ? strInput : Contract(strInput));
 }
 
-void CNumber::SetNumber(const std::string& strInput)
+void DescNumber::SetNumber(const std::string& strInput)
 {
 	bool bZero = true;
 	if (!strInput.empty())
@@ -136,12 +136,12 @@ void CNumber::SetNumber(const std::string& strInput)
 	}
 }
 
-std::string CNumber::WB()
+std::string DescNumber::WB()
 {
 	return g_huns[g_nHuns - 1];
 }
 
-std::string CNumber::Expand(const std::string& strInput)
+std::string DescNumber::Expand(const std::string& strInput)
 {
 	std::string strResult;
 	if (strInput.empty())
@@ -264,7 +264,7 @@ start:
 	return strResult;
 }
 
-std::string CNumber::Contract(const std::string& strInput) // Description
+std::string DescNumber::Contract(const std::string& strInput) // Description
 {
 	std::string strResult;
 	if (strInput.empty())
@@ -364,14 +364,14 @@ std::string CNumber::Contract(const std::string& strInput) // Description
 	return strResult;
 }
 
-void CNumber::Convert()
+void DescNumber::Convert()
 {
 	m_strPhrase = Expand(m_strNumber);
 	if (m_strPhrase.empty())
 		throw(std::exception("Invalid Number"));
 }
 
-void CNumber::Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind)
+void DescNumber::Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind)
 {
 	vstrTokens.clear();
 	if (strInput.empty())
@@ -393,17 +393,17 @@ void CNumber::Split(const std::string& strInput, std::vector<std::string>& vstrT
 	} while (ipos != std::string::npos);
 }
 
-const std::string& CNumber::GetNumber() const
+const std::string& DescNumber::GetNumber() const
 {
 	return m_strNumber;
 }
 
-const std::string& CNumber::GetPhrase() const
+const std::string& DescNumber::GetPhrase() const
 {
 	return m_strPhrase;
 }
 
-bool CNumber::TextEqual(const std::string& strLHS, const std::string& strRHS)
+bool DescNumber::TextEqual(const std::string& strLHS, const std::string& strRHS)
 {
 	bool bEqual = true;
 	if (strLHS.length() != strRHS.length())
@@ -420,7 +420,7 @@ bool CNumber::TextEqual(const std::string& strLHS, const std::string& strRHS)
 	return bEqual;
 }
 
-void CNumber::Init()
+void DescNumber::Init()
 {
 	std::string strTen, strWord, strNum, strHun;
 	for (int iOne = 0; iOne < g_nOnes; ++iOne)
@@ -448,7 +448,7 @@ void CNumber::Init()
 	}
 }
 
-std::ostream& operator<<(std::ostream& out, const CNumber& Number)
+std::ostream& operator<<(std::ostream& out, const DescNumber& Number)
 {
 	out << Number.m_strNumber;
 	return out;
@@ -457,7 +457,7 @@ std::ostream& operator<<(std::ostream& out, const CNumber& Number)
 // error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
 // for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
 // __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
-std::wstring CNumber::ToString(const CNumber& rhs)
+std::wstring DescNumber::ToString(const DescNumber& rhs)
 {
 	std::wstringstream wstrStream;
 	wstrStream << rhs.m_strNumber.c_str();

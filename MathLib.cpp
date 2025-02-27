@@ -18,7 +18,7 @@ int main()
 		char c;
 		while ((c = getchar()) != '\n')
 			strInput.append(1, c);
-		if (!CNumber::TextEqual(strInput, "quit") && !CNumber::TextEqual(strInput, "test"))
+		if (!DescNumber::TextEqual(strInput, "quit") && !DescNumber::TextEqual(strInput, "test"))
 		{
 			try
 			{
@@ -141,7 +141,7 @@ int main()
 		}
 		else
 		{
-			if (CNumber::TextEqual(strInput, "quit"))
+			if (DescNumber::TextEqual(strInput, "quit"))
 				bAgain = false;
 			else
 				test(); // Manual testing, automatic testing in TestMathLib project
@@ -152,8 +152,8 @@ int main()
 
 static void ttest(unsigned long long ullb, unsigned long long ulle)
 {
-	CNumber::Init();
-	CNumber Number;
+	DescNumber::Init();
+	DescNumber Number;
 
 	std::string s, sr, sv;
 	unsigned long long ull = ullb;

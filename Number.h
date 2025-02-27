@@ -29,13 +29,13 @@ typedef uint16_t UNUM;  // The internal type is a 'unsigned number'
 static const UNUM g_pow[BITWIDTH] = { 0x001, 0x002, 0x004, 0x008, 0x0010, 0x0020, 0x0040, 0x0080,   // 0-7
                                       0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000 }; // 8-15
 
-class CNumber
+class DescNumber
 {
 public:
-    CNumber();
-    CNumber(const std::string& strInput, bool bNum = true);
+    DescNumber();
+    DescNumber(const std::string& strInput, bool bNum = true);
 
-    ~CNumber() {};
+    ~DescNumber() {};
 
 public:
     void SetNumber(const std::string& strInput);
@@ -49,12 +49,12 @@ public:
 
     static void Init();
     static bool TextEqual(const std::string& strLHS, const std::string& strRHS);
-    friend std::ostream& operator<<(std::ostream& out, const CNumber& Number);
+    friend std::ostream& operator<<(std::ostream& out, const DescNumber& Number);
 
     // error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
     // for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
     // __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
-    static std::wstring ToString(const CNumber& Number);
+    static std::wstring ToString(const DescNumber& Number);
 
 protected:
     void Convert();
@@ -642,7 +642,7 @@ public:
         m_bNAN = false;
     }
 
-    Number(const CNumber rhs)
+    Number(const DescNumber rhs)
     {
         ToBinary(rhs.GetNumber());
     }

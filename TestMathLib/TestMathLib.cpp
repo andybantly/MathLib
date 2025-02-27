@@ -15,7 +15,7 @@ namespace TestMathLib
 	{
 		static void Test(long long ullb, long long ulle)
 		{
-			CNumber MathLib;
+			DescNumber MathLib;
 
 			string s, sr, sv;
 			long long ull = ullb;
@@ -35,7 +35,7 @@ namespace TestMathLib
 		TEST_CLASS_INITIALIZE(TestInitialize)
 		{
 			srand((unsigned)time(nullptr));
-			CNumber::Init();
+			DescNumber::Init();
 		}
 
 		TEST_METHOD(TestLib)
@@ -1066,9 +1066,9 @@ namespace Microsoft
 	{
 		namespace CppUnitTestFramework
 		{
-			template<> wstring static ToString<CNumber>(const CNumber& Number)
+			template<> wstring static ToString<DescNumber>(const DescNumber& Number)
 			{
-				return CNumber::ToString(Number);
+				return DescNumber::ToString(Number);
 			}
 		}
 	}
