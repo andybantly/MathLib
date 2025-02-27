@@ -46,18 +46,14 @@ protected:
     std::string m_strPhrase;
 };
 
-#define BITWIDTH 8
-static const uint8_t g_pow[BITWIDTH] = { 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80 }; // power of 2 lookup, has 2^BITWIDTH-1 entries
-/*
-static const uint8_t g_shft = 7;
-static const uint8_t g_shfr = 3;
-static const uint8_t g_and = 0x80;
-static const uint8_t g_max = 0xFF;
-*/
 #define g_shft 7
-#define g_shfr 3
+#define g_shfm 3
 #define g_and 0x80
 #define g_max 0xFF
+
+#define BITWIDTH 8
+static const uint8_t g_pow[BITWIDTH] = { 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80 }; // power of 2 lookup, has BITWIDTH entries
+
 
 class Number
 {
@@ -119,12 +115,18 @@ protected:
         m_bNAN = false;
 
         m_Bytes.resize(5);
-        m_Bytes[0] =  (uint32_t)(iNumber)          & 0xFF;
-        m_Bytes[1] = ((uint32_t)(iNumber) >> 0x08) & 0xFF;
-        m_Bytes[2] = ((uint32_t)(iNumber) >> 0x10) & 0xFF;
-        m_Bytes[3] =  (uint32_t)(iNumber) >> 0x18;
+        m_Bytes[0] = ((uint32_t)(iNumber)        ) & 0xFF; // 8
+        m_Bytes[1] = ((uint32_t)(iNumber) >> 0x08) & 0xFF; // 16
+        m_Bytes[2] = ((uint32_t)(iNumber) >> 0x10) & 0xFF; // 24
+        m_Bytes[3] = ((uint32_t)(iNumber) >> 0x18)       ; // 32
 
-        m_Bytes[4] = (m_bNeg = iNumber < 0) ? g_max : 0;
+        m_bNeg = iNumber < 0;
+        m_Bytes[4] = m_bNeg ? g_max : 0;
+
+        //////////////////////////////////////////////////////////
+
+        //uint16_t b1 = ((uint32_t)(iNumber)        ) & 0x0000FFFF; // 16
+        //uint16_t b2 = ((uint32_t)(iNumber) >> 0x10)             ; // 32
     }
 
 public:
@@ -135,7 +137,7 @@ public:
         size_t iByte = m_Bytes.size() - 1;
         if (stbit != size_t(-1))
         {
-            iByte = (stbit >> g_shfr) + 1;
+            iByte = (stbit >> g_shfm) + 1;
             if (iByte)
                 stn = iByte - 1;
         }
@@ -155,7 +157,7 @@ public:
         size_t iByte = 0;
         if (stbit != size_t(-1))
         {
-            stn = stbit >> g_shfr;
+            stn = stbit >> g_shfm;
             iByte = stn;
             if (iByte)
                 --iByte;
@@ -322,7 +324,7 @@ public:
                     continue;
                 }
 
-                quot = quot.Add(pow, stn >> g_shfr);
+                quot = quot.Add(pow, stn >> g_shfm);
                 rem -= dbl;
 
                 dbl.Shr();
@@ -349,7 +351,7 @@ public:
                     continue;
                 }
 
-                quot = quot.Add(pow, stn >> g_shfr);
+                quot = quot.Add(pow, stn >> g_shfm);
                 rem -= dbl;
 
                 dbl.Shr();
