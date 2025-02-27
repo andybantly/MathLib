@@ -46,7 +46,18 @@ protected:
     std::string m_strPhrase;
 };
 
-static uint8_t g_pow[8] = { 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80 };
+#define BITWIDTH 8
+static const uint8_t g_pow[BITWIDTH] = { 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80 }; // power of 2 lookup, has 2^BITWIDTH-1 entries
+/*
+static const uint8_t g_shft = 7;
+static const uint8_t g_shfr = 3;
+static const uint8_t g_and = 0x80;
+static const uint8_t g_max = 0xFF;
+*/
+#define g_shft 7
+#define g_shfr 3
+#define g_and 0x80
+#define g_max 0xFF
 
 class Number
 {
@@ -113,7 +124,7 @@ protected:
         m_Bytes[2] = ((uint32_t)(iNumber) >> 0x10) & 0xFF;
         m_Bytes[3] =  (uint32_t)(iNumber) >> 0x18;
 
-        m_Bytes[4] = (m_bNeg = iNumber < 0) ? 255 : 0;
+        m_Bytes[4] = (m_bNeg = iNumber < 0) ? g_max : 0;
     }
 
 public:
@@ -124,17 +135,17 @@ public:
         size_t iByte = m_Bytes.size() - 1;
         if (stbit != size_t(-1))
         {
-            iByte = (stbit >> 3) + 1;
+            iByte = (stbit >> g_shfr) + 1;
             if (iByte)
                 stn = iByte - 1;
         }
         for (; iByte != stn; --iByte)
         {
             m_Bytes[iByte].U <<= 1;
-            m_Bytes[iByte].U |= m_Bytes[iByte - 1].U & 128 ? 1 : 0;
+            m_Bytes[iByte].U |= m_Bytes[iByte - 1].U & g_and ? 1 : 0;
         }
         m_Bytes[iByte].U <<= 1;
-        m_bNeg = m_Bytes[m_Bytes.size() - 1].U && 128;
+        m_bNeg = m_Bytes[m_Bytes.size() - 1].U && g_and;
     }
 
     // Right Bit Shift -> halve value
@@ -144,7 +155,7 @@ public:
         size_t iByte = 0;
         if (stbit != size_t(-1))
         {
-            stn = stbit >> 3;
+            stn = stbit >> g_shfr;
             iByte = stn;
             if (iByte)
                 --iByte;
@@ -153,11 +164,11 @@ public:
         {
             m_Bytes[iByte].U >>= 1;
             if (m_Bytes[iByte + 1].U & 1)
-                m_Bytes[iByte].U |= 128;
+                m_Bytes[iByte].U |= g_and;
         }
         m_Bytes[iByte].U >>= 1;
         if (m_bNeg)
-            m_Bytes[iByte].U |= 128;
+            m_Bytes[iByte].U |= g_and;
     }
 
     Number Add(const Number& rhs, size_t st = 0) const
@@ -168,7 +179,7 @@ public:
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static CByte Zero(0), Neg1(255);
+        const static CByte Zero(0), Neg1(g_max);
         Number out(Zero, stMax);
         uint8_t of = 0;
 
@@ -189,7 +200,7 @@ public:
             of = (lb.OF = of, out.m_Bytes[st] = lb + rb, out.m_Bytes[st].OF);
         }
 
-        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & 128) >> 7 ? true : false;
+        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & g_and) >> g_shft ? true : false; // Shift nbits - 1  to match size of data
 
         return out;
     }
@@ -202,7 +213,7 @@ public:
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static CByte Zero(0), Neg1(255);
+        const static CByte Zero(0), Neg1(g_max);
         Number out(Zero, stMax);
         uint8_t of = 0;
 
@@ -223,7 +234,7 @@ public:
             of = (lb.OF = of, out.m_Bytes[st] = lb - rb, out.m_Bytes[st].OF);
         }
 
-        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & 128) >> 7 ? true : false;
+        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & g_and) >> g_shft ? true : false;
 
         return out;
     }
@@ -311,7 +322,7 @@ public:
                     continue;
                 }
 
-                quot = quot.Add(pow, stn >> 3);
+                quot = quot.Add(pow, stn >> g_shfr);
                 rem -= dbl;
 
                 dbl.Shr();
@@ -338,7 +349,7 @@ public:
                     continue;
                 }
 
-                quot = quot.Add(pow, stn >> 3);
+                quot = quot.Add(pow, stn >> g_shfr);
                 rem -= dbl;
 
                 dbl.Shr();
@@ -433,7 +444,7 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static CByte Zero(0), Neg1(255);
+        const static CByte Zero(0), Neg1(g_max);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
             CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
@@ -458,7 +469,7 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static CByte Zero(0), Neg1(255);
+        const static CByte Zero(0), Neg1(g_max);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
             CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
@@ -492,11 +503,7 @@ public:
         return Out;
     }
     
-    //
-    // From TFA - the internal data structure uses strings.  
-    // vector<char>, deque<char>, and list<char> were all tried 
-    // in its place and string works fastest, 8s, 6s, 10s, 3s
-    //
+    // Binary to text based base10 conversion 
     std::string ToDisplay() const
     {
         const static std::string strNAN = "NAN";
@@ -520,7 +527,7 @@ public:
             uint8_t iProd;
             uint8_t iCarry;
 
-            if (m_Bytes[iByte].U & pow) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,66,128
+            if (m_Bytes[iByte].U & pow) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,64,128
             {
                 Disp.clear();
                 iCarry = 0;
@@ -578,12 +585,12 @@ public:
 
     std::string ToBinary() const
     {
-        size_t nBin = m_Bytes.size() * size_t(8);
+        size_t nBin = m_Bytes.size() * size_t(BITWIDTH);
         std::string strBin(nBin, '0');
 
-        for (size_t iByte = 0, nBytes = m_Bytes.size(); iByte < nBytes; ++iByte, nBin -= 8)
+        for (size_t iByte = 0, nBytes = m_Bytes.size(); iByte < nBytes; ++iByte, nBin -= BITWIDTH)
         {
-            for (size_t iBit = 0; iBit < 8; ++iBit)
+            for (size_t iBit = 0; iBit < BITWIDTH; ++iBit)
             {
                 if (g_pow[iBit] & m_Bytes[iByte].U)
                     strBin[nBin - iBit - 1] = '1';
@@ -621,9 +628,9 @@ public:
 
     Number(CByte ch, size_t size)
     {
-        const static CByte _0(0), _255(255);
+        const static CByte _0(0), _255(g_max);
 
-        m_bNeg = (ch.U & 128) >> 7 ? true : false;
+        m_bNeg = (ch.U & g_and) >> g_shft ? true : false;
         m_Bytes.resize(size, m_bNeg ? _255 : _0);
         m_Bytes[0] = ch;
         m_bNAN = false;
@@ -812,7 +819,7 @@ public:
     void SetSize(size_t size)
     {
         if (size != m_Bytes.size())
-            m_Bytes.resize(size, m_bNeg ? 255 : 0);
+            m_Bytes.resize(size, m_bNeg ? g_max : 0);
     }
 
     size_t GetSize() const
