@@ -25,6 +25,10 @@
 
 typedef uint16_t UNUM;  // The internal type is a 'unsigned number'
 
+// Power of 2 map with BITWIDTH entries
+static const UNUM g_pow[BITWIDTH] = { 0x001, 0x002, 0x004, 0x008, 0x0010, 0x0020, 0x0040, 0x0080,   // 0-7
+                                      0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000 }; // 8-15
+
 class CNumber
 {
 public:
@@ -61,10 +65,6 @@ protected:
     std::string m_strNumber;
     std::string m_strPhrase;
 };
-
-// Power of 2 map with BITWIDTH entries
-static const UNUM g_pow[BITWIDTH] = { 0x001, 0x002, 0x004, 0x008, 0x0010, 0x0020, 0x0040, 0x0080,   // 0-7
-                                      0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000 }; // 8-15
 
 class Number
 {
