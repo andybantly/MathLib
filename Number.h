@@ -115,13 +115,13 @@ protected:
         UNUM U;
         UNUM OF;
     };
-
+    /*
     bool ispow2(const int32_t n) const
     {
         // The bitwise AND of n and n - 1 will be 0 for powers of 2
         return (n > 0) && (n & (n - 1)) == 0;
     }
-     
+    */ 
     // Helper to convert to the internal format
     void Convert(const int32_t iNumber)
     {
@@ -344,8 +344,6 @@ public:
             while (dbl < rem)
             {
                 dbl.Shl();
-                if (dbl.m_bNeg)
-                    return quot;
                 pow.Shl(stn++);
             }
 
@@ -371,8 +369,6 @@ public:
             while (dbl > rem)
             {
                 dbl.Shl();
-                if (!dbl.m_bNeg)
-                    return quot;
                 pow.Shl(stn++);
             }
 
@@ -426,8 +422,6 @@ public:
             while (dbl < rem)
             {
                 dbl.Shl();
-                if (dbl.m_bNeg)
-                    return Number();
                 ++stn;
             }
 
@@ -447,8 +441,6 @@ public:
             while (dbl > rem)
             {
                 dbl.Shl();
-                if (!dbl.m_bNeg)
-                    return Number();
                 ++stn;
             }
 
