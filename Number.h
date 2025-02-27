@@ -9,6 +9,22 @@
 #include <thread>
 #include <functional>
 
+/*
+* CONSTANT/TYPEDEF MEANINGS
+* SHFT - Number of bits to left shift. BITWIDTH - 1 in value.
+* SHFM - Number of bits for multiplication. (3=8 bits, 4=16 bits, etc)
+* AND  - Number of bits for masking in shifting
+* ALL  - Maximum value of the internal type
+* UNUM - The mapping to the actual type used (change one place, changes many)
+*/
+#define SHFT            15
+#define SHFM            4
+#define AND             0x8000
+#define ALL             0xFFFF
+#define BITWIDTH        16
+
+typedef uint16_t UNUM;  // The internal type is a 'unsigned number'
+
 class CNumber
 {
 public:
@@ -46,26 +62,21 @@ protected:
     std::string m_strPhrase;
 };
 
-#define g_shft 7
-#define g_shfm 3
-#define g_and 0x80
-#define g_max 0xFF
-
-#define BITWIDTH 8
-static const uint8_t g_pow[BITWIDTH] = { 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80 }; // power of 2 lookup, has BITWIDTH entries
-
+// Power of 2 map with BITWIDTH entries
+static const UNUM g_pow[BITWIDTH] = { 0x001, 0x002, 0x004, 0x008, 0x0010, 0x0020, 0x0040, 0x0080,   // 0-7
+                                      0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000 }; // 8-15
 
 class Number
 {
 protected:
-    class CByte
+    class WORD
     {
     public:
-        CByte(uint8_t byte = 0) : U(byte), OF(0) { };
+        WORD(UNUM byte = 0) : U(byte), OF(0) { };
 
-        CByte(const CByte& rhs) { *this = rhs; }
+        WORD(const WORD& rhs) { *this = rhs; }
 
-        CByte& operator = (const CByte& rhs)
+        WORD& operator = (const WORD& rhs)
         {
             if (this != &rhs)
             {
@@ -75,11 +86,11 @@ protected:
             return *this;
         }
 
-        CByte operator + (const CByte& rhs) const // Full-Adder
+        WORD operator + (const WORD& rhs) const // Full-Adder
         {
-            CByte Out;
+            WORD Out;
             Out.OF = OF; // Kerry-In
-            for (uint8_t ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
+            for (UNUM ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
                 Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((rhs.U & ui) >> uj))) << uj;                                                // SUM:   Kerry-in XOR (A XOR B)
                 Out.OF = (((U & ui) >> uj) & Out.OF) | (((U & ui) >> uj) & ((rhs.U & ui) >> uj)) | (((rhs.U & ui) >> uj) & Out.OF); // CARRY: Kerry-out AB OR BC OR ACin
@@ -87,11 +98,11 @@ protected:
             return Out;
         }
         
-        CByte operator - (const CByte& rhs) const // Full-Subtractor
+        WORD operator - (const WORD& rhs) const // Full-Subtractor
         {
-            CByte Out;
+            WORD Out;
             Out.OF = OF; // Borrow-In
-            for (uint8_t ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
+            for (UNUM ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
                 Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((rhs.U & ui) >> uj))) << uj;                                                  // DIFFERENCE: (A XOR B) XOR Borrow-in
                 Out.OF = (~((U & ui) >> uj) & Out.OF) | (~((U & ui) >> uj) & ((rhs.U & ui) >> uj)) | (((rhs.U & ui) >> uj) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
@@ -99,8 +110,8 @@ protected:
             return Out;
         }
 
-        uint8_t U;
-        uint8_t OF;
+        UNUM U;
+        UNUM OF;
     };
 
     //bool ispow2(const int32_t n) const
@@ -114,19 +125,12 @@ protected:
     {
         m_bNAN = false;
 
-        m_Bytes.resize(5);
-        m_Bytes[0] = ((uint32_t)(iNumber)        ) & 0xFF; // 8
-        m_Bytes[1] = ((uint32_t)(iNumber) >> 0x08) & 0xFF; // 16
-        m_Bytes[2] = ((uint32_t)(iNumber) >> 0x10) & 0xFF; // 24
-        m_Bytes[3] = ((uint32_t)(iNumber) >> 0x18)       ; // 32
-
+        m_Bytes.resize(3);
+        m_Bytes[0] = ((uint32_t)(iNumber)        ) & 0x0000FFFF; // 16
+        m_Bytes[1] = ((uint32_t)(iNumber) >> 0x10)             ; // 32
+        
         m_bNeg = iNumber < 0;
-        m_Bytes[4] = m_bNeg ? g_max : 0;
-
-        //////////////////////////////////////////////////////////
-
-        //uint16_t b1 = ((uint32_t)(iNumber)        ) & 0x0000FFFF; // 16
-        //uint16_t b2 = ((uint32_t)(iNumber) >> 0x10)             ; // 32
+        m_Bytes[2] = m_bNeg ? ALL : 0;
     }
 
 public:
@@ -137,17 +141,17 @@ public:
         size_t iByte = m_Bytes.size() - 1;
         if (stbit != size_t(-1))
         {
-            iByte = (stbit >> g_shfm) + 1;
+            iByte = (stbit >> SHFM) + 1;
             if (iByte)
                 stn = iByte - 1;
         }
         for (; iByte != stn; --iByte)
         {
             m_Bytes[iByte].U <<= 1;
-            m_Bytes[iByte].U |= m_Bytes[iByte - 1].U & g_and ? 1 : 0;
+            m_Bytes[iByte].U |= m_Bytes[iByte - 1].U & AND ? 1 : 0;
         }
         m_Bytes[iByte].U <<= 1;
-        m_bNeg = m_Bytes[m_Bytes.size() - 1].U && g_and;
+        m_bNeg = m_Bytes[m_Bytes.size() - 1].U && AND;
     }
 
     // Right Bit Shift -> halve value
@@ -157,7 +161,7 @@ public:
         size_t iByte = 0;
         if (stbit != size_t(-1))
         {
-            stn = stbit >> g_shfm;
+            stn = stbit >> SHFM;
             iByte = stn;
             if (iByte)
                 --iByte;
@@ -166,11 +170,11 @@ public:
         {
             m_Bytes[iByte].U >>= 1;
             if (m_Bytes[iByte + 1].U & 1)
-                m_Bytes[iByte].U |= g_and;
+                m_Bytes[iByte].U |= AND;
         }
         m_Bytes[iByte].U >>= 1;
         if (m_bNeg)
-            m_Bytes[iByte].U |= g_and;
+            m_Bytes[iByte].U |= AND;
     }
 
     Number Add(const Number& rhs, size_t st = 0) const
@@ -181,11 +185,11 @@ public:
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static CByte Zero(0), Neg1(g_max);
+        const static WORD Zero(0), Neg1(ALL);
         Number out(Zero, stMax);
-        uint8_t of = 0;
+        UNUM of = 0;
 
-        CByte lb, rb;
+        WORD lb, rb;
         for (; st < stMin; ++st)
         {
             lb = m_Bytes[st];
@@ -202,7 +206,7 @@ public:
             of = (lb.OF = of, out.m_Bytes[st] = lb + rb, out.m_Bytes[st].OF);
         }
 
-        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & g_and) >> g_shft ? true : false; // Shift nbits - 1  to match size of data
+        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false; // Shift nbits - 1  to match size of data
 
         return out;
     }
@@ -215,11 +219,11 @@ public:
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static CByte Zero(0), Neg1(g_max);
+        const static WORD Zero(0), Neg1(ALL);
         Number out(Zero, stMax);
-        uint8_t of = 0;
+        UNUM of = 0;
 
-        CByte lb, rb;
+        WORD lb, rb;
         for (; st < stMin; ++st)
         {
             lb = m_Bytes[st];
@@ -236,7 +240,7 @@ public:
             of = (lb.OF = of, out.m_Bytes[st] = lb - rb, out.m_Bytes[st].OF);
         }
 
-        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & g_and) >> g_shft ? true : false;
+        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false;
 
         return out;
     }
@@ -249,7 +253,7 @@ public:
         bool bND = m_Bytes.size() >= rhs.m_Bytes.size();
 
         size_t stMB = bND ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number prod(CByte(0), stMB);
+        Number prod(WORD(0), stMB);
         Number mulp = *this;
         Number mulc = rhs;
 
@@ -257,7 +261,7 @@ public:
         {
             for (size_t iByte = 0, nBytes = mulc.m_Bytes.size(); iByte < nBytes; ++iByte)
             {
-                for (uint8_t ui = 1; ui != 0; ui <<= 1)
+                for (UNUM ui = 1; ui != 0; ui <<= 1)
                 {
                     if (ui & mulc.m_Bytes[iByte].U)
                         prod += mulp;
@@ -269,7 +273,7 @@ public:
         {
             for (size_t iByte = 0, nBytes = mulp.m_Bytes.size(); iByte < nBytes; ++iByte)
             {
-                for (uint8_t ui = 1; ui != 0; ui <<= 1)
+                for (UNUM ui = 1; ui != 0; ui <<= 1)
                 {
                     if (ui & mulp.m_Bytes[iByte].U)
                         prod += mulc;
@@ -286,7 +290,7 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        const static Number _0(CByte(0), 1);
+        const static Number _0(WORD(0), 1);
         Number quot;
         if (rhs == _0)
             return quot;
@@ -301,7 +305,7 @@ public:
             rhsin = rhsin.TwosComplement();
 
         Number dbl = rhsin;
-        Number pow(m_bNeg == rhs.m_bNeg ? CByte(1) : CByte(-1), stMB);
+        Number pow(m_bNeg == rhs.m_bNeg ? WORD(1) : WORD(-1), stMB);
         size_t stn = 0;
 
         if (!m_bNeg)
@@ -324,7 +328,7 @@ public:
                     continue;
                 }
 
-                quot = quot.Add(pow, stn >> g_shfm);
+                quot = quot.Add(pow, stn >> SHFM);
                 rem -= dbl;
 
                 dbl.Shr();
@@ -351,7 +355,7 @@ public:
                     continue;
                 }
 
-                quot = quot.Add(pow, stn >> g_shfm);
+                quot = quot.Add(pow, stn >> SHFM);
                 rem -= dbl;
 
                 dbl.Shr();
@@ -367,7 +371,7 @@ public:
         if (m_bNAN || rhs.m_bNAN)
             throw("Invalid number");
 
-        const static Number _0(CByte(0), 1);
+        const static Number _0(WORD(0), 1);
         Number rem;
         if (rhs == _0)
             return rem;
@@ -446,11 +450,11 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static CByte Zero(0), Neg1(g_max);
+        const static WORD Zero(0), Neg1(ALL);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
-            CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
-            CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+            WORD lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
+            WORD rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (lb.U != rb.U)
                 return false;
         }
@@ -471,11 +475,11 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static CByte Zero(0), Neg1(g_max);
+        const static WORD Zero(0), Neg1(ALL);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
-            CByte lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
-            CByte rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+            WORD lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
+            WORD rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (lb.U != rb.U)
                 return m_bNeg ? lb.U < rb.U : lb.U < rb.U;
         }
@@ -489,10 +493,10 @@ public:
             throw("Invalid number");
 
         size_t size = m_Bytes.size();
-        Number Out(CByte(0), size);
-        const static Number _1(CByte(1), 1);
+        Number Out(WORD(0), size);
+        const static Number _1(WORD(1), 1);
 
-        uint8_t iByte = 0;
+        UNUM iByte = 0;
         do
         {
             Out.m_Bytes[iByte].U = ~m_Bytes[iByte].U;
@@ -522,12 +526,12 @@ public:
         std::string Num2(1, '0');
         std::string Disp(1, '0');
 
-        uint8_t iByte = 0;
-        uint8_t pow = 1;
+        UNUM iByte = 0;
+        UNUM pow = 1;
         do
         {
-            uint8_t iProd;
-            uint8_t iCarry;
+            UNUM iProd;
+            UNUM iCarry;
 
             if (m_Bytes[iByte].U & pow) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,64,128
             {
@@ -539,10 +543,10 @@ public:
 
                 for (std::string::const_iterator D1_crit = Num1.begin(), D2_crit = Num2.begin(); D1_crit != D1_cend || D2_crit != D2_cend;)
                 {
-                    uint8_t N1 = (D1_crit != D1_cend ? *D1_crit++ : g_cZero) - g_cZero;
-                    uint8_t N2 = (D2_crit != D2_cend ? *D2_crit++ : g_cZero) - g_cZero;
+                    UNUM N1 = (D1_crit != D1_cend ? *D1_crit++ : g_cZero) - g_cZero;
+                    UNUM N2 = (D2_crit != D2_cend ? *D2_crit++ : g_cZero) - g_cZero;
 
-                    uint8_t iSum = N1 + N2 + iCarry; // adding with carry
+                    UNUM iSum = N1 + N2 + iCarry; // adding with carry
                     iCarry = iSum >= 10;
                     if (iCarry)
                         iSum -= 10;
@@ -560,7 +564,7 @@ public:
             std::string Prod;
             for (std::string::const_iterator dit2 = Num1.begin(); dit2 != Num1.end(); )
             {
-                uint8_t N1 = *dit2++ - g_cZero;
+                UNUM N1 = *dit2++ - g_cZero;
 
                 iProd = 2 * N1 + iCarry; // doubling with carry
                 iCarry = iProd >= 10;
@@ -628,11 +632,11 @@ public:
         Convert(iNumber);
     }
 
-    Number(CByte ch, size_t size)
+    Number(WORD ch, size_t size)
     {
-        const static CByte _0(0), _255(g_max);
+        const static WORD _0(0), _255(ALL);
 
-        m_bNeg = (ch.U & g_and) >> g_shft ? true : false;
+        m_bNeg = (ch.U & AND) >> SHFT ? true : false;
         m_Bytes.resize(size, m_bNeg ? _255 : _0);
         m_Bytes[0] = ch;
         m_bNAN = false;
@@ -821,7 +825,7 @@ public:
     void SetSize(size_t size)
     {
         if (size != m_Bytes.size())
-            m_Bytes.resize(size, m_bNeg ? g_max : 0);
+            m_Bytes.resize(size, m_bNeg ? ALL : 0);
     }
 
     size_t GetSize() const
@@ -852,10 +856,10 @@ protected:
             throw("Invalid number");
 
         std::string strOut;
-        uint8_t idnm = 0;
-        uint8_t val = 0;
-        uint8_t pow = 1;
-        std::vector<uint8_t> vbytes;
+        UNUM idnm = 0;
+        UNUM val = 0;
+        UNUM pow = 1;
+        std::vector<UNUM> vbytes;
 
         std::string::const_iterator cit = strInput.begin();
         for (;;)
@@ -934,7 +938,7 @@ protected:
         if (val)
             vbytes.push_back(val);
 
-        size_t size = uint8_t(vbytes.size());
+        size_t size = UNUM(vbytes.size());
         if (size)
         {
             m_Bytes.resize(size);
@@ -954,7 +958,7 @@ protected:
     }
     
     protected:
-        std::vector<CByte> m_Bytes;
+        std::vector<WORD> m_Bytes;
         bool m_bNeg;
         bool m_bNAN;
 };
