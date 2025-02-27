@@ -1,4 +1,5 @@
 #pragma once
+#include "Constants.h"
 #include <map>
 #include <vector>
 #include <string>
@@ -45,7 +46,7 @@ protected:
     std::string m_strPhrase;
 };
 
-static uint8_t g_pow[8] = { 1,2,4,8,16,32,64,128 };
+static uint8_t g_pow[8] = { 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80 };
 
 class Number
 {
@@ -107,10 +108,11 @@ protected:
         m_bNAN = false;
 
         m_Bytes.resize(5);
-        m_Bytes[0] = (uint32_t)(iNumber) & 0xFF;
-        m_Bytes[1] = ((uint32_t)(iNumber) >> 8) & 0xFF;
-        m_Bytes[2] = ((uint32_t)(iNumber) >> 16) & 0xFF;
-        m_Bytes[3] = (uint32_t)(iNumber) >> 24;
+        m_Bytes[0] =  (uint32_t)(iNumber)          & 0xFF;
+        m_Bytes[1] = ((uint32_t)(iNumber) >> 0x08) & 0xFF;
+        m_Bytes[2] = ((uint32_t)(iNumber) >> 0x10) & 0xFF;
+        m_Bytes[3] =  (uint32_t)(iNumber) >> 0x18;
+
         m_Bytes[4] = (m_bNeg = iNumber < 0) ? 255 : 0;
     }
 
@@ -283,10 +285,7 @@ public:
         rhsin.SetSize(stMB);
 
         if (m_bNeg != rhs.m_bNeg)
-        {
             rhsin = rhsin.TwosComplement();
-            rhsin.m_bNeg = m_bNeg;
-        }
 
         Number dbl = rhsin;
         Number pow(m_bNeg == rhs.m_bNeg ? CByte(1) : CByte(-1), stMB);
@@ -367,10 +366,7 @@ public:
         rhsin.SetSize(stMB);
 
         if (m_bNeg != rhs.m_bNeg)
-        {
             rhsin = rhsin.TwosComplement();
-            rhsin.m_bNeg = m_bNeg;
-        }
 
         Number dbl = rhsin;
         size_t stn = 1;
@@ -491,11 +487,16 @@ public:
         } while (iByte != size);
 
         Out = Out + _1;
-        Out.m_bNeg = m_bNeg;
+        Out.m_bNeg = !m_bNeg;
 
         return Out;
     }
-
+    
+    //
+    // From TFA - the internal data structure uses strings.  
+    // vector<char>, deque<char>, and list<char> were all tried 
+    // in its place and string works fastest, 8s, 6s, 10s, 3s
+    //
     std::string ToDisplay() const
     {
         const static std::string strNAN = "NAN";
@@ -504,107 +505,75 @@ public:
 
         if (m_bNeg)
         {
-            Number Disp = TwosComplement();
-            Disp.m_bNeg = false;
-            return "-" + Disp.ToDisplay();
+            Number TC = TwosComplement();
+            return "-" + TC.ToDisplay();
         }
 
-        size_t size = m_Bytes.size();
-        std::string strResult = "0";
-
-        const uint8_t cZero = '0', cOne = '1', cDec = '.';
-        std::string strNum = "1";
+        std::string Num1(1, '1');
+        std::string Num2(1, '0');
+        std::string Disp(1, '0');
 
         uint8_t iByte = 0;
-        uint8_t iBit = 0;
-
+        uint8_t pow = 1;
         do
         {
             uint8_t iProd;
-            std::deque<char> mout;
-            bool bCarry = false;
-            for (std::string::const_reverse_iterator crit2 = strNum.rbegin(); crit2 != strNum.rend(); )
+            uint8_t iCarry;
+
+            if (m_Bytes[iByte].U & pow) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,66,128
             {
-                uint8_t iMP = *crit2++ - cZero;
-                iProd = 2 * iMP;
-                if (bCarry)
+                Disp.clear();
+                iCarry = 0;
+
+                std::string::const_iterator D1_cend = Num1.end();
+                std::string::const_iterator D2_cend = Num2.end();
+
+                for (std::string::const_iterator D1_crit = Num1.begin(), D2_crit = Num2.begin(); D1_crit != D1_cend || D2_crit != D2_cend;)
                 {
-                    iProd++;
-                    bCarry = false;
-                }
-                if (iProd >= 10)
-                {
-                    iProd -= 10;
-                    bCarry = true;
-                }
-                mout.push_front(cZero + iProd);
-            }
+                    uint8_t N1 = (D1_crit != D1_cend ? *D1_crit++ : g_cZero) - g_cZero;
+                    uint8_t N2 = (D2_crit != D2_cend ? *D2_crit++ : g_cZero) - g_cZero;
 
-            if (bCarry)
-                mout.push_front(cOne);
-
-            if (m_Bytes[iByte].U & g_pow[iBit++]) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,66,128
-            {
-                const std::string& strS1 = strNum;
-                const std::string& strS2 = strResult;
-
-                uint8_t iSum;
-                std::deque<char> Sum;
-                bool bCarry = false;
-
-                std::string::const_reverse_iterator S1_crend = strS1.rend();
-                std::string::const_reverse_iterator S2_crend = strS2.rend();
-
-                for (std::string::const_reverse_iterator S1_crit = strS1.rbegin(), S2_crit = strS2.rbegin();
-                    S1_crit != S1_crend || S2_crit != S2_crend;)
-                {
-                    uint8_t S1 = S1_crit != S1_crend ? *S1_crit++ : cZero;
-                    uint8_t S2 = S2_crit != S2_crend ? *S2_crit++ : cZero;
-
-                    if (S1 == cDec || S2 == cDec)
-                    {
-                        Sum.push_front(cDec);
-                        continue;
-                    }
-
-                    uint8_t N1 = S1 - cZero;
-                    uint8_t N2 = S2 - cZero;
-
-                    iSum = N1 + N2;
-
-                    if (bCarry)
-                    {
-                        iSum++;
-                        bCarry = false;
-                    }
-
-                    if (iSum >= 10)
-                    {
+                    uint8_t iSum = N1 + N2 + iCarry; // adding with carry
+                    iCarry = iSum >= 10;
+                    if (iCarry)
                         iSum -= 10;
-                        bCarry = true;
-                    }
 
-                    Sum.push_front(cZero + iSum);
+                    Disp.push_back(g_cZero + iSum);
                 }
+                
+                if (iCarry)
+                    Disp.push_back(g_cOne);
 
-                if (bCarry)
-                    Sum.push_front(cOne);
-
-                if (*Sum.begin() == cDec)
-                    Sum.push_front(cZero);
-
-                strResult = std::string(Sum.begin(), Sum.end());
+                Num2 = Disp;
             }
-            strNum = std::string(mout.begin(), mout.end());
 
-            if (iBit == 8)
+            iCarry = 0;
+            std::string Prod;
+            for (std::string::const_iterator dit2 = Num1.begin(); dit2 != Num1.end(); )
+            {
+                uint8_t N1 = *dit2++ - g_cZero;
+
+                iProd = 2 * N1 + iCarry; // doubling with carry
+                iCarry = iProd >= 10;
+                if (iCarry)
+                    iProd -= 10;
+
+                Prod.push_back(g_cZero + iProd); // double value
+            }
+
+            if (iCarry)
+                Prod.push_back(g_cOne);
+
+            Num1 = Prod;
+
+            if (!(pow <<= 1)) // When doubling overflows to 0
             {
                 iByte++;
-                iBit = 0;
+                pow = 1;
             }
-        } while (iByte != size);
+        } while (iByte != m_Bytes.size());
 
-        return strResult;
+        return std::string(Disp.rbegin(), Disp.rend());
     }
 
     std::string ToBinary() const
@@ -858,20 +827,20 @@ protected:
         if (strNumber.empty())
             throw("Invalid number");
         
+        m_bNeg = false;
+        m_bNAN = false;
+
+        bool bNeg = false;
         if (strNumber[0] == '-')
         {
             if (strNumber.length() < 2)
                 throw("Invalid number");
-            m_bNeg = true;
+            bNeg = true;
         }
-        else
-            m_bNeg = false;
 
-        std::string strInput = strNumber.substr(m_bNeg ? 1 : 0);
+        std::string strInput = strNumber.substr(bNeg ? 1 : 0);
         if (strInput.empty())
             throw("Invalid number");
-
-        m_bNAN = false;
 
         std::string strOut;
         uint8_t idnm = 0;
@@ -969,7 +938,7 @@ protected:
             m_Bytes[0].U = 0;
         }
 
-        if (m_bNeg)
+        if (bNeg)
             *this = TwosComplement();
 
         SetSize(GetSize() + 1);
