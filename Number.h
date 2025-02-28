@@ -120,6 +120,128 @@ protected:
         UNUM OF;
     };
 
+    void ToBinary(const std::string strNumber)
+    {
+        if (strNumber.empty())
+            throw("Invalid number");
+
+        m_bNeg = false;
+        m_bNAN = false;
+
+        bool bNeg = false;
+        if (strNumber[0] == '-')
+        {
+            if (strNumber.length() < 2)
+                throw("Invalid number");
+            bNeg = true;
+        }
+
+        std::string strInput = strNumber.substr(bNeg ? 1 : 0);
+        if (strInput.empty())
+            throw("Invalid number");
+
+        std::string strOut;
+        UNUM idnm = 0;
+        UNUM val = 0;
+        UNUM pow = 1;
+        std::vector<UNUM> vbytes;
+
+        std::string::const_iterator cit = strInput.begin();
+        for (;;)
+        {
+            // Compute the denominator of the division
+            idnm = idnm * 10 + *cit - '0';
+            if (idnm < 2 && cit + 1 != strInput.end())
+            {
+                // Carry a 0
+                if (!strOut.empty())
+                    strOut += '0';
+
+                // The denominator has to be greater than 2 now
+                idnm = idnm * 10 + (*(cit + 1) - '0');
+
+                // Move to the next character
+                cit += 2;
+            }
+            else
+            {
+                // Check for completion the conversion
+                if (strInput.length() == 1 && idnm < 2)
+                {
+                    /////////////////////////////////////
+                    // Byte stream 0-255
+
+                    if (idnm)
+                        val += pow;
+                    pow <<= 1;
+                    if (!pow)
+                    {
+                        vbytes.push_back(val);
+                        val = 0;
+                        pow = 1;
+                    }
+
+                    /////////////////////////////////////
+
+                    break;
+                }
+
+                // Move to the next character
+                cit++;
+            }
+
+            // Append the digit to the output that becomes the new input from integer division by 2
+            strOut += '0' + idnm / 2;
+            idnm = idnm % 2;
+
+            // Has the input been processed
+            if (cit == strInput.end())
+            {
+                /////////////////////////////////////
+                // Byte stream 0-255
+
+                if (idnm)
+                    val += pow;
+                pow <<= 1;
+                if (!pow)
+                {
+                    vbytes.push_back(val);
+                    val = 0;
+                    pow = 1;
+                }
+
+                /////////////////////////////////////
+
+                // Reset and restart (but not the incremental bytes, they carry over)
+                strInput = strOut;
+                strOut.clear();
+                idnm = 0;
+                cit = strInput.begin();
+            }
+        }
+
+        if (val)
+            vbytes.push_back(val);
+
+        size_t size = UNUM(vbytes.size());
+        if (size)
+        {
+            m_Bytes.resize(size);
+            for (size_t iByte = 0; iByte < size; ++iByte)
+                m_Bytes[iByte].U = vbytes[iByte];
+        }
+        else
+        {
+            m_Bytes.resize(1);
+            m_Bytes[0].U = 0;
+        }
+
+        if (bNeg)
+            *this = TwosComplement();
+
+        SetSize(GetSize() + 1);
+    }
+
     // Helper to convert to the internal format
 #if BITWIDTH == 32
     void Convert(const int32_t iNumber)
@@ -159,6 +281,61 @@ protected:
     }
 #endif
     
+    std::pair<size_t, size_t> LoHi() const
+    {
+        std::pair<size_t, size_t> lh(-1,-1);
+
+        size_t bit = 0;
+        size_t iByte = 0;
+        UNUM pow = 1;
+        do
+        {
+            if (m_Bytes[iByte].U & pow)
+            {
+                if (lh.first == -1)
+                {
+                    lh.first = bit;
+                    break;
+                }
+            }
+
+            if (!(pow <<= 1))
+            {
+                iByte++;
+                pow = 1;
+            }
+        } while (++bit, iByte != m_Bytes.size());
+
+        bit = m_Bytes.size() * BITWIDTH - 1;
+        iByte = m_Bytes.size() - 1;
+        pow = AND;
+        do
+        {
+            if (m_Bytes[iByte].U & pow)
+            {
+                if (lh.second == -1)
+                {
+                    lh.second = bit;
+                    break;
+                }
+            }
+
+            if (!(pow >>= 1))
+            {
+                iByte--;
+                pow = AND;
+            }
+        } while (--bit, iByte != -1);
+
+
+        if (lh.first == -1)
+            lh.first = 0;
+        if (lh.second == -1)
+            lh.second = m_Bytes.size() * BITWIDTH - 1;
+
+        return lh;
+    }
+
 public:
     // Left Bit Shift <- double value
     void Shl(size_t stbit = size_t(-1))
@@ -620,13 +797,13 @@ public:
         do
         {
             if (m_Bytes[iByte].U & pow)
-                sbin[nbit--] = '1';
+                sbin[nbit] = '1';
             if (!(pow <<= 1))
             {
                 iByte++;
                 pow = 1;
             }
-        } while (iByte != m_Bytes.size());
+        } while (--nbit, iByte != m_Bytes.size());
         return sbin;
     }
 
@@ -855,130 +1032,6 @@ public:
     size_t GetSize() const
     {
         return m_Bytes.size();
-    }
-
-protected:
-
-    void ToBinary(const std::string strNumber)
-    {
-        if (strNumber.empty())
-            throw("Invalid number");
-        
-        m_bNeg = false;
-        m_bNAN = false;
-
-        bool bNeg = false;
-        if (strNumber[0] == '-')
-        {
-            if (strNumber.length() < 2)
-                throw("Invalid number");
-            bNeg = true;
-        }
-
-        std::string strInput = strNumber.substr(bNeg ? 1 : 0);
-        if (strInput.empty())
-            throw("Invalid number");
-
-        std::string strOut;
-        UNUM idnm = 0;
-        UNUM val = 0;
-        UNUM pow = 1;
-        std::vector<UNUM> vbytes;
-
-        std::string::const_iterator cit = strInput.begin();
-        for (;;)
-        {
-            // Compute the denominator of the division
-            idnm = idnm * 10 + *cit - '0';
-            if (idnm < 2 && cit + 1 != strInput.end())
-            {
-                // Carry a 0
-                if (!strOut.empty())
-                    strOut += '0';
-
-                // The denominator has to be greater than 2 now
-                idnm = idnm * 10 + (*(cit + 1) - '0');
-
-                // Move to the next character
-                cit += 2;
-            }
-            else
-            {
-                // Check for completion the conversion
-                if (strInput.length() == 1 && idnm < 2)
-                {
-                    /////////////////////////////////////
-                    // Byte stream 0-255
-
-                    if (idnm)
-                        val += pow;
-                    pow <<= 1;
-                    if (!pow)
-                    {
-                        vbytes.push_back(val);
-                        val = 0;
-                        pow = 1;
-                    }
-
-                    /////////////////////////////////////
-
-                    break;
-                }
-
-                // Move to the next character
-                cit++;
-            }
-
-            // Append the digit to the output that becomes the new input from integer division by 2
-            strOut += '0' + idnm / 2;
-            idnm = idnm % 2;
-
-            // Has the input been processed
-            if (cit == strInput.end())
-            {
-                /////////////////////////////////////
-                // Byte stream 0-255
-
-                if (idnm)
-                    val += pow;
-                pow <<= 1;
-                if (!pow)
-                {
-                    vbytes.push_back(val);
-                    val = 0;
-                    pow = 1;
-                }
-
-                /////////////////////////////////////
-
-                // Reset and restart (but not the incremental bytes, they carry over)
-                strInput = strOut;
-                strOut.clear();
-                idnm = 0;
-                cit = strInput.begin();
-            }
-        }
-
-        if (val)
-            vbytes.push_back(val);
-
-        size_t size = UNUM(vbytes.size());
-        if (size)
-        {
-            m_Bytes.resize(size);
-            for (size_t iByte = 0; iByte < size; ++iByte)
-                m_Bytes[iByte].U = vbytes[iByte];
-        }
-        else
-        {
-            m_Bytes.resize(1);
-            m_Bytes[0].U = 0;
-        }
-
-        if (bNeg)
-            *this = TwosComplement();
-
-        SetSize(GetSize() + 1);
     }
     
     protected:
