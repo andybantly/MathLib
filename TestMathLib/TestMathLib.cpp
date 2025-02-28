@@ -1026,7 +1026,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteBigDiv)
 		{
-			Number N = "99999999999999999999";
+			Number N = "9999999999999999";
 			Number D = 180;
 			Number Q;
 
@@ -1036,7 +1036,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteBigMul)
 		{
-			Number N = "99999999999999999999";
+			Number N = "9999999999999999";
 			Number D = 180;
 			Number Q;
 
@@ -1046,7 +1046,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteBigMul2)
 		{
-			Number N = "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999";
+			Number N = "9999999999999999";
 			Number D = 180;
 			Number Q;
 

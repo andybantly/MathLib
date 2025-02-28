@@ -9,27 +9,26 @@
 #include <thread>
 #include <functional>
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
 * CONSTANT/TYPEDEF MEANINGS
 * SHFT - Number of bits to left shift. BITWIDTH - 1 in value.
 * SHFM - Number of bits for multiplication. (3=8 bits, 4=16 bits, etc)
 * AND  - Number of bits for masking in shifting
-* ALL  - Maximum value of the internal type
+* NTH  - Maximum value of the internal type
 * UNUM - The mapping to the actual type used (change one place, changes many)
 */
+#define BITWIDTH        32
+
 #define SHFT            31
 #define SHFM            5
 #define AND             0x80000000
-#define ALL             0xFFFFFFFF
-#define BITWIDTH        32
+#define NTH             0xFFFFFFFF
 
 typedef uint32_t UNUM;  // The internal type is a 'unsigned number'
 
-// Power of 2 map with BITWIDTH entries
-static const UNUM g_pow[BITWIDTH] = { 1, 2, 4, 8, 16, 32, 64, 128,  // 0-7
-                                      256, 512, 1024, 2048, 4096, 8192, 16384, 32768,  // 8-15
-                                      65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, // 16-24
-                                      16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824 }; // 24-31
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 class DescNumber
 {
@@ -112,17 +111,17 @@ protected:
             return Out;
         }
 
+        bool ispow2(const UNUM n) const
+        {
+            return (n > 0) && (n & (n - 1)) == 0;
+        }
+
         UNUM U;
         UNUM OF;
     };
-    /*
-    bool ispow2(const int32_t n) const
-    {
-        // The bitwise AND of n and n - 1 will be 0 for powers of 2
-        return (n > 0) && (n & (n - 1)) == 0;
-    }
-    */ 
+
     // Helper to convert to the internal format
+#if BITWIDTH == 32
     void Convert(const int32_t iNumber)
     {
         m_bNAN = false;
@@ -131,10 +130,9 @@ protected:
         m_Bytes[0] = (uint32_t)(iNumber); // 32
 
         m_bNeg = iNumber < 0;
-        m_Bytes[1] = m_bNeg ? ALL : 0;
+        m_Bytes[1] = m_bNeg ? NTH : 0;
     }
-
-    /* -- For 16 and 8 bit widths
+#elif BITWIDTH == 16
     void Convert(const int32_t iNumber)
     {
         m_bNAN = false;
@@ -145,10 +143,9 @@ protected:
         m_Bytes[2] = ((uint32_t)(iNumber) >> 0x10) & 0xFF;
         m_Bytes[3] = (uint32_t)(iNumber) >> 0x18;
 
-        m_Bytes[4] = (m_bNeg = iNumber < 0) ? 255 : 0;
+        m_Bytes[4] = (m_bNeg = iNumber < 0) ? NTH : 0;
     }
-
-    
+#elif BITWIDTH == 8
     void Convert(const int32_t iNumber)
     {
         m_bNAN = false;
@@ -158,10 +155,10 @@ protected:
         m_Bytes[1] = ((uint32_t)(iNumber) >> 0x10); // 32
 
         m_bNeg = iNumber < 0;
-        m_Bytes[2] = m_bNeg ? ALL : 0;
+        m_Bytes[2] = m_bNeg ? NTH : 0;
     }
-    */
-
+#endif
+    
 public:
     // Left Bit Shift <- double value
     void Shl(size_t stbit = size_t(-1))
@@ -214,7 +211,7 @@ public:
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static DATA Zero(0), Neg1(ALL);
+        const static DATA Zero(0), Neg1(NTH);
         Number out(Zero, stMax);
         UNUM of = 0;
 
@@ -248,7 +245,7 @@ public:
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static DATA Zero(0), Neg1(ALL);
+        const static DATA Zero(0), Neg1(NTH);
         Number out(Zero, stMax);
         UNUM of = 0;
 
@@ -475,7 +472,7 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static DATA Zero(0), Neg1(ALL);
+        const static DATA Zero(0), Neg1(NTH);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
             DATA lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
@@ -500,7 +497,7 @@ public:
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
-        const static DATA Zero(0), Neg1(ALL);
+        const static DATA Zero(0), Neg1(NTH);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
             DATA lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
@@ -616,19 +613,21 @@ public:
 
     std::string ToBinary() const
     {
-        size_t nBin = m_Bytes.size() * size_t(BITWIDTH);
-        std::string strBin(nBin, '0');
-
-        for (size_t iByte = 0, nBytes = m_Bytes.size(); iByte < nBytes; ++iByte, nBin -= BITWIDTH)
+        size_t nbit = m_Bytes.size() * size_t(BITWIDTH) - 1;
+        std::string sbin(nbit + 1, '0');
+        UNUM iByte = 0;
+        UNUM pow = 1;
+        do
         {
-            for (size_t iBit = 0; iBit < BITWIDTH; ++iBit)
+            if (m_Bytes[iByte].U & pow)
+                sbin[nbit--] = '1';
+            if (!(pow <<= 1))
             {
-                if (g_pow[iBit] & m_Bytes[iByte].U)
-                    strBin[nBin - iBit - 1] = '1';
+                iByte++;
+                pow = 1;
             }
-        }
-
-        return strBin;
+        } while (iByte != m_Bytes.size());
+        return sbin;
     }
 
     std::string ToPhrase() const;
@@ -659,7 +658,7 @@ public:
 
     Number(DATA ch, size_t size)
     {
-        const static DATA _0(0), _255(ALL);
+        const static DATA _0(0), _255(NTH);
 
         m_bNeg = (ch.U & AND) >> SHFT ? true : false;
         m_Bytes.resize(size, m_bNeg ? _255 : _0);
@@ -850,7 +849,7 @@ public:
     void SetSize(size_t size)
     {
         if (size != m_Bytes.size())
-            m_Bytes.resize(size, m_bNeg ? ALL : 0);
+            m_Bytes.resize(size, m_bNeg ? NTH : 0);
     }
 
     size_t GetSize() const
