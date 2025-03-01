@@ -280,55 +280,6 @@ protected:
         m_Bytes[2] = m_bNeg ? NTH : 0;
     }
 #endif
-    
-    std::pair<size_t, size_t> LoHi() const
-    {
-        std::pair<size_t, size_t> lh(size_t(-1), size_t(-1));
-
-        size_t bit = 0;
-        size_t iByte = 0;
-        UNUM pow = 1;
-        do
-        {
-            if (m_Bytes[iByte].U & pow)
-            {
-                if (lh.first == size_t(-1))
-                {
-                    lh.first = bit;
-                    break;
-                }
-            }
-
-            if (!(pow <<= 1))
-            {
-                iByte++;
-                pow = 1;
-            }
-        } while (++bit, iByte != m_Bytes.size());
-
-        bit = m_Bytes.size() * BITWIDTH - 1;
-        iByte = m_Bytes.size() - 1;
-        pow = AND;
-        do
-        {
-            if (m_Bytes[iByte].U & pow)
-            {
-                if (lh.second == size_t(-1))
-                {
-                    lh.second = bit;
-                    break;
-                }
-            }
-
-            if (!(pow >>= 1))
-            {
-                iByte--;
-                pow = AND;
-            }
-        } while (--bit, iByte != -1);
-
-        return lh;
-    }
 
 public:
     // Left Bit Shift by n bits <- double value n times
@@ -554,6 +505,22 @@ public:
 
         if (!m_bNeg)
         {
+            std::pair<size_t, size_t> dlh = dbl.LoHi();
+            if (dlh.first != size_t(-1) && dlh.second != size_t(-1))
+            {
+                std::pair<size_t, size_t> rlh = rem.LoHi();
+                if (rlh.first != size_t(-1) && rlh.second != size_t(-1))
+                {
+                    if (rlh.second > dlh.second)
+                    {
+                        size_t nb = rlh.second - dlh.second;
+                        dbl.Shl(-1, nb);
+                        pow.Shl(-1, nb);
+                        stn = nb;
+                    }
+                }
+            }
+
             while (dbl < rem)
             {
                 dbl.Shl();
@@ -579,6 +546,22 @@ public:
         }
         else
         {
+            std::pair<size_t, size_t> dlh = dbl.LoHi();
+            if (dlh.first != size_t(-1) && dlh.second != size_t(-1))
+            {
+                std::pair<size_t, size_t> rlh = rem.LoHi();
+                if (rlh.first != size_t(-1) && rlh.second != size_t(-1))
+                {
+                    if (rlh.second > dlh.second)
+                    {
+                        size_t nb = rlh.second - dlh.second;
+                        dbl.Shl(-1, nb);
+                        pow.Shl(-1, nb);
+                        stn = nb;
+                    }
+                }
+            }
+            
             while (dbl > rem)
             {
                 dbl.Shl();
@@ -1072,7 +1055,88 @@ public:
     {
         return m_Bytes.size();
     }
-    
+
+    protected:
+
+        // Find the low and high bits
+        std::pair<size_t, size_t> LoHi() const
+        {
+            std::pair<size_t, size_t> lhp(size_t(-1), size_t(-1));
+            std::pair<size_t, size_t> lhn(size_t(-1), size_t(-1));
+
+            size_t bit = 0;
+            size_t iByte = 0;
+            UNUM pow = 1;
+            do
+            {
+                if (!m_bNeg)
+                {
+                    if (m_Bytes[iByte].U & pow)
+                    {
+                        if (lhp.first == size_t(-1))
+                        {
+                            lhp.first = bit;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!(m_Bytes[iByte].U & pow))
+                    {
+                        if (lhn.first == size_t(-1))
+                        {
+                            lhn.first = bit + 1;
+                            break;
+                        }
+                    }
+                }
+
+                if (!(pow <<= 1))
+                {
+                    iByte++;
+                    pow = 1;
+                }
+            } while (++bit, iByte != m_Bytes.size());
+
+            bit = m_Bytes.size() * BITWIDTH - 1;
+            iByte = m_Bytes.size() - 1;
+            pow = AND;
+            do
+            {
+                if (!m_bNeg)
+                {
+                    if (m_Bytes[iByte].U & pow)
+                    {
+                        if (lhp.second == size_t(-1))
+                        {
+                            lhp.second = bit;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!(m_Bytes[iByte].U & pow))
+                    {
+                        if (lhn.second == size_t(-1))
+                        {
+                            lhn.second = bit + 1;
+                            break;
+                        }
+                    }
+                }
+
+                if (!(pow >>= 1))
+                {
+                    iByte--;
+                    pow = AND;
+                }
+            } while (--bit, iByte != -1);
+
+            return !m_bNeg ? lhp : lhn;
+        }
+
     protected:
         std::vector<DATA> m_Bytes;
         bool m_bNeg;

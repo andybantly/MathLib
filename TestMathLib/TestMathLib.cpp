@@ -8,7 +8,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
 {
-	const int iBeg = -128, iEnd = 127;
+	const int iBeg = -128/* 10*/, iEnd = 127/* 10*/;
 	const int jBeg = iBeg, jEnd = iEnd;
 
 	TEST_CLASS(TestMathLib)
