@@ -503,24 +503,24 @@ public:
         Number pow(m_bNeg == rhs.m_bNeg ? DATA(1) : DATA(-1), stMB);
         size_t stn = 0;
 
-        if (!m_bNeg)
+        size_t dlh = dbl.MSb();
+        if (dlh != size_t(-1))
         {
-            std::pair<size_t, size_t> dlh = dbl.LoHi();
-            if (dlh.first != size_t(-1) && dlh.second != size_t(-1))
+            size_t rlh = rem.MSb();
+            if (rlh != size_t(-1))
             {
-                std::pair<size_t, size_t> rlh = rem.LoHi();
-                if (rlh.first != size_t(-1) && rlh.second != size_t(-1))
+                if (rlh > dlh)
                 {
-                    if (rlh.second > dlh.second)
-                    {
-                        size_t nb = rlh.second - dlh.second;
-                        dbl.Shl(-1, nb);
-                        pow.Shl(-1, nb);
-                        stn = nb;
-                    }
+                    size_t nb = rlh - dlh;
+                    dbl.Shl(-1, nb);
+                    pow.Shl(-1, nb);
+                    stn = nb;
                 }
             }
+        }
 
+        if (!m_bNeg)
+        {
             while (dbl < rem)
             {
                 dbl.Shl();
@@ -546,22 +546,6 @@ public:
         }
         else
         {
-            std::pair<size_t, size_t> dlh = dbl.LoHi();
-            if (dlh.first != size_t(-1) && dlh.second != size_t(-1))
-            {
-                std::pair<size_t, size_t> rlh = rem.LoHi();
-                if (rlh.first != size_t(-1) && rlh.second != size_t(-1))
-                {
-                    if (rlh.second > dlh.second)
-                    {
-                        size_t nb = rlh.second - dlh.second;
-                        dbl.Shl(-1, nb);
-                        pow.Shl(-1, nb);
-                        stn = nb;
-                    }
-                }
-            }
-            
             while (dbl > rem)
             {
                 dbl.Shl();
@@ -595,13 +579,13 @@ public:
             throw("Invalid number");
 
         const static Number _0(DATA(0), 1);
-        Number rem;
+        Number quot;
         if (rhs == _0)
-            return rem;
+            return quot;
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
 
-        rem = *this;
+        Number rem = *this;
         rem.SetSize(stMB);
 
         Number rhsin = rhs;
@@ -611,25 +595,48 @@ public:
         Number dbl = rhsin;
         dbl.SetSize(stMB);
 
-        size_t stn = 1;
+        Number pow(m_bNeg == rhs.m_bNeg ? DATA(1) : DATA(-1), stMB);
+        size_t stn = 0;
+
+        size_t dlh = dbl.MSb();
+        if (dlh != size_t(-1))
+        {
+            size_t rlh = rem.MSb();
+            if (rlh != size_t(-1))
+            {
+                if (rlh > dlh)
+                {
+                    size_t nb = rlh - dlh;
+                    dbl.Shl(-1, nb);
+                    pow.Shl(-1, nb);
+                    stn = nb;
+                }
+            }
+        }
 
         if (!m_bNeg)
         {
             while (dbl < rem)
             {
                 dbl.Shl();
-                ++stn;
+                pow.Shl(stn++);
             }
 
-            for (size_t ndbl = stn; ndbl > 0; --ndbl)
+            quot = _0;
+            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
             {
                 if (dbl > rem)
                 {
                     dbl.Shr();
+                    pow.Shr(stn--);
                     continue;
                 }
+
+                quot = quot.Add(pow, stn >> SHFM);
                 rem -= dbl;
+
                 dbl.Shr();
+                pow.Shr(stn--);
             }
         }
         else
@@ -637,18 +644,24 @@ public:
             while (dbl > rem)
             {
                 dbl.Shl();
-                ++stn;
+                pow.Shl(stn++);
             }
 
-            for (size_t ndbl = stn; ndbl > 0; --ndbl)
+            quot = _0;
+            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
             {
                 if (dbl < rem)
                 {
                     dbl.Shr();
+                    pow.Shr(stn--);
                     continue;
                 }
+
+                quot = quot.Add(pow, stn >> SHFM);
                 rem -= dbl;
+
                 dbl.Shr();
+                pow.Shr(stn--);
             }
         }
 
@@ -1059,71 +1072,30 @@ public:
     protected:
 
         // Find the low and high bits
-        std::pair<size_t, size_t> LoHi() const
+        size_t MSb() const
         {
-            std::pair<size_t, size_t> lhp(size_t(-1), size_t(-1));
-            std::pair<size_t, size_t> lhn(size_t(-1), size_t(-1));
+            size_t lhp(size_t(-1));
+            size_t lhn(size_t(-1));
 
-            size_t bit = 0;
-            size_t iByte = 0;
-            UNUM pow = 1;
+            size_t bit = m_Bytes.size() * BITWIDTH - 1;
+            size_t iByte = m_Bytes.size() - 1;
+            UNUM pow = AND;
             do
             {
-                if (!m_bNeg)
+                if (!m_bNeg && (m_Bytes[iByte].U & pow))
                 {
-                    if (m_Bytes[iByte].U & pow)
+                    if (lhp == size_t(-1))
                     {
-                        if (lhp.first == size_t(-1))
-                        {
-                            lhp.first = bit;
-                            break;
-                        }
+                        lhp = bit;
+                        break;
                     }
                 }
-                else
+                else if (m_bNeg && (~m_Bytes[iByte].U & pow))
                 {
-                    if (!(m_Bytes[iByte].U & pow))
+                    if (lhn == size_t(-1))
                     {
-                        if (lhn.first == size_t(-1))
-                        {
-                            lhn.first = bit + 1;
-                            break;
-                        }
-                    }
-                }
-
-                if (!(pow <<= 1))
-                {
-                    iByte++;
-                    pow = 1;
-                }
-            } while (++bit, iByte != m_Bytes.size());
-
-            bit = m_Bytes.size() * BITWIDTH - 1;
-            iByte = m_Bytes.size() - 1;
-            pow = AND;
-            do
-            {
-                if (!m_bNeg)
-                {
-                    if (m_Bytes[iByte].U & pow)
-                    {
-                        if (lhp.second == size_t(-1))
-                        {
-                            lhp.second = bit;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    if (!(m_Bytes[iByte].U & pow))
-                    {
-                        if (lhn.second == size_t(-1))
-                        {
-                            lhn.second = bit + 1;
-                            break;
-                        }
+                        lhn = bit + 1;
+                        break;
                     }
                 }
 
