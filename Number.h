@@ -511,7 +511,7 @@ public:
             {
                 if (rlh > dlh)
                 {
-                    size_t nb = rlh - dlh;
+                    size_t nb = rlh - dlh + 1;
                     dbl.Shl(-1, nb);
                     pow.Shl(-1, nb);
                     stn = nb;
@@ -606,7 +606,7 @@ public:
             {
                 if (rlh > dlh)
                 {
-                    size_t nb = rlh - dlh;
+                    size_t nb = rlh - dlh + 1;
                     dbl.Shl(-1, nb);
                     pow.Shl(-1, nb);
                     stn = nb;
