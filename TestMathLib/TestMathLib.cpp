@@ -170,6 +170,10 @@ namespace TestMathLib
 			s = C.ToDisplay();
 			if (std::to_string(c) != s)
 				Assert::AreEqual(std::to_string(c), s);
+
+			Number X = "13107200000000";
+			X.Shr(-1, 40); 
+			Assert::AreEqual(std::string("11"), X.ToDisplay());
 		}
 
 		TEST_METHOD(ByteCornerCases)
@@ -1030,8 +1034,10 @@ namespace TestMathLib
 			Number D = 180;
 			Number Q;
 
+			std::string s = "55555555555555";
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = N / D;
+			Assert::AreEqual(s, Q.ToDisplay());
 		}
 
 		TEST_METHOD(ByteBigMul)
@@ -1040,8 +1046,10 @@ namespace TestMathLib
 			Number D = 180;
 			Number Q;
 
+			std::string s = "1799999999999999820";
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = N * D;
+			Assert::AreEqual(s, Q.ToDisplay());
 		}
 
 		TEST_METHOD(ByteBigMul2)
@@ -1050,8 +1058,10 @@ namespace TestMathLib
 			Number D = 180;
 			Number Q;
 
+			std::string s = "1799999999999999820";
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = D * N;
+			Assert::AreEqual(s, Q.ToDisplay());
 		}
 	};
 }

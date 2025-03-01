@@ -283,7 +283,7 @@ protected:
     
     std::pair<size_t, size_t> LoHi() const
     {
-        std::pair<size_t, size_t> lh(-1,-1);
+        std::pair<size_t, size_t> lh(size_t(-1), size_t(-1));
 
         size_t bit = 0;
         size_t iByte = 0;
@@ -292,7 +292,7 @@ protected:
         {
             if (m_Bytes[iByte].U & pow)
             {
-                if (lh.first == -1)
+                if (lh.first == size_t(-1))
                 {
                     lh.first = bit;
                     break;
@@ -313,7 +313,7 @@ protected:
         {
             if (m_Bytes[iByte].U & pow)
             {
-                if (lh.second == -1)
+                if (lh.second == size_t(-1))
                 {
                     lh.second = bit;
                     break;
@@ -327,53 +327,93 @@ protected:
             }
         } while (--bit, iByte != -1);
 
-
-        if (lh.first == -1)
-            lh.first = 0;
-        if (lh.second == -1)
-            lh.second = m_Bytes.size() * BITWIDTH - 1;
-
         return lh;
     }
 
 public:
     // Left Bit Shift by n bits <- double value n times
-    void Shl(size_t stbit = size_t(-1), const size_t nbits = 1)
+    void Shl(size_t stbit = size_t(-1), size_t nbits = 1)
     {
         size_t stn = 0;
         size_t iByte = m_Bytes.size() - 1;
         if (stbit != size_t(-1))
         {
             iByte = (stbit >> SHFM) + 1;
+            if (iByte >= m_Bytes.size())
+                iByte = m_Bytes.size() - 1;
             if (iByte)
                 stn = iByte - 1;
         }
+        
+        if (nbits >= BITWIDTH)
+        {
+            size_t tmp = iByte;
+            size_t sb = nbits / BITWIDTH;
+            if (sb)
+            {
+                for (; iByte != -1; --iByte)
+                {
+                    if (iByte >= sb)
+                    {
+                        m_Bytes[iByte].U = m_Bytes[iByte - sb].U;
+                        m_Bytes[iByte - sb].U = 0;
+                    }
+                }
+                nbits = nbits % BITWIDTH;
+            }
+            iByte = tmp;
+        }
+
         for (; iByte != stn; --iByte)
         {
             m_Bytes[iByte].U <<= nbits;
             m_Bytes[iByte].U |= (m_Bytes[iByte - 1].U >> (BITWIDTH - nbits));
         }
         m_Bytes[iByte].U <<= nbits;
+
         m_bNeg = (m_Bytes[m_Bytes.size() - 1].U & AND) >> SHFT ? true : false;
     }
 
     // Right Bit Shift by n bits -> halve value n times
-    void Shr(size_t stbit = size_t(-1), const size_t nbits = 1)
+    void Shr(size_t stbit = size_t(-1), size_t nbits = 1)
     {
         size_t stn = m_Bytes.size() - 1;
         size_t iByte = 0;
         if (stbit != size_t(-1))
         {
             stn = stbit >> SHFM;
+            if (stn >= m_Bytes.size())
+                stn = m_Bytes.size() - 1;
             iByte = stn;
             if (iByte)
                 --iByte;
         }
+
+        if (nbits >= BITWIDTH)
+        {
+            size_t tmp = iByte;
+            size_t sb = nbits / BITWIDTH;
+            if (sb)
+            {
+                for (; iByte != m_Bytes.size() - 1; ++iByte)
+                {
+                    if (iByte + sb < m_Bytes.size())
+                    {
+                        m_Bytes[iByte].U = m_Bytes[iByte + sb].U;
+                        m_Bytes[iByte + sb].U = 0;
+                    }
+                }
+                nbits = nbits % BITWIDTH;
+            }
+            iByte = tmp;
+        }
+
         for (; iByte != stn; ++iByte)
         {
             m_Bytes[iByte].U >>= nbits;
             m_Bytes[iByte].U |= (m_Bytes[iByte + 1].U << (BITWIDTH - nbits));
         }
+
         m_Bytes[iByte].U >>= nbits;
         if (m_bNeg)
             m_Bytes[iByte].U |= AND;
