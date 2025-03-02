@@ -810,22 +810,19 @@ public:
         return *this;
     }
 
-    Number& operator = (const int32_t iNumber)
+    void operator = (const int32_t iNumber)
     {
         Convert(iNumber);
-        return *this;
     }
 
-    Number& operator = (const std::string& strNumber)
+    void operator = (const std::string& strNumber)
     {
         ToBinary(strNumber);
-        return *this;
     }
 
-    Number& operator = (const char* pstrNumber)
+    void operator = (const char* pstrNumber)
     {
         ToBinary(pstrNumber);
-        return *this;
     }
 
     bool operator == (const Number& rhs) const
@@ -916,7 +913,7 @@ public:
         if (m_bNAN)
             throw("Invalid number");
 
-        *this -= 1;
+        *this -= _1;
     }
 
     Number operator ++ (int) // By standard, returns the value before arithmetic
@@ -947,7 +944,7 @@ public:
         return prev;
     }
 
-    Number operator , (const Number& rhs) const
+    const Number& operator , (const Number& rhs) const
     {
         return rhs;
     }
