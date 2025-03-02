@@ -130,7 +130,7 @@ namespace TestMathLib
 				Assert::AreEqual(std::to_string(c), s);
 
 			B = 256;
-			B.Shr();
+			B >> 1;
 			s = B.ToDisplay();
 			B = 0;
 			s = B.ToBinary();
@@ -141,10 +141,10 @@ namespace TestMathLib
 			B = -2;
 			s = B.ToBinary();
 			s = B.ToDisplay();
-			B.Shl();
+			B << 1;
 			s = B.ToBinary();
 			s = B.ToDisplay();
-			B.Shr();
+			B >> 1;
 			s = B.ToBinary();
 			s = B.ToDisplay();
 			B = -3;
@@ -172,7 +172,7 @@ namespace TestMathLib
 				Assert::AreEqual(std::to_string(c), s);
 
 			Number X = "13107200000000";
-			X.Shr(-1, 40); 
+			X >> 40; 
 			Assert::AreEqual(std::string("11"), X.ToDisplay());
 		}
 
@@ -297,13 +297,20 @@ namespace TestMathLib
 			///////////////////////////////////////////////////////////////////////////////////////////////
 
 			////// TEST CASE //////
+			B = b = 1;
+			B << 1;
+			b = b << 1;
 
-			B = 1;
-			while (B > 0)
-			{
-				B.Shl();
-				s = B.ToDisplay();
-			}
+			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
+
+			B << 2;
+			b = b << 2;
+
+			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
 
 			A = 56;
 			B = 7;

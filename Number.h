@@ -282,94 +282,6 @@ protected:
 #endif
 
 public:
-    // Left Bit Shift by n bits <- double value n times
-    void Shl(size_t stbit = size_t(-1), size_t nbits = 1)
-    {
-        size_t stn = 0;
-        size_t iByte = m_Bytes.size() - 1;
-        if (stbit != size_t(-1))
-        {
-            iByte = (stbit >> SHFM) + 1;
-            if (iByte >= m_Bytes.size())
-                iByte = m_Bytes.size() - 1;
-            if (iByte)
-                stn = iByte - 1;
-        }
-        
-        if (nbits >= BITWIDTH)
-        {
-            size_t tmp = iByte;
-            size_t sb = nbits / BITWIDTH;
-            if (sb)
-            {
-                for (; iByte != -1; --iByte)
-                {
-                    if (iByte >= sb)
-                    {
-                        m_Bytes[iByte].U = m_Bytes[iByte - sb].U;
-                        m_Bytes[iByte - sb].U = 0;
-                    }
-                }
-                nbits = nbits % BITWIDTH;
-            }
-            iByte = tmp;
-        }
-
-        for (; iByte != stn; --iByte)
-        {
-            m_Bytes[iByte].U <<= nbits;
-            m_Bytes[iByte].U |= (m_Bytes[iByte - 1].U >> (BITWIDTH - nbits));
-        }
-        m_Bytes[iByte].U <<= nbits;
-
-        m_bNeg = (m_Bytes[m_Bytes.size() - 1].U & AND) >> SHFT ? true : false;
-    }
-
-    // Right Bit Shift by n bits -> halve value n times
-    void Shr(size_t stbit = size_t(-1), size_t nbits = 1)
-    {
-        size_t stn = m_Bytes.size() - 1;
-        size_t iByte = 0;
-        if (stbit != size_t(-1))
-        {
-            stn = stbit >> SHFM;
-            if (stn >= m_Bytes.size())
-                stn = m_Bytes.size() - 1;
-            iByte = stn;
-            if (iByte)
-                --iByte;
-        }
-
-        if (nbits >= BITWIDTH)
-        {
-            size_t tmp = iByte;
-            size_t sb = nbits / BITWIDTH;
-            if (sb)
-            {
-                for (; iByte != m_Bytes.size() - 1; ++iByte)
-                {
-                    if (iByte + sb < m_Bytes.size())
-                    {
-                        m_Bytes[iByte].U = m_Bytes[iByte + sb].U;
-                        m_Bytes[iByte + sb].U = 0;
-                    }
-                }
-                nbits = nbits % BITWIDTH;
-            }
-            iByte = tmp;
-        }
-
-        for (; iByte != stn; ++iByte)
-        {
-            m_Bytes[iByte].U >>= nbits;
-            m_Bytes[iByte].U |= (m_Bytes[iByte + 1].U << (BITWIDTH - nbits));
-        }
-
-        m_Bytes[iByte].U >>= nbits;
-        if (m_bNeg)
-            m_Bytes[iByte].U |= AND;
-    }
-
     Number Add(const Number& rhs, size_t st = 0) const
     {
         if (m_bNAN || rhs.m_bNAN)
@@ -946,6 +858,16 @@ public:
         return !(operator < (rhs));
     }
 
+    void operator << (const size_t nbits)
+    {
+        Shl(size_t(-1), nbits);
+    }
+
+    void operator >> (const size_t nbits)
+    {
+        Shr(size_t(-1), nbits);
+    }
+
     Number operator + (const Number& rhs) const
     {
         return Add(rhs);
@@ -1019,7 +941,7 @@ public:
             throw("Invalid number");
 
         Number rhs = *this;
-        *this += _1;
+        *this -= _1;
         return rhs;
     }
 
@@ -1107,6 +1029,94 @@ public:
             } while (--bit, iByte != -1);
 
             return !m_bNeg ? lhp : lhn;
+        }
+
+        // Left Bit Shift by n bits <- double value n times
+        void Shl(size_t stbit = size_t(-1), size_t nbits = 1)
+        {
+            size_t stn = 0;
+            size_t iByte = m_Bytes.size() - 1;
+            if (stbit != size_t(-1))
+            {
+                iByte = (stbit >> SHFM) + 1;
+                if (iByte >= m_Bytes.size())
+                    iByte = m_Bytes.size() - 1;
+                if (iByte)
+                    stn = iByte - 1;
+            }
+
+            if (nbits >= BITWIDTH)
+            {
+                size_t tmp = iByte;
+                size_t sb = nbits / BITWIDTH;
+                if (sb)
+                {
+                    for (; iByte != -1; --iByte)
+                    {
+                        if (iByte >= sb)
+                        {
+                            m_Bytes[iByte].U = m_Bytes[iByte - sb].U;
+                            m_Bytes[iByte - sb].U = 0;
+                        }
+                    }
+                    nbits = nbits % BITWIDTH;
+                }
+                iByte = tmp;
+            }
+
+            for (; iByte != stn; --iByte)
+            {
+                m_Bytes[iByte].U <<= nbits;
+                m_Bytes[iByte].U |= (m_Bytes[iByte - 1].U >> (BITWIDTH - nbits));
+            }
+            m_Bytes[iByte].U <<= nbits;
+
+            m_bNeg = (m_Bytes[m_Bytes.size() - 1].U & AND) >> SHFT ? true : false;
+        }
+
+        // Right Bit Shift by n bits -> halve value n times
+        void Shr(size_t stbit = size_t(-1), size_t nbits = 1)
+        {
+            size_t stn = m_Bytes.size() - 1;
+            size_t iByte = 0;
+            if (stbit != size_t(-1))
+            {
+                stn = stbit >> SHFM;
+                if (stn >= m_Bytes.size())
+                    stn = m_Bytes.size() - 1;
+                iByte = stn;
+                if (iByte)
+                    --iByte;
+            }
+
+            if (nbits >= BITWIDTH)
+            {
+                size_t tmp = iByte;
+                size_t sb = nbits / BITWIDTH;
+                if (sb)
+                {
+                    for (; iByte != m_Bytes.size() - 1; ++iByte)
+                    {
+                        if (iByte + sb < m_Bytes.size())
+                        {
+                            m_Bytes[iByte].U = m_Bytes[iByte + sb].U;
+                            m_Bytes[iByte + sb].U = 0;
+                        }
+                    }
+                    nbits = nbits % BITWIDTH;
+                }
+                iByte = tmp;
+            }
+
+            for (; iByte != stn; ++iByte)
+            {
+                m_Bytes[iByte].U >>= nbits;
+                m_Bytes[iByte].U |= (m_Bytes[iByte + 1].U << (BITWIDTH - nbits));
+            }
+
+            m_Bytes[iByte].U >>= nbits;
+            if (m_bNeg)
+                m_Bytes[iByte].U |= AND;
         }
 
     protected:
