@@ -8,6 +8,8 @@
 
 int main()
 {
+	NumberTranscriber& NumberX = NumberTranscriber::getInstance();
+
 	std::string strInput, strResult;
 	bool bAgain = true;
 	do
@@ -15,10 +17,9 @@ int main()
 		std::cout << "Enter a number, set of numbers separated by arithmetic or comparison operations (+,-,*,/,%, <, >, <=, >=, =)" << std::endl << "Enter 'test' for verification or 'quit' to exit." << std::endl << "Examples: 2147483647, 12 * 11 + 12, three + 4 - two, 9 / 3 + 7 * 10, 10 % 3, 2 < 3" << std::endl << "Input: ";
 
 		strInput.clear();
-		char c;
-		while ((c = getchar()) != '\n')
-			strInput.append(1, c);
-		if (!DescNumber::TextEqual(strInput, "quit") && !DescNumber::TextEqual(strInput, "test"))
+		std::getline(std::cin, strInput);
+
+		if (!NumberX.TextEqual(strInput, "quit") && !NumberX.TextEqual(strInput, "test"))
 		{
 			try
 			{
@@ -141,7 +142,7 @@ int main()
 		}
 		else
 		{
-			if (DescNumber::TextEqual(strInput, "quit"))
+			if (NumberX.TextEqual(strInput,"quit"))
 				bAgain = false;
 			else
 				test(); // Manual testing, automatic testing in TestMathLib project
@@ -152,8 +153,7 @@ int main()
 
 static void ttest(unsigned long long ullb, unsigned long long ulle)
 {
-	DescNumber::Init();
-	DescNumber Number;
+	NumberTranscriber& NumberX = NumberTranscriber::getInstance();
 
 	std::string s, sr, sv;
 	unsigned long long ull = ullb;
@@ -170,7 +170,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 	do
 	{
 		s = std::to_string(ull++);
-		sr = Number.Expand(s);
+		sr = NumberX.Expand(s);
 		if (sr.empty())
 		{
 			std::lock_guard<std::mutex> guard(g_io_mutex);
@@ -179,7 +179,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 		}
 		else
 		{
-			sv = Number.Contract(sr);
+			sv = NumberX.Contract(sr);
 			if (sv.empty())
 			{
 				std::lock_guard<std::mutex> guard(g_io_mutex);

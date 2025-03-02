@@ -8,6 +8,7 @@
 #include <ctime>
 #include <thread>
 #include <functional>
+#include <mutex>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,43 +29,30 @@
 
 typedef uint32_t UNUM;  // The internal type is a 'unsigned number'
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-class DescNumber
+struct CILT
 {
+    struct Compare { bool operator() (const unsigned char& cl, const unsigned char& cr) const { return tolower(cl) < tolower(cr); } };
+    bool operator() (const std::string& sl, const std::string& sr) const { return std::lexicographical_compare(sl.begin(), sl.end(), sr.begin(), sr.end(), Compare()); }
+};
+
+// Global singleton for number transcribing
+class NumberTranscriber
+{
+    NumberTranscriber() { init(); }
+    NumberTranscriber(const NumberTranscriber&) = delete;
+    NumberTranscriber& operator=(const NumberTranscriber&) = delete;
+        
+    static std::unique_ptr<NumberTranscriber> instance;
+    static std::mutex mutex;
+    static std::map<std::string, std::string, CILT> mapWordTo99;
+    static std::map<std::string, std::string, CILT> mapWordTo100;
+    static void init();
+
 public:
-    DescNumber();
-    DescNumber(const std::string& strInput, bool bNum = true);
-
-    ~DescNumber() {};
-
-public:
-    void SetNumber(const std::string& strInput);
-
-    std::string Contract(const std::string& strInput);
-    std::string Expand(const std::string& strInput);
-
-    static std::string WB();
-    const std::string& GetNumber() const;
-    const std::string& GetPhrase() const;
-
-    static void Init();
-    static bool TextEqual(const std::string& strLHS, const std::string& strRHS);
-    friend std::ostream& operator<<(std::ostream& out, const DescNumber& Number);
-
-    // error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
-    // for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
-    // __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
-    static std::wstring ToString(const DescNumber& Number);
-
-protected:
-    void Convert();
-    void Split(const std::string& strInput, std::vector<std::string>& vstrTokens, const char cFind = ' ');
-
-    bool m_bNegative;
-
-    std::string m_strNumber;
-    std::string m_strPhrase;
+    static NumberTranscriber& getInstance();
+    static std::string Expand(const std::string& number);
+    static std::string Contract(const std::string& phrase);
+    static bool TextEqual(const std::string& s1, const std::string& s2);
 };
 
 class Number
@@ -73,40 +61,40 @@ protected:
     class DATA
     {
     public:
-        DATA(UNUM byte = 0) : U(byte), OF(0) { };
+        DATA(UNUM n = 0) : U(n), OF(0) { };
 
-        DATA(const DATA& rhs) { *this = rhs; }
+        DATA(const DATA& data) { *this = data; }
 
-        DATA& operator = (const DATA& rhs)
+        DATA& operator = (const DATA& data)
         {
-            if (this != &rhs)
+            if (this != &data)
             {
-                U = rhs.U;
-                OF = rhs.OF;
+                U = data.U;
+                OF = data.OF;
             }
             return *this;
         }
 
-        DATA operator + (const DATA& rhs) const // Full-Adder
+        DATA operator + (const DATA& data) const // Full-Adder
         {
             DATA Out;
             Out.OF = OF; // Kerry-In
             for (UNUM ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
-                Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((rhs.U & ui) >> uj))) << uj;                                                // SUM:   Kerry-in XOR (A XOR B)
-                Out.OF = (((U & ui) >> uj) & Out.OF) | (((U & ui) >> uj) & ((rhs.U & ui) >> uj)) | (((rhs.U & ui) >> uj) & Out.OF); // CARRY: Kerry-out AB OR BC OR ACin
+                Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                  // SUM:   Kerry-in XOR (A XOR B)
+                Out.OF = (((U & ui) >> uj) & Out.OF) | (((U & ui) >> uj) & ((data.U & ui) >> uj)) | (((data.U & ui) >> uj) & Out.OF);  // CARRY: Kerry-out AB OR BC OR ACin
             }
             return Out;
         }
         
-        DATA operator - (const DATA& rhs) const // Full-Subtractor
+        DATA operator - (const DATA& data) const // Full-Subtractor
         {
             DATA Out;
             Out.OF = OF; // Borrow-In
             for (UNUM ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
-                Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((rhs.U & ui) >> uj))) << uj;                                                  // DIFFERENCE: (A XOR B) XOR Borrow-in
-                Out.OF = (~((U & ui) >> uj) & Out.OF) | (~((U & ui) >> uj) & ((rhs.U & ui) >> uj)) | (((rhs.U & ui) >> uj) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
+                Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                   // DIFFERENCE: (A XOR B) XOR Borrow-in
+                Out.OF = (~((U & ui) >> uj) & Out.OF) | (~((U & ui) >> uj) & ((data.U & ui) >> uj)) | (((data.U & ui) >> uj) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
             }
             return Out;
         }
@@ -120,10 +108,51 @@ protected:
         UNUM OF;
     };
 
-    void ToBinary(const std::string strNumber)
+public:
+
+    Number() : m_bNeg(false), m_bNAN(true) {};
+
+    Number(const char* pstrNumber) { ToBinary(pstrNumber); }
+
+    Number(const std::string& strNumber) { ToBinary(strNumber); }
+
+    Number(const int32_t iNumber) { Convert(iNumber); }
+
+    Number(DATA ch, size_t size)
     {
-        if (strNumber.empty())
+        const static DATA _0(0), _255(NTH);
+
+        m_bNeg = (ch.U & AND) >> SHFT ? true : false;
+        m_Bytes.resize(size, m_bNeg ? _255 : _0);
+        m_Bytes[0] = ch;
+        m_bNAN = false;
+    }
+
+    Number(const Number& rhs) { *this = rhs; }
+
+    ~Number() { }
+
+    Number& operator = (const Number& rhs)
+    {
+        if (this != &rhs)
+        {
+            m_Bytes = rhs.m_Bytes;
+            m_bNeg = rhs.m_bNeg;
+            m_bNAN = rhs.m_bNAN;
+        }
+        return *this;
+    }
+
+protected:
+
+    void ToBinary(const std::string& strNumberIn)
+    {
+        if (strNumberIn.empty())
             throw("Invalid number");
+
+        std::string strNumber = NumberTranscriber::getInstance().Contract(strNumberIn);
+        if (strNumber.empty())
+            strNumber = strNumberIn;
 
         m_bNeg = false;
         m_bNAN = false;
@@ -754,7 +783,10 @@ public:
         return sbin;
     }
 
-    std::string ToPhrase() const;
+    std::string ToPhrase() const
+    {
+        return NumberTranscriber::getInstance().Expand(ToDisplay());
+    }
 
     friend std::ostream& operator << (std::ostream& out, Number& rhs)
     {
@@ -763,53 +795,6 @@ public:
     }
 
 public:
-    Number() : m_bNeg(false), m_bNAN(true) {};
-
-    Number(const char* pstrNumber)
-    {
-        ToBinary(pstrNumber);
-    }
-
-    Number(const std::string& strNumber)
-    {
-        ToBinary(strNumber);
-    }
-
-    Number(const int32_t iNumber)
-    {
-        Convert(iNumber);
-    }
-
-    Number(DATA ch, size_t size)
-    {
-        const static DATA _0(0), _255(NTH);
-
-        m_bNeg = (ch.U & AND) >> SHFT ? true : false;
-        m_Bytes.resize(size, m_bNeg ? _255 : _0);
-        m_Bytes[0] = ch;
-        m_bNAN = false;
-    }
-
-    Number(const DescNumber rhs)
-    {
-        ToBinary(rhs.GetNumber());
-    }
-
-    ~Number()
-    {
-    }
-
-    Number& operator = (const Number& rhs)
-    {
-        if (this != &rhs)
-        {
-            m_Bytes = rhs.m_Bytes;
-            m_bNeg = rhs.m_bNeg;
-            m_bNAN = rhs.m_bNAN;
-        }
-        return *this;
-    }
-
     void operator = (const int32_t iNumber)
     {
         Convert(iNumber);
@@ -903,7 +888,7 @@ public:
         if (m_bNAN)
             throw("Invalid number");
 
-        *this += _1;
+        *this = this->Add(_1);
     }
 
     void operator -- ()
@@ -913,7 +898,7 @@ public:
         if (m_bNAN)
             throw("Invalid number");
 
-        *this -= _1;
+        *this = this->Sub(_1);
     }
 
     Number operator ++ (int) // By standard, returns the value before arithmetic
@@ -925,7 +910,7 @@ public:
 
         Number prev = *this;
 
-        *this += _1;
+        *this = this->Add(_1);
 
         return prev;
     }
@@ -939,7 +924,7 @@ public:
 
         Number prev = *this;
 
-        *this -= _1;
+        *this = this->Sub(_1);
 
         return prev;
     }
@@ -951,27 +936,27 @@ public:
 
     void operator += (const Number& rhs)
     {
-        *this = *this + rhs;
+        *this = this->Add(rhs);
     }
 
     void operator -= (const Number& rhs)
     {
-        *this = *this - rhs;
+        *this = this->Sub(rhs);
     }
 
     void operator *= (const Number& rhs)
     {
-        *this = *this * rhs;
+        *this = this->Mul(rhs);
     }
 
     void operator /= (const Number& rhs)
     {
-        *this = *this / rhs;
+        *this = this->Div(rhs);
     }
 
     void operator %= (const Number& rhs)
     {
-        *this = *this % rhs;
+        *this = this->Mod(rhs);
     }
 
     void SetSize(size_t size)

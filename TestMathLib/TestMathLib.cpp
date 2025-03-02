@@ -15,8 +15,7 @@ namespace TestMathLib
 	{
 		static void Test(long long ullb, long long ulle)
 		{
-			DescNumber MathLib;
-
+			NumberTranscriber& MathLib = NumberTranscriber::getInstance();
 			string s, sr, sv;
 			long long ull = ullb;
 
@@ -35,7 +34,7 @@ namespace TestMathLib
 		TEST_CLASS_INITIALIZE(TestInitialize)
 		{
 			srand((unsigned)time(nullptr));
-			DescNumber::Init();
+			NumberTranscriber& instance = NumberTranscriber::getInstance();
 		}
 
 		TEST_METHOD(TestLib)
@@ -1071,22 +1070,4 @@ namespace TestMathLib
 			Assert::AreEqual(s, Q.ToDisplay());
 		}
 	};
-}
-
-
-// error C2338 : static_assert failed : 'Test writer must define specialization of ToString<const Q& q> 
-// for your class class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > 
-// __cdecl Microsoft::VisualStudio::CppUnitTestFramework::ToString<class CNumber>(const class CNumber &).
-namespace Microsoft
-{
-	namespace VisualStudio
-	{
-		namespace CppUnitTestFramework
-		{
-			template<> wstring static ToString<DescNumber>(const DescNumber& Number)
-			{
-				return DescNumber::ToString(Number);
-			}
-		}
-	}
 }
