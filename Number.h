@@ -259,6 +259,18 @@ protected:
     {
         m_bNAN = false;
 
+        m_Bytes.resize(3);
+        m_Bytes[0] = ((uint32_t)(iNumber)) & 0x0000FFFF; // 16
+        m_Bytes[1] = ((uint32_t)(iNumber) >> 0x10); // 32
+
+        m_bNeg = iNumber < 0;
+        m_Bytes[2] = m_bNeg ? NTH : 0;
+    }
+#elif BITWIDTH == 8
+    void Convert(const int32_t iNumber)
+    {
+        m_bNAN = false;
+
         m_Bytes.resize(5);
         m_Bytes[0] = (uint32_t)(iNumber) & 0xFF;
         m_Bytes[1] = ((uint32_t)(iNumber) >> 0x08) & 0xFF;
@@ -266,18 +278,6 @@ protected:
         m_Bytes[3] = (uint32_t)(iNumber) >> 0x18;
 
         m_Bytes[4] = (m_bNeg = iNumber < 0) ? NTH : 0;
-    }
-#elif BITWIDTH == 8
-    void Convert(const int32_t iNumber)
-    {
-        m_bNAN = false;
-
-        m_Bytes.resize(3);
-        m_Bytes[0] = ((uint32_t)(iNumber)) & 0x0000FFFF; // 16
-        m_Bytes[1] = ((uint32_t)(iNumber) >> 0x10); // 32
-
-        m_bNeg = iNumber < 0;
-        m_Bytes[2] = m_bNeg ? NTH : 0;
     }
 #endif
 
@@ -899,7 +899,7 @@ public:
     The postfix increment/decrement operator (++/--)(int) adds/subs one to its operand and the previous value is the result of the expression
     */
 
-    Number operator ++ ()
+    void operator ++ ()
     {
         const static Number _1(1, 1);
 
@@ -907,10 +907,9 @@ public:
             throw("Invalid number");
 
         *this += _1;
-        return *this;
     }
 
-    Number operator -- ()
+    void operator -- ()
     {
         const static Number _1(1, 1);
 
@@ -918,31 +917,34 @@ public:
             throw("Invalid number");
 
         *this -= 1;
-        return *this;
     }
 
-    Number operator ++ (int)
+    Number operator ++ (int) // By standard, returns the value before arithmetic
     {
         const static Number _1(1, 1);
 
         if (m_bNAN)
             throw("Invalid number");
 
-        Number rhs = *this;
+        Number prev = *this;
+
         *this += _1;
-        return rhs;
+
+        return prev;
     }
 
-    Number operator -- (int)
+    Number operator -- (int)  // By standard, returns the value before arithmetic
     {
         const static Number _1(1, 1);
 
         if (m_bNAN)
             throw("Invalid number");
 
-        Number rhs = *this;
+        Number prev = *this;
+
         *this -= _1;
-        return rhs;
+
+        return prev;
     }
 
     Number operator , (const Number& rhs) const
@@ -950,34 +952,29 @@ public:
         return rhs;
     }
 
-    Number operator += (const Number& rhs)
+    void operator += (const Number& rhs)
     {
         *this = *this + rhs;
-        return *this;
     }
 
-    Number operator -= (const Number& rhs)
+    void operator -= (const Number& rhs)
     {
         *this = *this - rhs;
-        return *this;
     }
 
-    Number operator *= (const Number& rhs)
+    void operator *= (const Number& rhs)
     {
         *this = *this * rhs;
-        return *this;
     }
 
-    Number operator /= (const Number& rhs)
+    void operator /= (const Number& rhs)
     {
         *this = *this / rhs;
-        return *this;
     }
 
-    Number operator %= (const Number& rhs)
+    void operator %= (const Number& rhs)
     {
         *this = *this % rhs;
-        return *this;
     }
 
     void SetSize(size_t size)
