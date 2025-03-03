@@ -840,14 +840,16 @@ public:
         return !(operator < (rhs));
     }
 
-    void operator << (const size_t nbits)
+    Number& operator << (const size_t nbits)
     {
         Shl(size_t(-1), nbits);
+        return *this;
     }
 
-    void operator >> (const size_t nbits)
+    Number& operator >> (const size_t nbits)
     {
         Shr(size_t(-1), nbits);
+        return *this;
     }
 
     Number operator + (const Number& rhs) const
@@ -929,11 +931,22 @@ public:
         return prev;
     }
 
+    //
+    // Comma Operators
+    //
     const Number& operator , (const Number& rhs) const
     {
         return rhs;
     }
 
+    Number& operator , (Number& rhs)
+    {
+        return rhs;
+    }
+
+    //
+    // Arithmetic operators
+    //
     void operator += (const Number& rhs)
     {
         *this = this->Add(rhs);
@@ -959,6 +972,9 @@ public:
         *this = this->Mod(rhs);
     }
 
+    //
+    // Helpers
+    //
     void SetSize(size_t size)
     {
         if (size != m_Bytes.size())
