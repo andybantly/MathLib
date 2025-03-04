@@ -60,6 +60,9 @@ class Number
 protected:
     struct DATA
     {
+        alignas(8) UNUM U;
+        UNUM OF;
+
         DATA(UNUM n = 0) : U(n), OF(0) { };
 
         const DATA Add(const DATA& data, const UNUM of) const // Full-Adder
@@ -87,9 +90,6 @@ protected:
         }
 
         const bool ispow2() const { return (U > 0) && (U & (U - 1)) == 0; }
-
-        UNUM U;
-        UNUM OF;
     };
 
 public:
