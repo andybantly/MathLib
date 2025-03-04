@@ -115,21 +115,9 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteSingleTest)
 		{
-			Number A, B, C;
-			Number A0, B0, C0;
-
-			A0 = "999999999999999999";
-			A  = "999999999999999999";
-
-			B0 = "999999999999999999";
-			B = "999999999999999999";
-
-			C0 = A + B;
-
-			C = A.Add(B);
-
-			if (C0.ToDisplay() != C.ToDisplay())
-				Assert::AreEqual(C0.ToDisplay(), C.ToDisplay());
+			Number A = -20000000000000000;
+			if (A.ToDisplay() != "-20000000000000000")
+				Assert::AreEqual(A.ToDisplay(), std::string("-20000000000000000"));
 		}
 
 		TEST_METHOD(ByteMixSize)
