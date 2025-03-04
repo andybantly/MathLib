@@ -58,27 +58,14 @@ public:
 class Number
 {
 protected:
-    class DATA
+    struct DATA
     {
-    public:
         DATA(UNUM n = 0) : U(n), OF(0) { };
 
-        DATA(const DATA& data) { *this = data; }
-
-        DATA& operator = (const DATA& data)
-        {
-            if (this != &data)
-            {
-                U = data.U;
-                OF = data.OF;
-            }
-            return *this;
-        }
-
-        DATA operator + (const DATA& data) const // Full-Adder
+        const DATA Add(const DATA& data, const UNUM of) const // Full-Adder
         {
             DATA Out;
-            Out.OF = OF; // Kerry-In
+            Out.OF = of; // Kerry-In
             for (UNUM ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
                 Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                  // SUM:   Kerry-in XOR (A XOR B)
@@ -87,10 +74,10 @@ protected:
             return Out;
         }
 
-        DATA operator - (const DATA& data) const // Full-Subtractor
+        const DATA Sub(const DATA& data, const UNUM of) const // Full-Subtractor
         {
             DATA Out;
-            Out.OF = OF; // Borrow-In
+            Out.OF = of; // Borrow-In
             for (UNUM ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
             {
                 Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                   // DIFFERENCE: (A XOR B) XOR Borrow-in
@@ -98,11 +85,8 @@ protected:
             }
             return Out;
         }
-        
-        bool ispow2(const UNUM n) const
-        {
-            return (n > 0) && (n & (n - 1)) == 0;
-        }
+
+        const bool ispow2() const { return (U > 0) && (U & (U - 1)) == 0; }
 
         UNUM U;
         UNUM OF;
@@ -148,7 +132,7 @@ protected:
     void ToBinary(const std::string& strNumberIn)
     {
         if (strNumberIn.empty())
-            throw("Invalid number");
+            throw std::exception();
 
         std::string strNumber = NumberTranscriber::getInstance().Contract(strNumberIn);
         if (strNumber.empty())
@@ -161,13 +145,13 @@ protected:
         if (strNumber[0] == '-')
         {
             if (strNumber.length() < 2)
-                throw("Invalid number");
+                throw std::exception();
             bNeg = true;
         }
 
         std::string strInput = strNumber.substr(bNeg ? 1 : 0);
         if (strInput.empty())
-            throw("Invalid number");
+            throw std::exception();
 
         std::string strOut;
         UNUM idnm = 0;
@@ -314,7 +298,7 @@ public:
     Number Add(const Number& rhs, size_t st = 0) const
     {
         if (m_bNAN || rhs.m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
@@ -323,21 +307,18 @@ public:
         Number out(Zero, stMax);
         UNUM of = 0;
 
-        DATA lb, rb;
         for (; st < stMin; ++st)
         {
-            lb = m_Bytes[st];
-            rb = rhs.m_Bytes[st];
-            if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (lb.OF = of, out.m_Bytes[st] = (lb + rb), out.m_Bytes[st].OF);
+            if (of == 0 && m_Bytes[st].U == 0 && rhs.m_Bytes[st].U == 0) continue;
+            of = (out.m_Bytes[st] = m_Bytes[st].Add(rhs.m_Bytes[st], of), out.m_Bytes[st].OF);
         }
 
-        for (; st < stMax; ++st)
+        for (DATA lb, rb; st < stMax; ++st)
         {
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (lb.OF = of, out.m_Bytes[st] = (lb + rb), out.m_Bytes[st].OF);
+            of = (out.m_Bytes[st] = lb.Add(rb, of), out.m_Bytes[st].OF);
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false; // Shift nbits - 1  to match size of data
@@ -348,7 +329,7 @@ public:
     Number Sub(const Number& rhs, size_t st = 0) const
     {
         if (m_bNAN || rhs.m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
@@ -357,32 +338,29 @@ public:
         Number out(Zero, stMax);
         UNUM of = 0;
 
-        DATA lb, rb;
         for (; st < stMin; ++st)
         {
-            lb = m_Bytes[st];
-            rb = rhs.m_Bytes[st];
-            if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (lb.OF = of, out.m_Bytes[st] = (lb - rb), out.m_Bytes[st].OF);
+            if (of == 0 && m_Bytes[st].U == 0 && rhs.m_Bytes[st].U == 0) continue;
+            of = (out.m_Bytes[st] = m_Bytes[st].Sub(rhs.m_Bytes[st], of), out.m_Bytes[st].OF);
         }
 
-        for (; st < stMax; ++st)
+        for (DATA lb, rb; st < stMax; ++st)
         {
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (lb.OF = of, out.m_Bytes[st] = (lb - rb), out.m_Bytes[st].OF);
+            of = (out.m_Bytes[st] = lb.Sub(rb, of), out.m_Bytes[st].OF);
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false;
 
         return out;
     }
-    
+
     Number Mul(const Number& rhs) const
     {
         if (m_bNAN || rhs.m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         bool bND = m_Bytes.size() >= rhs.m_Bytes.size();
 
@@ -422,7 +400,7 @@ public:
     Number Div(const Number& rhs) const
     {
         if (m_bNAN || rhs.m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         const static Number _0(DATA(0), 1);
         Number quot;
@@ -517,7 +495,7 @@ public:
     Number Mod(const Number& rhs) const
     {
         if (m_bNAN || rhs.m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         const static Number _0(DATA(0), 1);
         Number quot;
@@ -665,7 +643,7 @@ public:
     Number TwosComplement() const
     {
         if (m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         size_t size = m_Bytes.size();
         Number Out(DATA(0), size);
@@ -888,7 +866,7 @@ public:
         const static Number _1(1, 1);
 
         if (m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         *this = this->Add(_1);
         return *this;
@@ -899,7 +877,7 @@ public:
         const static Number _1(1, 1);
 
         if (m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         *this = this->Sub(_1);
         return *this;
@@ -910,7 +888,7 @@ public:
         const static Number _1(1, 1);
 
         if (m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         Number prev = *this;
 
@@ -924,7 +902,7 @@ public:
         const static Number _1(1, 1);
 
         if (m_bNAN)
-            throw("Invalid number");
+            throw std::exception();
 
         Number prev = *this;
 
