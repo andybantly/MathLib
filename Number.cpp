@@ -7,8 +7,8 @@
 
 std::unique_ptr<NumberTranscriber> NumberTranscriber::instance = nullptr;
 std::mutex NumberTranscriber::mutex;
-std::map<std::string, std::string, CILT> NumberTranscriber::mapWordTo99;
-std::map<std::string, std::string, CILT> NumberTranscriber::mapWordTo100;
+std::map<std::string, std::string, NumberTranscriber::cilt> NumberTranscriber::mapWordTo99;
+std::map<std::string, std::string, NumberTranscriber::cilt> NumberTranscriber::mapWordTo100;
 
 NumberTranscriber& NumberTranscriber::getInstance()
 {
