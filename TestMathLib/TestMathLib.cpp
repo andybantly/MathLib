@@ -113,13 +113,32 @@ namespace TestMathLib
 			}
 		}
 
+		TEST_METHOD(ByteSingleTest)
+		{
+			Number A, B, C;
+			Number A0, B0, C0;
+
+			A0 = "999999999999999999";
+			A  = "999999999999999999";
+
+			B0 = "999999999999999999";
+			B = "999999999999999999";
+
+			C0 = A + B;
+
+			C = A.Add(B);
+
+			if (C0.ToDisplay() != C.ToDisplay())
+				Assert::AreEqual(C0.ToDisplay(), C.ToDisplay());
+		}
+
 		TEST_METHOD(ByteMixSize)
 		{
 			Number A, B, C;
 			int a, b, c;
 			std::string s;
 
-			A = "999999";
+			A = 999999;
 			a = 999999;
 			B = b = 180;
 			C = A / B;

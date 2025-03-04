@@ -86,7 +86,7 @@ protected:
             }
             return Out;
         }
-        
+
         DATA operator - (const DATA& data) const // Full-Subtractor
         {
             DATA Out;
@@ -98,7 +98,7 @@ protected:
             }
             return Out;
         }
-
+        
         bool ispow2(const UNUM n) const
         {
             return (n > 0) && (n & (n - 1)) == 0;
@@ -329,7 +329,7 @@ public:
             lb = m_Bytes[st];
             rb = rhs.m_Bytes[st];
             if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (lb.OF = of, out.m_Bytes[st] = lb + rb, out.m_Bytes[st].OF);
+            of = (lb.OF = of, out.m_Bytes[st] = (lb + rb), out.m_Bytes[st].OF);
         }
 
         for (; st < stMax; ++st)
@@ -337,7 +337,7 @@ public:
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (lb.OF = of, out.m_Bytes[st] = lb + rb, out.m_Bytes[st].OF);
+            of = (lb.OF = of, out.m_Bytes[st] = (lb + rb), out.m_Bytes[st].OF);
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false; // Shift nbits - 1  to match size of data
@@ -363,7 +363,7 @@ public:
             lb = m_Bytes[st];
             rb = rhs.m_Bytes[st];
             if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (lb.OF = of, out.m_Bytes[st] = lb - rb, out.m_Bytes[st].OF);
+            of = (lb.OF = of, out.m_Bytes[st] = (lb - rb), out.m_Bytes[st].OF);
         }
 
         for (; st < stMax; ++st)
@@ -371,14 +371,14 @@ public:
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (lb.OF = of, out.m_Bytes[st] = lb - rb, out.m_Bytes[st].OF);
+            of = (lb.OF = of, out.m_Bytes[st] = (lb - rb), out.m_Bytes[st].OF);
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false;
 
         return out;
     }
-
+    
     Number Mul(const Number& rhs) const
     {
         if (m_bNAN || rhs.m_bNAN)
@@ -883,7 +883,7 @@ public:
     The postfix increment/decrement operator (++/--)(int) adds/subs one to its operand and the previous value is the result of the expression
     */
 
-    void operator ++ ()
+    Number& operator ++ ()
     {
         const static Number _1(1, 1);
 
@@ -891,9 +891,10 @@ public:
             throw("Invalid number");
 
         *this = this->Add(_1);
+        return *this;
     }
 
-    void operator -- ()
+    Number& operator -- ()
     {
         const static Number _1(1, 1);
 
@@ -901,9 +902,10 @@ public:
             throw("Invalid number");
 
         *this = this->Sub(_1);
+        return *this;
     }
 
-    Number operator ++ (int) // By standard, returns the value before arithmetic
+    const Number operator ++ (int) // By standard, returns the value before arithmetic
     {
         const static Number _1(1, 1);
 
@@ -917,7 +919,7 @@ public:
         return prev;
     }
 
-    Number operator -- (int)  // By standard, returns the value before arithmetic
+    const Number operator -- (int)  // By standard, returns the value before arithmetic
     {
         const static Number _1(1, 1);
 
@@ -947,29 +949,34 @@ public:
     //
     // Arithmetic operators
     //
-    void operator += (const Number& rhs)
+    Number& operator += (const Number& rhs)
     {
         *this = this->Add(rhs);
+        return *this;
     }
 
-    void operator -= (const Number& rhs)
+    Number& operator -= (const Number& rhs)
     {
         *this = this->Sub(rhs);
+        return *this;
     }
 
-    void operator *= (const Number& rhs)
+    Number& operator *= (const Number& rhs)
     {
         *this = this->Mul(rhs);
+        return *this;
     }
 
-    void operator /= (const Number& rhs)
+    Number& operator /= (const Number& rhs)
     {
         *this = this->Div(rhs);
+        return *this;
     }
 
-    void operator %= (const Number& rhs)
+    Number& operator %= (const Number& rhs)
     {
         *this = this->Mod(rhs);
+        return *this;
     }
 
     //
