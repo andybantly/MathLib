@@ -22,8 +22,8 @@ namespace TestMathLib
 			do
 			{
 				s = to_string(ull++);
-				sr = MathLib.Expand(s);
-				sv = MathLib.Contract(sr);
+				sr = MathLib.ToPhrase(s);
+				sv = MathLib.ToNumber(sr);
 				if (sv != s)
 					Assert::AreEqual(sv, s);
 			} while (ull <= ulle && ull != 0);

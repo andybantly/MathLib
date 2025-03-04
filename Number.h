@@ -51,8 +51,8 @@ class NumberTranscriber
 
 public:
     static NumberTranscriber& getInstance();
-    static std::string Expand(const std::string& number);
-    static std::string Contract(const std::string& phrase);
+    static std::string ToPhrase(const std::string& number);
+    static std::string ToNumber(const std::string& phrase);
     static bool TextEqual(const std::string& s1, const std::string& s2);
 };
 
@@ -135,7 +135,7 @@ protected:
         if (strNumberIn.empty())
             throw std::exception();
 
-        std::string strNumber = NumberTranscriber::getInstance().Contract(strNumberIn);
+        std::string strNumber = NumberTranscriber::getInstance().ToNumber(strNumberIn);
         if (strNumber.empty())
             strNumber = strNumberIn;
 
@@ -764,7 +764,7 @@ public:
 
     std::string ToPhrase() const
     {
-        return NumberTranscriber::getInstance().Expand(ToDisplay());
+        return NumberTranscriber::getInstance().ToPhrase(ToDisplay());
     }
 
     friend std::ostream& operator << (std::ostream& out, Number& rhs)

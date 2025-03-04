@@ -170,7 +170,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 	do
 	{
 		s = std::to_string(ull++);
-		sr = NumberX.Expand(s);
+		sr = NumberX.ToPhrase(s);
 		if (sr.empty())
 		{
 			std::lock_guard<std::mutex> guard(g_io_mutex);
@@ -179,7 +179,7 @@ static void ttest(unsigned long long ullb, unsigned long long ulle)
 		}
 		else
 		{
-			sv = NumberX.Contract(sr);
+			sv = NumberX.ToNumber(sr);
 			if (sv.empty())
 			{
 				std::lock_guard<std::mutex> guard(g_io_mutex);
