@@ -115,9 +115,28 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteSingleTest)
 		{
+			std::string s;
+
+			int b = 25;
 			Number A = -20000000000000000;
 			if (A.ToDisplay() != "-20000000000000000")
 				Assert::AreEqual(A.ToDisplay(), std::string("-20000000000000000"));
+
+			b = (int)sqrt(b);
+			s = std::to_string(b);
+
+			Number B = 25;
+			Number C = B.Sqrt();
+
+			if (C.ToDisplay() != s)
+				Assert::AreEqual(C.ToDisplay(), s);
+
+			B = b = 26;
+			b = (int)sqrt(b);
+			C = B.Sqrt();
+
+			if (C.ToDisplay() != s)
+				Assert::AreEqual(C.ToDisplay(), s);
 		}
 
 		TEST_METHOD(ByteMixSize)

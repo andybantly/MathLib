@@ -606,6 +606,37 @@ public:
         return rem;
     }
 
+    Number Sqrt() const
+    {
+        if (m_bNAN)
+            throw std::exception();
+
+        if (m_bNeg)
+            return TwosComplement().Sqrt();
+
+        const static Number _0(DATA(0), 1);
+        const static Number _1(DATA(1), 1);
+        const static Number _2(DATA(2), 1);
+
+        Number low = _0, mid, high = *this, sqrt = _0;
+        Number msq;
+        while (low <= high)
+        {
+            mid = low + ((high - low) >> 1);
+            msq = mid * mid;
+            if (msq == *this)
+                return mid;
+            if (msq < *this)
+            {
+                low = mid + _1;
+                sqrt = mid;
+            }
+            else
+                high = mid - _1;
+        }
+        return sqrt;
+    }
+
     bool Equals(const Number& rhs) const
     {
         if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
