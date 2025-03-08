@@ -873,14 +873,14 @@ public:
         return !(operator < (rhs));
     }
 
-    Number operator << (const size_t nbits)
+    Number operator << (const size_t nbits) const
     {
         Number out = *this;
         out <<= nbits;
         return out;
     }
 
-    Number operator >> (const size_t nbits)
+    Number operator >> (const size_t nbits) const
     {
         Number out = *this;
         out >>= nbits;
