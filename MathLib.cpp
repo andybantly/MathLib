@@ -5,6 +5,7 @@
 #include "Number.h"
 
 #pragma warning(disable:6385)
+#pragma warning(disable:4552)
 
 int main()
 {

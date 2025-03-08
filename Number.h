@@ -873,16 +873,18 @@ public:
         return !(operator < (rhs));
     }
 
-    Number& operator << (const size_t nbits)
+    Number operator << (const size_t nbits)
     {
-        Shl(size_t(-1), nbits);
-        return *this;
+        Number out = *this;
+        out <<= nbits;
+        return out;
     }
 
-    Number& operator >> (const size_t nbits)
+    Number operator >> (const size_t nbits)
     {
-        Shr(size_t(-1), nbits);
-        return *this;
+        Number out = *this;
+        out >>= nbits;
+        return out;
     }
 
     Number operator + (const Number& rhs) const
@@ -1009,6 +1011,18 @@ public:
     Number& operator %= (const Number& rhs)
     {
         *this = this->Mod(rhs);
+        return *this;
+    }
+
+    Number& operator >>= (const size_t nbits)
+    {
+        Shr(size_t(-1), nbits);
+        return *this;
+    }
+
+    Number& operator <<= (const size_t nbits)
+    {
+        Shl(size_t(-1), nbits);
         return *this;
     }
 

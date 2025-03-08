@@ -2,6 +2,8 @@
 #include "CppUnitTest.h"
 #include "..\Number.h"
 
+#pragma warning(disable:4552)
+
 using namespace std;
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -137,6 +139,12 @@ namespace TestMathLib
 
 			if (C.ToDisplay() != s)
 				Assert::AreEqual(C.ToDisplay(), s);
+
+			Number D = 50;
+			Number E = D >> 2; // D can't change
+			E = D >>= 2; // D changes
+			if (D.ToDisplay() == E.ToDisplay())
+				Assert::AreEqual(D.ToDisplay(), E.ToDisplay());
 		}
 
 		TEST_METHOD(ByteMixSize)
@@ -197,7 +205,7 @@ namespace TestMathLib
 				Assert::AreEqual(std::to_string(c), s);
 
 			Number X = "13107200000000";
-			X >> 40; 
+			X >>= 40; 
 			Assert::AreEqual(std::string("11"), X.ToDisplay());
 		}
 
@@ -324,13 +332,20 @@ namespace TestMathLib
 			////// TEST CASE //////
 			B = b = 1;
 			B << 1;
-			b = b << 1;
+			b << 1;
 
 			s = B.ToDisplay();
 			if (std::to_string(b) != s)
 				Assert::AreEqual(std::to_string(b), s);
 
-			B << 2;
+			B <<= 1;
+			b <<= 1;
+
+			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
+
+			B = B << 2;
 			b = b << 2;
 
 			s = B.ToDisplay();
