@@ -117,34 +117,24 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteSingleTest)
 		{
+			//int a, b, c;
+			Number A,B,C;
 			std::string s;
 
-			int b = 25;
-			Number A = -20000000000000000;
-			if (A.ToDisplay() != "-20000000000000000")
-				Assert::AreEqual(A.ToDisplay(), std::string("-20000000000000000"));
+			//A = 2147483647; A.SetSize(1); B = A;
+			/*
+			a = -19;
+			b = -21;
 
-			b = (int)sqrt(b);
-			s = std::to_string(b);
+			A = a; A.SetSize(1);
+			B = b; B.SetSize(1);
 
-			Number B = 25;
-			Number C = B.Sqrt();
+			c = a + b;
+			C = A + B;
 
-			if (C.ToDisplay() != s)
-				Assert::AreEqual(C.ToDisplay(), s);
-
-			B = b = 26;
-			b = (int)sqrt(b);
-			C = B.Sqrt();
-
-			if (C.ToDisplay() != s)
-				Assert::AreEqual(C.ToDisplay(), s);
-
-			Number D = 50;
-			Number E = D >> 2; // D can't change
-			E = D >>= 2; // D changes
-			if (D.ToDisplay() == E.ToDisplay())
-				Assert::AreEqual(D.ToDisplay(), E.ToDisplay());
+			s = C.ToDisplay();
+			if (std::to_string(c) != s)
+				Assert::AreEqual(std::to_string(c), s);*/
 		}
 
 		TEST_METHOD(ByteMixSize)
@@ -207,6 +197,47 @@ namespace TestMathLib
 			Number X = "13107200000000";
 			X >>= 40; 
 			Assert::AreEqual(std::string("11"), X.ToDisplay());
+
+			b = 25;
+			A = -20000000000000000;
+			if (A.ToDisplay() != "-20000000000000000")
+				Assert::AreEqual(A.ToDisplay(), std::string("-20000000000000000"));
+
+			b = (int)sqrt(b);
+			s = std::to_string(b);
+
+			B = 25;
+			C = B.Sqrt();
+
+			if (C.ToDisplay() != s)
+				Assert::AreEqual(C.ToDisplay(), s);
+
+			B = b = 26;
+			b = (int)sqrt(b);
+			C = B.Sqrt();
+
+			if (C.ToDisplay() != s)
+				Assert::AreEqual(C.ToDisplay(), s);
+
+			Number D = 50;
+			Number E = D >> 2; // D can't change
+			E = D >>= 2; // D changes
+			if (D.ToDisplay() == E.ToDisplay())
+				Assert::AreEqual(D.ToDisplay(), E.ToDisplay());
+
+//			Number N25p = "15511210043330985984000000";
+//			B = B.Prime();
+//			if (B.ToDisplay() != N25p.ToDisplay())
+//				Assert::AreEqual(B.ToDisplay(), N25p.ToDisplay());
+		}
+
+		TEST_METHOD(BytePI)
+		{
+			Number PI = "3141592653589793";
+			std::string s = PI.ToBinary();
+			std::cout << s << std::endl;
+			s = PI.ToDisplay();
+			std::cout << s << std::endl;
 		}
 
 		TEST_METHOD(ByteCornerCases)

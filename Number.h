@@ -637,6 +637,27 @@ public:
         return sqrt;
     }
 
+    Number Prime() const
+    {
+        if (m_bNAN)
+            throw std::exception();
+
+        Number prme;
+        if (m_bNeg)
+        {
+            prme = TwosComplement().Prime();
+            return prme.TwosComplement();
+        }
+
+        const static Number _1(DATA(1), 1);
+
+        prme = _1;
+        for (Number mul = *this; mul != _1; --mul)
+            prme *= mul;
+
+        return prme;
+    }
+
     bool Equals(const Number& rhs) const
     {
         if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
@@ -646,9 +667,6 @@ public:
             return false;
 
         if (m_bNeg != rhs.m_bNeg)
-            return false;
-
-        if (m_Bytes.size() != rhs.m_Bytes.size())
             return false;
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
