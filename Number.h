@@ -29,6 +29,11 @@
 
 typedef uint32_t UNUM;  // The internal type is a 'unsigned number'
 
+const static UNUM _pow[BITWIDTH] = {     0x01,      0x02,      0x04,      0x08,       0x10,       0x20,       0x40,       0x80,
+                                        0x100,     0x200,     0x400,     0x800,     0x1000,     0x2000,     0x4000,     0x8000,
+                                      0x10000,   0x20000,   0x40000,   0x80000,   0x100000,   0x200000,   0x400000,   0x800000,
+                                    0x1000000, 0x2000000, 0x4000000, 0x8000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000};
+
 // Global singleton for number transcribing
 class NumberTranscriber
 {
@@ -69,8 +74,9 @@ private:
         {
             DATA Out;
             Out.OF = of; // Kerry-In
-            for (UNUM ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
+            for (UNUM uj = 0; uj < BITWIDTH; ++uj)
             {
+                UNUM ui = _pow[uj];
                 Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                  // SUM:   Kerry-in XOR (A XOR B)
                 Out.OF = (((U & ui) >> uj) & Out.OF) | (((U & ui) >> uj) & ((data.U & ui) >> uj)) | (((data.U & ui) >> uj) & Out.OF);  // CARRY: Kerry-out AB OR BC OR ACin
             }
@@ -81,8 +87,9 @@ private:
         {
             DATA Out;
             Out.OF = of; // Borrow-In
-            for (UNUM ui = 1, uj = 0; ui != 0; ui <<= 1, ++uj)
+            for (UNUM uj = 0; uj < BITWIDTH; ++uj)
             {
+                UNUM ui = _pow[uj];
                 Out.U |= (Out.OF ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                   // DIFFERENCE: (A XOR B) XOR Borrow-in
                 Out.OF = (~((U & ui) >> uj) & Out.OF) | (~((U & ui) >> uj) & ((data.U & ui) >> uj)) | (((data.U & ui) >> uj) & Out.OF); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
             }
