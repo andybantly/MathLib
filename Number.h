@@ -29,7 +29,6 @@
 
 typedef uint32_t UNUM;  // The internal type is a 'unsigned number'
 
-
 // Global singleton for number transcribing
 class NumberTranscriber
 {
@@ -58,7 +57,7 @@ public:
 
 class Number
 {
-protected:
+private:
     struct DATA
     {
         alignas(8) UNUM U;
@@ -95,7 +94,7 @@ protected:
 
 public:
 
-    Number() : m_bNeg(false), m_bNAN(true) {};
+    Number() : m_bNeg(false), m_bNan(true), m_bOvf(false) {};
 
     Number(const char* pnum) { ToBinary(pnum); }
 
@@ -105,19 +104,9 @@ public:
 
     Number(const int64_t u) { Convert(u); }
 
-    Number(DATA ch, size_t size)
-    {
-        const static DATA _0(0), _255(NTH);
-
-        m_bNeg = (ch.U & AND) >> SHFT ? true : false;
-        m_Bytes.resize(size, m_bNeg ? _255 : _0);
-        m_Bytes[0] = ch;
-        m_bNAN = false;
-    }
-
     Number(const Number& rhs) { *this = rhs; }
 
-    ~Number() { }
+    ~Number() {}
 
     Number& operator = (const Number& rhs)
     {
@@ -125,7 +114,8 @@ public:
         {
             m_Bytes = rhs.m_Bytes;
             m_bNeg = rhs.m_bNeg;
-            m_bNAN = rhs.m_bNAN;
+            m_bNan = rhs.m_bNan;
+            m_bOvf = rhs.m_bOvf;
         }
         return *this;
     }
@@ -140,9 +130,6 @@ protected:
         std::string strNumber = NumberTranscriber::getInstance().ToNumber(strNumberIn);
         if (strNumber.empty())
             strNumber = strNumberIn;
-
-        m_bNeg = false;
-        m_bNAN = false;
 
         bool bNeg = false;
         if (strNumber[0] == '-')
@@ -207,7 +194,7 @@ protected:
             }
 
             // Append the digit to the output that becomes the new input from integer division by 2
-            strOut += '0' + idnm / 2;
+            strOut += '0' + (unsigned)idnm / 2;
             idnm = idnm % 2;
 
             // Has the input been processed
@@ -252,10 +239,12 @@ protected:
             m_Bytes[0].U = 0;
         }
 
+        m_bNeg = false;
+        m_bNan = false;
+        m_bOvf = false;
+
         if (bNeg)
             *this = TwosComplement();
-
-        SetSize(GetSize() + 1);
     }
 
     // Helper to convert to the internal format
@@ -264,66 +253,67 @@ protected:
     // 32 bit signed quantities
     void Convert(const int32_t u)
     {
-        m_bNAN = false;
+        m_bNan = false;
+        m_bOvf = false;
 
-        m_Bytes.resize(2);
+        m_Bytes.resize(1);
         m_Bytes[0] = (uint32_t)(u);
 
         m_bNeg = u < 0;
-        m_Bytes[1] = m_bNeg ? NTH : 0;
     }
 
     // 64 bit signed quantities
     void Convert(const int64_t u)
     {
-        m_bNAN = false;
+        m_bNan = false;
+        m_bOvf = false;
 
-        m_Bytes.resize(3);
+        m_Bytes.resize(2);
 
         m_Bytes[0] = ((uint32_t)(u)) & 0x00000000FFFFFFFF;
-        m_Bytes[1] = ((uint32_t)((u) >> BITWIDTH));
+        m_Bytes[1] = ((uint32_t)((u) >> 32));
 
         m_bNeg = u < 0;
-        m_Bytes[2] = m_bNeg ? NTH : 0;
     }
 #elif BITWIDTH == 16
     void Convert(const int32_t u)
     {
         m_bNAN = false;
+        m_bOvf = false;
 
-        m_Bytes.resize(3);
+        m_Bytes.resize(2);
         m_Bytes[0] = ((uint32_t)(u)) & 0x0000FFFF; // 16
         m_Bytes[1] = ((uint32_t)(u) >> 0x10); // 32
 
         m_bNeg = u < 0;
-        m_Bytes[2] = m_bNeg ? NTH : 0;
     }
 #elif BITWIDTH == 8
     void Convert(const int32_t u)
     {
         m_bNAN = false;
+        m_bOvf = false;
 
-        m_Bytes.resize(5);
+        m_Bytes.resize(4);
         m_Bytes[0] = (uint32_t)(u) & 0xFF;
         m_Bytes[1] = ((uint32_t)(u) >> 0x08) & 0xFF;
         m_Bytes[2] = ((uint32_t)(u) >> 0x10) & 0xFF;
         m_Bytes[3] = (uint32_t)(u) >> 0x18;
 
-        m_Bytes[4] = (m_bNeg = u < 0) ? NTH : 0;
+        m_bNeg = u < 0;
     }
 #endif
 
 public:
     Number Add(const Number& rhs, size_t st = 0) const
     {
-        if (m_bNAN || rhs.m_bNAN)
+        if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
         const static DATA Zero(0), Neg1(NTH);
-        Number out(Zero, stMax);
+        Number out(0); out.SetSize(stMax);
         UNUM of = 0;
 
         for (; st < stMin; ++st)
@@ -341,20 +331,21 @@ public:
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false; // Shift nbits - 1  to match size of data
+        out.m_bOvf = ((m_bNeg == rhs.m_bNeg) && (m_bNeg != out.m_bNeg));
 
         return out;
     }
 
     Number Sub(const Number& rhs, size_t st = 0) const
     {
-        if (m_bNAN || rhs.m_bNAN)
+        if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
         size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
         const static DATA Zero(0), Neg1(NTH);
-        Number out(Zero, stMax);
+        Number out(0); out.SetSize(stMax);
         UNUM of = 0;
 
         for (; st < stMin; ++st)
@@ -372,19 +363,20 @@ public:
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false;
+        out.m_bOvf = ((m_bNeg != rhs.m_bNeg) && (m_bNeg != out.m_bNeg));
 
         return out;
     }
 
     Number Mul(const Number& rhs) const
     {
-        if (m_bNAN || rhs.m_bNAN)
+        if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
-        bool bND = m_Bytes.size() >= rhs.m_Bytes.size();
+        bool bND = m_Bytes.size() >= rhs.m_Bytes.size(); // need a 0 and 1 counter to decide
 
         size_t stMB = bND ? m_Bytes.size() : rhs.m_Bytes.size();
-        Number prod(DATA(0), stMB);
+        Number prod(0); prod.SetSize(stMB);
         Number mulp = *this;
         Number mulc = rhs;
 
@@ -418,13 +410,15 @@ public:
 
     Number Div(const Number& rhs) const
     {
-        if (m_bNAN || rhs.m_bNAN)
+        if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
-        const static Number _0(DATA(0), 1);
+        const static Number _0(0);
         Number quot;
         if (rhs == _0)
             return quot;
+
+        const static DATA One1(1), Neg1(NTH);
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
 
@@ -438,7 +432,7 @@ public:
         Number dbl = rhsin;
         dbl.SetSize(stMB);
 
-        Number pow(m_bNeg == rhs.m_bNeg ? DATA(1) : DATA(-1), stMB);
+        Number pow(m_bNeg == rhs.m_bNeg ? 1 : -1); pow.SetSize(stMB);
         size_t stn = 0;
 
         size_t dlh = dbl.MSb();
@@ -513,13 +507,15 @@ public:
 
     Number Mod(const Number& rhs) const
     {
-        if (m_bNAN || rhs.m_bNAN)
+        if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
-        const static Number _0(DATA(0), 1);
+        const static Number _0(0);
         Number quot;
         if (rhs == _0)
             return quot;
+
+        DATA One1(1), Neg1(NTH);
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
 
@@ -533,7 +529,7 @@ public:
         Number dbl = rhsin;
         dbl.SetSize(stMB);
 
-        Number pow(m_bNeg == rhs.m_bNeg ? DATA(1) : DATA(-1), stMB);
+        Number pow(m_bNeg == rhs.m_bNeg ? 1 : -1); pow.SetSize(stMB);
         size_t stn = 0;
 
         size_t dlh = dbl.MSb();
@@ -608,15 +604,15 @@ public:
 
     Number Sqrt() const
     {
-        if (m_bNAN)
+        if (m_bNan)
             throw std::exception();
 
         if (m_bNeg)
             return TwosComplement().Sqrt();
 
-        const static Number _0(DATA(0), 1);
-        const static Number _1(DATA(1), 1);
-        const static Number _2(DATA(2), 1);
+        const static Number _0(0);
+        const static Number _1(1);
+        const static Number _2(2);
 
         Number low = _0, mid, high = *this, sqrt = _0;
         Number msq;
@@ -639,7 +635,7 @@ public:
 
     Number Prime() const
     {
-        if (m_bNAN)
+        if (m_bNan)
             throw std::exception();
 
         Number prme;
@@ -649,7 +645,7 @@ public:
             return prme.TwosComplement();
         }
 
-        const static Number _1(DATA(1), 1);
+        const static Number _1(1);
 
         prme = _1;
         for (Number mul = *this; mul != _1; --mul)
@@ -663,7 +659,7 @@ public:
         if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
             return true;
 
-        if (m_bNAN || rhs.m_bNAN)
+        if (m_bNan || rhs.m_bNan)
             return false;
 
         if (m_bNeg != rhs.m_bNeg)
@@ -688,7 +684,7 @@ public:
         if (this == &rhs)
             return false; // I CANT BE LESS THAN MYSELF!
 
-        if (m_bNAN || rhs.m_bNAN)
+        if (m_bNan || rhs.m_bNan)
             return false;
 
         if (m_bNeg != rhs.m_bNeg)
@@ -710,12 +706,12 @@ public:
 
     Number TwosComplement() const
     {
-        if (m_bNAN)
+        if (m_bNan)
             throw std::exception();
 
         size_t size = m_Bytes.size();
-        Number Out(DATA(0), size);
-        const static Number _1(DATA(1), 1);
+        Number Out(0); Out.SetSize(size);
+        const static Number _1(1);
 
         UNUM iByte = 0;
         do
@@ -734,7 +730,7 @@ public:
     std::string ToDisplay() const
     {
         const static std::string strNAN = "NAN";
-        if (m_bNAN)
+        if (m_bNan)
             return strNAN;
 
         if (m_bNeg)
@@ -772,7 +768,7 @@ public:
                     if (iCarry)
                         iSum -= 10;
 
-                    Disp.push_back(g_cZero + iSum);
+                    Disp.push_back(g_cZero + (unsigned)iSum);
                 }
                 
                 if (iCarry)
@@ -792,7 +788,7 @@ public:
                 if (iCarry)
                     iProd -= 10;
 
-                Prod.push_back(g_cZero + iProd); // double value
+                Prod.push_back(g_cZero + (unsigned)iProd); // double value
             }
 
             if (iCarry)
@@ -938,9 +934,9 @@ public:
 
     Number& operator ++ ()
     {
-        const static Number _1(1, 1);
+        const static Number _1(1);
 
-        if (m_bNAN)
+        if (m_bNan)
             throw std::exception();
 
         *this = this->Add(_1);
@@ -949,9 +945,9 @@ public:
 
     Number& operator -- ()
     {
-        const static Number _1(1, 1);
+        const static Number _1(1);
 
-        if (m_bNAN)
+        if (m_bNan)
             throw std::exception();
 
         *this = this->Sub(_1);
@@ -960,9 +956,9 @@ public:
 
     const Number operator ++ (int) // By standard, returns the value before arithmetic
     {
-        const static Number _1(1, 1);
+        const static Number _1(1);
 
-        if (m_bNAN)
+        if (m_bNan)
             throw std::exception();
 
         Number prev = *this;
@@ -974,9 +970,9 @@ public:
 
     const Number operator -- (int)  // By standard, returns the value before arithmetic
     {
-        const static Number _1(1, 1);
+        const static Number _1(1);
 
-        if (m_bNAN)
+        if (m_bNan)
             throw std::exception();
 
         Number prev = *this;
@@ -1189,5 +1185,6 @@ public:
     protected:
         std::vector<DATA> m_Bytes;
         bool m_bNeg;
-        bool m_bNAN;
+        bool m_bNan;
+        bool m_bOvf;
 };
