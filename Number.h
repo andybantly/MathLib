@@ -401,15 +401,18 @@ public:
         if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
-        bool bND = m_Bytes.size() >= rhs.m_Bytes.size(); // need a 0 and 1 counter to decide
+        size_t l1 = Count1();
+        size_t r1 = rhs.Count1();
+
+        bool bND = l1 >= r1;
 
         size_t stMB = bND ? m_Bytes.size() : rhs.m_Bytes.size();
         Number prod(0); prod.SetSize(stMB);
-        Number mulp = *this;
         Number mulc = rhs;
 
-        if (bND) // N =>= D
+        if (bND) // N1s >= D1s
         {
+            Number mulp = *this;
             for (size_t iByte = 0, nBytes = mulc.m_Bytes.size(); iByte < nBytes; ++iByte)
             {
                 for (UNUM ui = 1; ui != 0; ui <<= 1)
@@ -420,13 +423,13 @@ public:
                 }
             }
         }
-        else // D > N
+        else // D1s > N1s
         {
-            for (size_t iByte = 0, nBytes = mulp.m_Bytes.size(); iByte < nBytes; ++iByte)
+            for (size_t iByte = 0, nBytes = m_Bytes.size(); iByte < nBytes; ++iByte)
             {
                 for (UNUM ui = 1; ui != 0; ui <<= 1)
                 {
-                    if (ui & mulp.m_Bytes[iByte].U)
+                    if (ui & m_Bytes[iByte].U)
                         prod += mulc;
                     mulc.Shl();
                 }
@@ -832,6 +835,21 @@ public:
         } while (iByte != m_Bytes.size());
 
         return std::string(Disp.rbegin(), Disp.rend());
+    }
+
+    size_t Count1() const
+    {
+        size_t stcnt = 0;
+        for (size_t st = 0; st < m_Bytes.size(); ++st)
+        {
+            for (UNUM uj = 0; uj < BITWIDTH; ++uj)
+            {
+                UNUM ui = _pow[uj];
+                if (m_Bytes[st].U & ui)
+                    ++stcnt;
+            }
+        }
+        return stcnt;
     }
 
     std::string ToBinary() const
