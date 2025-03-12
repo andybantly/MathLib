@@ -4,8 +4,6 @@
 
 #pragma warning(disable:4552)
 
-using namespace std;
-
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
@@ -18,12 +16,12 @@ namespace TestMathLib
 		static void Test(long long ullb, long long ulle)
 		{
 			NumberTranscriber& MathLib = NumberTranscriber::getInstance();
-			string s, sr, sv;
+			std::string s, sr, sv;
 			long long ull = ullb;
 
 			do
 			{
-				s = to_string(ull++);
+				s = std::to_string(ull++);
 				sr = MathLib.ToPhrase(s);
 				sv = MathLib.ToNumber(sr);
 				if (sv != s)
@@ -41,10 +39,10 @@ namespace TestMathLib
 
 		TEST_METHOD(TestLib)
 		{
-			long long numt = thread::hardware_concurrency();
+			long long numt = std::thread::hardware_concurrency();
 			long long dtpt = RAND_MAX / numt;
 
-			vector<thread*> vptp;
+			std::vector<std::thread*> vptp;
 			long long ullb, ulle;
 			for (long long it = 0; it < numt; it++)
 			{
@@ -54,14 +52,14 @@ namespace TestMathLib
 				else
 					ulle = RAND_MAX;
 
-				thread* ptp = new thread(Test, ullb, ulle);
+				std::thread* ptp = new std::thread(Test, ullb, ulle);
 				vptp.push_back(ptp);
 			}
 
-			for (vector<thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
+			for (std::vector<std::thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
 				(*it)->join();
 
-			for (vector<thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
+			for (std::vector<std::thread*>::iterator it = vptp.begin(); it != vptp.end(); ++it)
 				delete* it;
 		}
 
@@ -74,7 +72,7 @@ namespace TestMathLib
 			NJ.SetSize(96);
 			NZ.SetSize(1);
 
-			while ((NJ = (/*std::cout << Fn << std::endl,*/ Fn = NI, NI = NJ, Fn + NI)) > NZ) {}
+			while (!NJ.IsOverFlow()) { NJ = (/*std::cout << Fn << std::endl,*/ Fn = NI, NI = NJ, Fn + NI); }
 		}
 
 		TEST_METHOD(FibObj)
@@ -88,7 +86,7 @@ namespace TestMathLib
 			Fib3.SetSize(96);
 			NZ.SetSize(1);
 
-			while (Fib3 > NZ)
+			while (!Fib3.IsOverFlow())
 			{
 				Fib1 = Fib2;
 				Fib2 = Fib3;
@@ -107,7 +105,7 @@ namespace TestMathLib
 			Fib[2].SetSize(96);
 			NZ.SetSize(1);
 
-			while (Fib[2] > NZ)
+			while (!Fib[2].IsOverFlow())
 			{
 				Fib[0] = Fib[1];
 				Fib[1] = Fib[2];

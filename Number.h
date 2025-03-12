@@ -107,6 +107,9 @@ public:
 
     Number(const std::string& number) { ToBinary(number); }
 
+    // Special helper constructor for twos complement addition
+    Number(const int8_t u, bool bOvf) { Convert(u); m_bOvf = bOvf; }
+
     Number(const int32_t u) { Convert(u); }
 
     Number(const int64_t u) { Convert(u); }
@@ -160,6 +163,7 @@ protected:
         for (;;)
         {
             // Compute the denominator of the division
+            if (*cit == ',') ++cit;
             idnm = idnm * 10 + *cit - '0';
             if (idnm < 2 && cit + 1 != strInput.end())
             {
@@ -264,7 +268,7 @@ protected:
         m_bOvf = false;
 
         m_Bytes.resize(1);
-        m_Bytes[0] = (uint32_t)(u);
+        m_Bytes[0] = (UNUM)(u);
 
         m_bNeg = u < 0;
     }
@@ -277,8 +281,8 @@ protected:
 
         m_Bytes.resize(2);
 
-        m_Bytes[0] = ((uint32_t)(u)) & 0x00000000FFFFFFFF;
-        m_Bytes[1] = ((uint32_t)((u) >> 32));
+        m_Bytes[0] = ((UNUM)(u)) & 0x00000000FFFFFFFF;
+        m_Bytes[1] = ((UNUM)((u) >> 32));
 
         m_bNeg = u < 0;
     }
@@ -338,7 +342,16 @@ public:
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false; // Shift nbits - 1  to match size of data
-        out.m_bOvf = ((m_bNeg == rhs.m_bNeg) && (m_bNeg != out.m_bNeg));
+
+        if (!rhs.IsOverFlow())
+        {
+            out.m_bOvf = ((m_bNeg == rhs.m_bNeg) && (m_bNeg != out.m_bNeg));
+            if (out.m_bOvf)
+            {
+                out.m_Bytes.push_back(0);
+                out.m_bNeg = false;
+            }
+        }
 
         return out;
     }
@@ -370,7 +383,15 @@ public:
         }
 
         out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false;
-        out.m_bOvf = ((m_bNeg != rhs.m_bNeg) && (m_bNeg != out.m_bNeg));
+        if (!rhs.IsOverFlow())
+        {
+            out.m_bOvf = ((m_bNeg != rhs.m_bNeg) && (m_bNeg != out.m_bNeg));
+            if (out.m_bOvf)
+            {
+                out.m_Bytes.push_back(m_bNeg ? NTH : 0);
+                out.m_bNeg = m_bNeg;
+            }
+        }
 
         return out;
     }
@@ -718,7 +739,7 @@ public:
 
         size_t size = m_Bytes.size();
         Number Out(0); Out.SetSize(size);
-        const static Number _1(1);
+        const static Number _1(1, true);
 
         UNUM iByte = 0;
         do
@@ -1188,6 +1209,11 @@ public:
             if (m_bNeg)
                 m_Bytes[iByte].U |= AND;
         }
+
+    public: // helpers
+        const bool IsOverFlow() const { return m_bOvf; }
+        const bool IsNegative() const { return m_bNeg; }
+        const bool IsNan() const { return m_bNan; }
 
     protected:
         std::vector<DATA> m_Bytes;
