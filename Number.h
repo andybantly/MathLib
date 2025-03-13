@@ -671,19 +671,13 @@ public:
         Number Out(0); Out.SetSize(size);
         const static Number _1(1, true);
 
-        UNUM iByte = 0;
-        do
-        {
-            Out.m_Bytes[iByte].U = ~m_Bytes[iByte].U;
-            iByte++;
-        } while (iByte != size);
-
-        Out = Out + _1;
+        Out = BitNot();
+        Out += _1;
         Out.m_bNeg = !m_bNeg;
 
         return Out;
     }
-    
+
     // Binary to text based base10 conversion 
     std::string ToDisplay() const
     {
@@ -728,7 +722,7 @@ public:
 
                     Disp.push_back(g_cZero + (unsigned)iSum);
                 }
-                
+
                 if (iCarry)
                     Disp.push_back(g_cOne);
 
@@ -777,6 +771,16 @@ public:
             }
         }
         return stcnt;
+    }
+
+    Number BitNot() const
+    {
+        size_t size = m_Bytes.size();
+        Number Out(0); Out.SetSize(size);
+
+        for (UNUM iByte = 0; iByte != size; ++iByte) { Out.m_Bytes[iByte].U = ~m_Bytes[iByte].U; }
+
+        return Out;
     }
 
     std::string ToBinary() const
@@ -872,6 +876,11 @@ public:
         Number out = *this;
         out >>= nbits;
         return out;
+    }
+
+    Number operator ~ () const
+    {
+        return BitNot();
     }
 
     Number operator + (const Number& rhs) const
