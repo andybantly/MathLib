@@ -142,109 +142,81 @@ protected:
             strNumber = strNumberIn;
 
         bool bNeg = false;
-        if (strNumber[0] == '-')
+        std::string::iterator it = strNumber.begin();
+        if (*it == '-') 
         {
-            if (strNumber.length() < 2)
+            bNeg = true; 
+            if (++it == strNumber.end()) 
                 throw std::exception();
-            bNeg = true;
         }
-
-        std::string strInput = strNumber.substr(bNeg ? 1 : 0);
-        if (strInput.empty())
-            throw std::exception();
 
         std::string strOut;
         UNUM idnm = 0;
         UNUM val = 0;
         UNUM pow = 1;
-        std::vector<UNUM> vbytes;
 
-        std::string::const_iterator cit = strInput.begin();
         for (;;)
         {
-            // Compute the denominator of the division
-            if (*cit == ',') ++cit;
-            idnm = idnm * 10 + *cit - '0';
-            if (idnm < 2 && cit + 1 != strInput.end())
+            // compute the denominator
+            idnm = idnm * 10 + *it - '0';
+            if (idnm < 2 && it + 1 != strNumber.end())
             {
                 // Carry a 0
                 if (!strOut.empty())
-                    strOut += '0';
+                    strOut.push_back('0');
 
                 // The denominator has to be greater than 2 now
-                idnm = idnm * 10 + (*(cit + 1) - '0');
-
-                // Move to the next character
-                cit += 2;
+                idnm = idnm * 10 + (*(it + 1) - '0');
+                it += 2;
             }
             else
             {
-                // Check for completion the conversion
-                if (strInput.length() == 1 && idnm < 2)
+                // done?
+                if (idnm < 2 && strNumber.length() == 1)
                 {
-                    /////////////////////////////////////
-                    // Byte stream 0-255
-
                     if (idnm)
                         val += pow;
                     pow <<= 1;
                     if (!pow)
                     {
-                        vbytes.push_back(val);
+                        m_Data.push_back(val);
                         val = 0;
                         pow = 1;
                     }
-
-                    /////////////////////////////////////
-
                     break;
                 }
-
-                // Move to the next character
-                cit++;
+                it++;
             }
 
-            // Append the digit to the output that becomes the new input from integer division by 2
-            strOut += '0' + (unsigned)idnm / 2;
-            idnm = idnm % 2;
+            // append to the new string after division
+            strOut.push_back('0' + (unsigned)(idnm >> 1));
+            idnm %= 2;
 
-            // Has the input been processed
-            if (cit == strInput.end())
+            // done?
+            if (it == strNumber.end())
             {
-                /////////////////////////////////////
-                // Byte stream 0-255
-
                 if (idnm)
                     val += pow;
                 pow <<= 1;
                 if (!pow)
                 {
-                    vbytes.push_back(val);
+                    m_Data.push_back(val);
                     val = 0;
                     pow = 1;
                 }
 
-                /////////////////////////////////////
-
-                // Reset and restart (but not the incremental bytes, they carry over)
-                strInput = strOut;
+                // start processing over
+                strNumber = strOut;
                 strOut.clear();
                 idnm = 0;
-                cit = strInput.begin();
+                it = strNumber.begin();
             }
         }
 
         if (val)
-            vbytes.push_back(val);
+            m_Data.push_back(val);
 
-        size_t size = UNUM(vbytes.size());
-        if (size)
-        {
-            m_Data.resize(size);
-            for (size_t data = 0; data < size; ++data)
-                m_Data[data].U = vbytes[data];
-        }
-        else
+        if (!m_Data.size())
         {
             m_Data.resize(1);
             m_Data[0].U = 0;
