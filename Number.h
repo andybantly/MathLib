@@ -333,7 +333,7 @@ public:
             of = (out.m_Bytes[st] = m_Bytes[st].Add(rhs.m_Bytes[st], of), out.m_Bytes[st].OF);
         }
 
-        for (DATA lb, rb; st < stMax; ++st)
+        for (DATA lb, rb; st < stMax; ++st) // This loop occurs for mixed Number sizes
         {
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
@@ -341,7 +341,7 @@ public:
             of = (out.m_Bytes[st] = lb.Add(rb, of), out.m_Bytes[st].OF);
         }
 
-        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false; // Shift nbits - 1  to match size of data
+        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT;
 
         if (!rhs.IsOverFlow())
         {
@@ -374,7 +374,7 @@ public:
             of = (out.m_Bytes[st] = m_Bytes[st].Sub(rhs.m_Bytes[st], of), out.m_Bytes[st].OF);
         }
 
-        for (DATA lb, rb; st < stMax; ++st)
+        for (DATA lb, rb; st < stMax; ++st) // This loop occurs for mixed Number sizes
         {
             lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
@@ -382,7 +382,7 @@ public:
             of = (out.m_Bytes[st] = lb.Sub(rb, of), out.m_Bytes[st].OF);
         }
 
-        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT ? true : false;
+        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT;
         if (!rhs.IsOverFlow())
         {
             out.m_bOvf = ((m_bNeg != rhs.m_bNeg) && (m_bNeg != out.m_bNeg));
@@ -449,8 +449,6 @@ public:
         if (rhs == _0)
             return quot;
 
-        const static DATA One1(1), Neg1(NTH);
-
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
 
         Number rem = *this;
@@ -482,55 +480,27 @@ public:
             }
         }
 
-        if (!m_bNeg)
+        while (!m_bNeg ? dbl < rem : dbl > rem)
         {
-            while (dbl < rem)
-            {
-                dbl.Shl();
-                pow.Shl(stn++);
-            }
-
-            quot = _0;
-            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
-            {
-                if (dbl > rem)
-                {
-                    dbl.Shr();
-                    pow.Shr(stn--);
-                    continue;
-                }
-
-                quot = quot.Add(pow, stn >> SHFM);
-                rem -= dbl;
-
-                dbl.Shr();
-                pow.Shr(stn--);
-            }
+            dbl.Shl();
+            pow.Shl(stn++);
         }
-        else
+
+        quot = _0;
+        for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
         {
-            while (dbl > rem)
+            if (!m_bNeg ? dbl > rem : dbl < rem)
             {
-                dbl.Shl();
-                pow.Shl(stn++);
-            }
-
-            quot = _0;
-            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
-            {
-                if (dbl < rem)
-                {
-                    dbl.Shr();
-                    pow.Shr(stn--);
-                    continue;
-                }
-
-                quot = quot.Add(pow, stn >> SHFM);
-                rem -= dbl;
-
                 dbl.Shr();
                 pow.Shr(stn--);
+                continue;
             }
+
+            quot = quot.Add(pow, stn >> SHFM);
+            rem -= dbl;
+
+            dbl.Shr();
+            pow.Shr(stn--);
         }
 
         return quot;
@@ -542,15 +512,13 @@ public:
             throw std::exception();
 
         const static Number _0(0);
-        Number quot;
+        Number rem;
         if (rhs == _0)
-            return quot;
-
-        DATA One1(1), Neg1(NTH);
+            return rem;
 
         size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
 
-        Number rem = *this;
+        rem = *this;
         rem.SetSize(stMB);
 
         Number rhsin = rhs;
@@ -560,9 +528,7 @@ public:
         Number dbl = rhsin;
         dbl.SetSize(stMB);
 
-        Number pow(m_bNeg == rhs.m_bNeg ? 1 : -1); pow.SetSize(stMB);
         size_t stn = 0;
-
         size_t dlh = dbl.MSb();
         if (dlh != size_t(-1))
         {
@@ -573,61 +539,22 @@ public:
                 {
                     size_t nb = rlh - dlh + 1;
                     dbl.Shl(-1, nb);
-                    pow.Shl(-1, nb);
                     stn = nb;
                 }
             }
         }
 
-        if (!m_bNeg)
+        while (!m_bNeg ? dbl < rem : dbl > rem) { dbl.Shl(); ++stn; }
+
+        for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
         {
-            while (dbl < rem)
+            if (!m_bNeg ? dbl > rem : dbl < rem)
             {
-                dbl.Shl();
-                pow.Shl(stn++);
-            }
-
-            quot = _0;
-            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
-            {
-                if (dbl > rem)
-                {
-                    dbl.Shr();
-                    pow.Shr(stn--);
-                    continue;
-                }
-
-                quot = quot.Add(pow, stn >> SHFM);
-                rem -= dbl;
-
                 dbl.Shr();
-                pow.Shr(stn--);
+                continue;
             }
-        }
-        else
-        {
-            while (dbl > rem)
-            {
-                dbl.Shl();
-                pow.Shl(stn++);
-            }
-
-            quot = _0;
-            for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
-            {
-                if (dbl < rem)
-                {
-                    dbl.Shr();
-                    pow.Shr(stn--);
-                    continue;
-                }
-
-                quot = quot.Add(pow, stn >> SHFM);
-                rem -= dbl;
-
-                dbl.Shr();
-                pow.Shr(stn--);
-            }
+            rem -= dbl;
+            dbl.Shr();
         }
 
         return rem;
@@ -1180,7 +1107,7 @@ public:
             }
             m_Bytes[iByte].U <<= nbits;
 
-            m_bNeg = (m_Bytes[m_Bytes.size() - 1].U & AND) >> SHFT ? true : false;
+            m_bNeg = (m_Bytes[m_Bytes.size() - 1].U & AND) >> SHFT;
         }
 
         // Right Bit Shift by n bits -> halve value n times
