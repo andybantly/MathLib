@@ -122,7 +122,7 @@ public:
     {
         if (this != &rhs)
         {
-            m_Bytes = rhs.m_Bytes;
+            m_Data = rhs.m_Data;
             m_bNeg = rhs.m_bNeg;
             m_bNan = rhs.m_bNan;
             m_bOvf = rhs.m_bOvf;
@@ -240,14 +240,14 @@ protected:
         size_t size = UNUM(vbytes.size());
         if (size)
         {
-            m_Bytes.resize(size);
-            for (size_t iByte = 0; iByte < size; ++iByte)
-                m_Bytes[iByte].U = vbytes[iByte];
+            m_Data.resize(size);
+            for (size_t data = 0; data < size; ++data)
+                m_Data[data].U = vbytes[data];
         }
         else
         {
-            m_Bytes.resize(1);
-            m_Bytes[0].U = 0;
+            m_Data.resize(1);
+            m_Data[0].U = 0;
         }
 
         m_bNeg = false;
@@ -267,8 +267,8 @@ protected:
         m_bNan = false;
         m_bOvf = false;
 
-        m_Bytes.resize(1);
-        m_Bytes[0] = (UNUM)(u);
+        m_Data.resize(1);
+        m_Data[0] = (UNUM)(u);
 
         m_bNeg = u < 0;
     }
@@ -279,10 +279,10 @@ protected:
         m_bNan = false;
         m_bOvf = false;
 
-        m_Bytes.resize(2);
+        m_Data.resize(2);
 
-        m_Bytes[0] = ((UNUM)(u)) & 0x00000000FFFFFFFF;
-        m_Bytes[1] = ((UNUM)((u) >> 32));
+        m_Data[0] = ((UNUM)(u)) & 0x00000000FFFFFFFF;
+        m_Data[1] = ((UNUM)((u) >> 32));
 
         m_bNeg = u < 0;
     }
@@ -292,9 +292,9 @@ protected:
         m_bNAN = false;
         m_bOvf = false;
 
-        m_Bytes.resize(2);
-        m_Bytes[0] = ((uint32_t)(u)) & 0x0000FFFF; // 16
-        m_Bytes[1] = ((uint32_t)(u) >> 0x10); // 32
+        m_Data.resize(2);
+        m_Data[0] = ((uint32_t)(u)) & 0x0000FFFF; // 16
+        m_Data[1] = ((uint32_t)(u) >> 0x10); // 32
 
         m_bNeg = u < 0;
     }
@@ -304,11 +304,11 @@ protected:
         m_bNAN = false;
         m_bOvf = false;
 
-        m_Bytes.resize(4);
-        m_Bytes[0] = (uint32_t)(u) & 0xFF;
-        m_Bytes[1] = ((uint32_t)(u) >> 0x08) & 0xFF;
-        m_Bytes[2] = ((uint32_t)(u) >> 0x10) & 0xFF;
-        m_Bytes[3] = (uint32_t)(u) >> 0x18;
+        m_Data.resize(4);
+        m_Data[0] = (uint32_t)(u) & 0xFF;
+        m_Data[1] = ((uint32_t)(u) >> 0x08) & 0xFF;
+        m_Data[2] = ((uint32_t)(u) >> 0x10) & 0xFF;
+        m_Data[3] = (uint32_t)(u) >> 0x18;
 
         m_bNeg = u < 0;
     }
@@ -320,7 +320,7 @@ public:
         if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
-        size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t l = m_Data.size(), r = rhs.m_Data.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
         const static DATA Zero(0), Neg1(NTH);
@@ -329,26 +329,26 @@ public:
 
         for (; st < stMin; ++st)
         {
-            if (of == 0 && m_Bytes[st].U == 0 && rhs.m_Bytes[st].U == 0) continue;
-            of = (out.m_Bytes[st] = m_Bytes[st].Add(rhs.m_Bytes[st], of), out.m_Bytes[st].OF);
+            if (of == 0 && m_Data[st].U == 0 && rhs.m_Data[st].U == 0) continue;
+            of = (out.m_Data[st] = m_Data[st].Add(rhs.m_Data[st], of), out.m_Data[st].OF);
         }
 
         for (DATA lb, rb; st < stMax; ++st) // This loop occurs for mixed Number sizes
         {
-            lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
-            rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+            lb = st < l ? m_Data[st] : (m_bNeg ? Neg1 : Zero);
+            rb = st < r ? rhs.m_Data[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (out.m_Bytes[st] = lb.Add(rb, of), out.m_Bytes[st].OF);
+            of = (out.m_Data[st] = lb.Add(rb, of), out.m_Data[st].OF);
         }
 
-        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT;
+        out.m_bNeg = (out.m_Data[out.GetSize() - 1].U & AND) >> SHFT;
 
         if (!rhs.IsOverFlow())
         {
             out.m_bOvf = ((m_bNeg == rhs.m_bNeg) && (m_bNeg != out.m_bNeg));
             if (out.m_bOvf)
             {
-                out.m_Bytes.push_back(0);
+                out.m_Data.push_back(0);
                 out.m_bNeg = false;
             }
         }
@@ -361,7 +361,7 @@ public:
         if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
-        size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t l = m_Data.size(), r = rhs.m_Data.size();
         size_t stMin = l == r ? l : (l < r ? l : r);
         size_t stMax = l == r ? l : (l < r ? r : l);
         const static DATA Zero(0), Neg1(NTH);
@@ -370,25 +370,25 @@ public:
 
         for (; st < stMin; ++st)
         {
-            if (of == 0 && m_Bytes[st].U == 0 && rhs.m_Bytes[st].U == 0) continue;
-            of = (out.m_Bytes[st] = m_Bytes[st].Sub(rhs.m_Bytes[st], of), out.m_Bytes[st].OF);
+            if (of == 0 && m_Data[st].U == 0 && rhs.m_Data[st].U == 0) continue;
+            of = (out.m_Data[st] = m_Data[st].Sub(rhs.m_Data[st], of), out.m_Data[st].OF);
         }
 
         for (DATA lb, rb; st < stMax; ++st) // This loop occurs for mixed Number sizes
         {
-            lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
-            rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+            lb = st < l ? m_Data[st] : (m_bNeg ? Neg1 : Zero);
+            rb = st < r ? rhs.m_Data[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (out.m_Bytes[st] = lb.Sub(rb, of), out.m_Bytes[st].OF);
+            of = (out.m_Data[st] = lb.Sub(rb, of), out.m_Data[st].OF);
         }
 
-        out.m_bNeg = (out.m_Bytes[out.GetSize() - 1].U & AND) >> SHFT;
+        out.m_bNeg = (out.m_Data[out.GetSize() - 1].U & AND) >> SHFT;
         if (!rhs.IsOverFlow())
         {
             out.m_bOvf = ((m_bNeg != rhs.m_bNeg) && (m_bNeg != out.m_bNeg));
             if (out.m_bOvf)
             {
-                out.m_Bytes.push_back(m_bNeg ? NTH : 0);
+                out.m_Data.push_back(m_bNeg ? NTH : 0);
                 out.m_bNeg = m_bNeg;
             }
         }
@@ -406,18 +406,18 @@ public:
 
         bool bND = l1 >= r1;
 
-        size_t stMB = bND ? m_Bytes.size() : rhs.m_Bytes.size();
+        size_t stMB = bND ? m_Data.size() : rhs.m_Data.size();
         Number prod(0); prod.SetSize(stMB);
         Number mulc = rhs;
 
         if (bND) // N1s >= D1s
         {
             Number mulp = *this;
-            for (size_t iByte = 0, nBytes = mulc.m_Bytes.size(); iByte < nBytes; ++iByte)
+            for (size_t data = 0, ndata = mulc.m_Data.size(); data < ndata; ++data)
             {
                 for (UNUM ui = 1; ui != 0; ui <<= 1)
                 {
-                    if (ui & mulc.m_Bytes[iByte].U)
+                    if (ui & mulc.m_Data[data].U)
                         prod += mulp;
                     mulp.Shl();
                 }
@@ -425,11 +425,11 @@ public:
         }
         else // D1s > N1s
         {
-            for (size_t iByte = 0, nBytes = m_Bytes.size(); iByte < nBytes; ++iByte)
+            for (size_t data = 0, ndata = m_Data.size(); data < ndata; ++data)
             {
                 for (UNUM ui = 1; ui != 0; ui <<= 1)
                 {
-                    if (ui & m_Bytes[iByte].U)
+                    if (ui & m_Data[data].U)
                         prod += mulc;
                     mulc.Shl();
                 }
@@ -449,7 +449,7 @@ public:
         if (rhs == _0)
             return quot;
 
-        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
+        size_t stMB = m_Data.size() > rhs.m_Data.size() ? m_Data.size() : rhs.m_Data.size();
 
         Number rem = *this;
         rem.SetSize(stMB);
@@ -516,7 +516,7 @@ public:
         if (rhs == _0)
             return rem;
 
-        size_t stMB = m_Bytes.size() > rhs.m_Bytes.size() ? m_Bytes.size() : rhs.m_Bytes.size();
+        size_t stMB = m_Data.size() > rhs.m_Data.size() ? m_Data.size() : rhs.m_Data.size();
 
         rem = *this;
         rem.SetSize(stMB);
@@ -623,13 +623,13 @@ public:
         if (m_bNeg != rhs.m_bNeg)
             return false;
 
-        size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t l = m_Data.size(), r = rhs.m_Data.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
         const static DATA Zero(0), Neg1(NTH);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
-            DATA lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
-            DATA rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+            DATA lb = st < l ? m_Data[st] : (m_bNeg ? Neg1 : Zero);
+            DATA rb = st < r ? rhs.m_Data[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (lb.U != rb.U)
                 return false;
         }
@@ -648,13 +648,13 @@ public:
         if (m_bNeg != rhs.m_bNeg)
             return m_bNeg;
 
-        size_t l = m_Bytes.size(), r = rhs.m_Bytes.size();
+        size_t l = m_Data.size(), r = rhs.m_Data.size();
         size_t stMax = l == r ? l : (l < r ? r : l);
         const static DATA Zero(0), Neg1(NTH);
         for (size_t st = stMax - 1; st != size_t(-1); --st)
         {
-            DATA lb = st < l ? m_Bytes[st] : (m_bNeg ? Neg1 : Zero);
-            DATA rb = st < r ? rhs.m_Bytes[st] : (rhs.m_bNeg ? Neg1 : Zero);
+            DATA lb = st < l ? m_Data[st] : (m_bNeg ? Neg1 : Zero);
+            DATA rb = st < r ? rhs.m_Data[st] : (rhs.m_bNeg ? Neg1 : Zero);
             if (lb.U != rb.U)
                 return m_bNeg ? lb.U < rb.U : lb.U < rb.U;
         }
@@ -667,7 +667,7 @@ public:
         if (m_bNan)
             throw std::exception();
 
-        size_t size = m_Bytes.size();
+        size_t size = m_Data.size();
         Number Out(0); Out.SetSize(size);
         const static Number _1(1, true);
 
@@ -695,14 +695,14 @@ public:
         std::string Num2(1, '0');
         std::string Disp(1, '0');
 
-        UNUM iByte = 0;
+        UNUM data = 0;
         UNUM pow = 1;
         do
         {
             UNUM iProd;
             UNUM iCarry;
 
-            if (m_Bytes[iByte].U & pow) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,64,128
+            if (m_Data[data].U & pow) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,64,128
             {
                 Disp.clear();
                 iCarry = 0;
@@ -750,10 +750,10 @@ public:
 
             if (!(pow <<= 1)) // When doubling overflows to 0
             {
-                iByte++;
+                data++;
                 pow = 1;
             }
-        } while (iByte != m_Bytes.size());
+        } while (data != m_Data.size());
 
         return std::string(Disp.rbegin(), Disp.rend());
     }
@@ -761,12 +761,12 @@ public:
     size_t Count1() const
     {
         size_t stcnt = 0;
-        for (size_t st = 0; st < m_Bytes.size(); ++st)
+        for (size_t st = 0; st < m_Data.size(); ++st)
         {
             for (UNUM uj = 0; uj < BITWIDTH; ++uj)
             {
                 UNUM ui = _pow[uj];
-                if (m_Bytes[st].U & ui)
+                if (m_Data[st].U & ui)
                     ++stcnt;
             }
         }
@@ -775,30 +775,30 @@ public:
 
     Number BitNot() const
     {
-        size_t size = m_Bytes.size();
+        size_t size = m_Data.size();
         Number Out(0); Out.SetSize(size);
 
-        for (UNUM iByte = 0; iByte != size; ++iByte) { Out.m_Bytes[iByte].U = ~m_Bytes[iByte].U; }
+        for (UNUM data = 0; data != size; ++data) { Out.m_Data[data].U = ~m_Data[data].U; }
 
         return Out;
     }
 
     std::string ToBinary() const
     {
-        size_t nbit = m_Bytes.size() * size_t(BITWIDTH) - 1;
+        size_t nbit = m_Data.size() * size_t(BITWIDTH) - 1;
         std::string sbin(nbit + 1, '0');
-        UNUM iByte = 0;
+        UNUM data = 0;
         UNUM pow = 1;
         do
         {
-            if (m_Bytes[iByte].U & pow)
+            if (m_Data[data].U & pow)
                 sbin[nbit] = '1';
             if (!(pow <<= 1))
             {
-                iByte++;
+                data++;
                 pow = 1;
             }
-        } while (--nbit, iByte != m_Bytes.size());
+        } while (--nbit, data != m_Data.size());
         return sbin;
     }
 
@@ -1027,13 +1027,13 @@ public:
     //
     void SetSize(size_t size)
     {
-        if (size != m_Bytes.size())
-            m_Bytes.resize(size, m_bNeg ? NTH : 0);
+        if (size != m_Data.size())
+            m_Data.resize(size, m_bNeg ? NTH : 0);
     }
 
     size_t GetSize() const
     {
-        return m_Bytes.size();
+        return m_Data.size();
     }
 
     protected:
@@ -1044,12 +1044,12 @@ public:
             size_t lhp(size_t(-1));
             size_t lhn(size_t(-1));
 
-            size_t bit = m_Bytes.size() * BITWIDTH - 1;
-            size_t iByte = m_Bytes.size() - 1;
+            size_t bit = m_Data.size() * BITWIDTH - 1;
+            size_t data = m_Data.size() - 1;
             UNUM pow = AND;
             do
             {
-                if (!m_bNeg && (m_Bytes[iByte].U & pow))
+                if (!m_bNeg && (m_Data[data].U & pow))
                 {
                     if (lhp == size_t(-1))
                     {
@@ -1057,7 +1057,7 @@ public:
                         break;
                     }
                 }
-                else if (m_bNeg && (~m_Bytes[iByte].U & pow))
+                else if (m_bNeg && (~m_Data[data].U & pow))
                 {
                     if (lhn == size_t(-1))
                     {
@@ -1068,10 +1068,10 @@ public:
 
                 if (!(pow >>= 1))
                 {
-                    iByte--;
+                    data--;
                     pow = AND;
                 }
-            } while (--bit, iByte != -1);
+            } while (--bit, data != -1);
 
             return !m_bNeg ? lhp : lhn;
         }
@@ -1080,88 +1080,88 @@ public:
         void Shl(size_t stbit = size_t(-1), size_t nbits = 1)
         {
             size_t stn = 0;
-            size_t iByte = m_Bytes.size() - 1;
+            size_t data = m_Data.size() - 1;
             if (stbit != size_t(-1))
             {
-                iByte = (stbit >> SHFM) + 1;
-                if (iByte >= m_Bytes.size())
-                    iByte = m_Bytes.size() - 1;
-                if (iByte)
-                    stn = iByte - 1;
+                data = (stbit >> SHFM) + 1;
+                if (data >= m_Data.size())
+                    data = m_Data.size() - 1;
+                if (data)
+                    stn = data - 1;
             }
 
             if (nbits >= BITWIDTH)
             {
-                size_t tmp = iByte;
+                size_t tmp = data;
                 size_t sb = nbits / BITWIDTH;
                 if (sb)
                 {
-                    for (; iByte != -1; --iByte)
+                    for (; data != -1; --data)
                     {
-                        if (iByte >= sb)
+                        if (data >= sb)
                         {
-                            m_Bytes[iByte].U = m_Bytes[iByte - sb].U;
-                            m_Bytes[iByte - sb].U = 0;
+                            m_Data[data].U = m_Data[data - sb].U;
+                            m_Data[data - sb].U = 0;
                         }
                     }
                     nbits = nbits % BITWIDTH;
                 }
-                iByte = tmp;
+                data = tmp;
             }
 
-            for (; iByte != stn; --iByte)
+            for (; data != stn; --data)
             {
-                m_Bytes[iByte].U <<= nbits;
-                m_Bytes[iByte].U |= (m_Bytes[iByte - 1].U >> (BITWIDTH - nbits));
+                m_Data[data].U <<= nbits;
+                m_Data[data].U |= (m_Data[data - 1].U >> (BITWIDTH - nbits));
             }
-            m_Bytes[iByte].U <<= nbits;
+            m_Data[data].U <<= nbits;
 
-            m_bNeg = (m_Bytes[m_Bytes.size() - 1].U & AND) >> SHFT;
+            m_bNeg = (m_Data[m_Data.size() - 1].U & AND) >> SHFT;
         }
 
         // Right Bit Shift by n bits -> halve value n times
         void Shr(size_t stbit = size_t(-1), size_t nbits = 1)
         {
-            size_t stn = m_Bytes.size() - 1;
-            size_t iByte = 0;
+            size_t stn = m_Data.size() - 1;
+            size_t data = 0;
             if (stbit != size_t(-1))
             {
                 stn = stbit >> SHFM;
-                if (stn >= m_Bytes.size())
-                    stn = m_Bytes.size() - 1;
-                iByte = stn;
-                if (iByte)
-                    --iByte;
+                if (stn >= m_Data.size())
+                    stn = m_Data.size() - 1;
+                data = stn;
+                if (data)
+                    --data;
             }
 
             if (nbits >= BITWIDTH)
             {
-                size_t tmp = iByte;
+                size_t tmp = data;
                 size_t sb = nbits / BITWIDTH;
                 if (sb)
                 {
-                    for (; iByte != m_Bytes.size() - 1; ++iByte)
+                    for (; data != m_Data.size() - 1; ++data)
                     {
-                        if (iByte + sb < m_Bytes.size())
+                        if (data + sb < m_Data.size())
                         {
-                            m_Bytes[iByte].U = m_Bytes[iByte + sb].U;
-                            m_Bytes[iByte + sb].U = 0;
+                            m_Data[data].U = m_Data[data + sb].U;
+                            m_Data[data + sb].U = 0;
                         }
                     }
                     nbits = nbits % BITWIDTH;
                 }
-                iByte = tmp;
+                data = tmp;
             }
 
-            for (; iByte != stn; ++iByte)
+            for (; data != stn; ++data)
             {
-                m_Bytes[iByte].U >>= nbits;
-                m_Bytes[iByte].U |= (m_Bytes[iByte + 1].U << (BITWIDTH - nbits));
+                m_Data[data].U >>= nbits;
+                m_Data[data].U |= (m_Data[data + 1].U << (BITWIDTH - nbits));
             }
 
-            m_Bytes[iByte].U >>= nbits;
+            m_Data[data].U >>= nbits;
             if (m_bNeg)
-                m_Bytes[iByte].U |= AND;
+                m_Data[data].U |= AND;
         }
 
     public: // helpers
@@ -1170,7 +1170,7 @@ public:
         const bool IsNan() const { return m_bNan; }
 
     protected:
-        std::vector<DATA> m_Bytes;
+        std::vector<DATA> m_Data;
         bool m_bNeg;
         bool m_bNan;
         bool m_bOvf;
