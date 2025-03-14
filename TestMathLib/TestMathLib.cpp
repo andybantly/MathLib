@@ -237,10 +237,24 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteShift)
 		{
-			std::string s = "1326124800";
-			std::string e = "2652249600";
-			Number A = s;
+			std::string s, e;
+			int a;
+			Number A;
+
+			A = a = -31;
+			a = a << 1;
 			A <<= 1;
+			s = std::to_string(a);
+			if (s != A.ToDisplay())
+				Assert::AreEqual(s, A.ToDisplay());
+
+			e = "2652249600";
+			A = 1326124800;
+			s = A.ToDisplay();
+			A = "1326124800";
+			s = A.ToDisplay();
+			A <<= 1;
+			s = A.ToDisplay();
 			if (e != A.ToDisplay())
 				Assert::AreEqual(e, A.ToDisplay());
 		}

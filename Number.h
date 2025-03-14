@@ -137,6 +137,8 @@ protected:
         if (strNumberIn.empty())
             throw std::exception();
 
+        m_Data.clear();
+
         std::string strNumber = NumberTranscriber::getInstance().ToNumber(strNumberIn);
         if (strNumber.empty())
             strNumber = strNumberIn;
