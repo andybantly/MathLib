@@ -251,7 +251,7 @@ namespace TestMathLib
 		TEST_METHOD(ByteShift)
 		{
 			std::string s, e;
-			int a;
+			int64_t a;
 			Number A;
 
 			A = a = -31;
@@ -265,8 +265,38 @@ namespace TestMathLib
 			A = 1326124800;
 			A <<= 1;
 			s = A.ToDisplay();
-			if (e != A.ToDisplay())
-				Assert::AreEqual(e, A.ToDisplay());
+			if (e != s)
+				Assert::AreEqual(e, s);
+
+			A = a = 0x40000000;
+			a <<= 8;
+			A <<= 8;
+			e = std::to_string(a);
+			s = A.ToDisplay();
+			if (e != s)
+				Assert::AreEqual(e, s);
+
+			for (UNUM ipow = 0; ipow < BITWIDTH - 1; ++ipow)
+			{
+				UNUM pow = _pow[ipow];
+				for (int nb = 1; nb <= BITWIDTH; ++nb)
+				{
+					A = a = pow;
+					a <<= nb;
+					A <<= nb;
+					e = std::to_string(a);
+					s = A.ToDisplay();
+					if (e != s)
+						Assert::AreEqual(e, s);
+
+					a >>= nb;
+					A >>= nb;
+					e = std::to_string(a);
+					s = A.ToDisplay();
+					if (e != s)
+						Assert::AreEqual(e, s);
+				}
+			}
 		}
 
 		TEST_METHOD(ByteCornerCases)
