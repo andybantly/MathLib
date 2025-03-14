@@ -376,7 +376,7 @@ public:
         size_t l1 = Count1();
         size_t r1 = rhs.Count1();
 
-        bool bND = l1 >= r1;
+        bool bND = l1 > r1;
 
         size_t stMB = bND ? m_Data.size() : rhs.m_Data.size();
         Number prod(0); prod.SetSize(stMB);
@@ -576,9 +576,13 @@ public:
         }
 
         const static Number _1(1);
+        const static Number _0(0);
 
-        prme = _1;
-        for (Number mul = *this; mul != _1; --mul)
+        prme = *this;
+        if (prme == _1 || prme == _0)
+            return prme;
+
+        for (Number mul = prme - _1; mul != _1; --mul)
             prme *= mul;
 
         return prme;

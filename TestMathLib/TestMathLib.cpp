@@ -150,30 +150,25 @@ namespace TestMathLib
 			if (std::to_string(c) != s)
 				Assert::AreEqual(std::to_string(c), s);
 
-			B = 256;
+			B = b = 256;
+			b >> 1;
 			B >> 1;
 			s = B.ToDisplay();
-			B = 0;
-			s = B.ToBinary();
-			s = B.ToDisplay();
-			B = -1;
-			s = B.ToBinary();
-			s = B.ToDisplay();
-			B = -2;
-			s = B.ToBinary();
-			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
+
+			B = b = -2;
+			b << 1;
 			B << 1;
-			s = B.ToBinary();
 			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
+
+			b >> 1;
 			B >> 1;
-			s = B.ToBinary();
 			s = B.ToDisplay();
-			B = -3;
-			s = B.ToBinary();
-			s = B.ToDisplay();
-			B = -127;
-			s = B.ToBinary();
-			s = B.ToDisplay();
+			if (std::to_string(b) != s)
+				Assert::AreEqual(std::to_string(b), s);
 
 			////// TEST CASE //////
 			A = a = 1, B = b = 255;
@@ -222,20 +217,32 @@ namespace TestMathLib
 			E = D >>= 2; // D changes
 			if (D.ToDisplay() == E.ToDisplay())
 				Assert::AreEqual(D.ToDisplay(), E.ToDisplay());
-
-//			Number N25p = "15511210043330985984000000";
-//			B = B.Prime();
-//			if (B.ToDisplay() != N25p.ToDisplay())
-//				Assert::AreEqual(B.ToDisplay(), N25p.ToDisplay());
 		}
 
 		TEST_METHOD(BytePI)
 		{
-			Number PI = "3141592653589793";
-			std::string s = PI.ToBinary();
-			std::cout << s << std::endl;
-			s = PI.ToDisplay();
-			std::cout << s << std::endl;
+			std::string s = "3141592653589793";
+			Number PI = s;
+//			s = PI.ToBinary();
+//			s = PI.ToDisplay();
+		}
+
+		TEST_METHOD(BytePrime)
+		{
+			Number B = 25, N25p = "15511210043330985984000000";
+			B = B.Prime();
+			if (B.ToDisplay() != N25p.ToDisplay())
+				Assert::AreEqual(N25p.ToDisplay(), B.ToDisplay());
+		}
+
+		TEST_METHOD(ByteShift)
+		{
+			std::string s = "1326124800";
+			std::string e = "2652249600";
+			Number A = s;
+			A <<= 1;
+			if (e != A.ToDisplay())
+				Assert::AreEqual(e, A.ToDisplay());
 		}
 
 		TEST_METHOD(ByteCornerCases)
