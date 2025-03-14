@@ -375,18 +375,25 @@ public:
         if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
-        size_t l1 = Count1();
-        size_t r1 = rhs.Count1();
+        Number prod(0); 
+        if (*this == prod || rhs == prod)
+            return prod;
+
+        Number This = m_bNeg ? this->TwosComplement() : *this;
+        Number That = rhs.m_bNeg ? rhs.TwosComplement() : rhs;
+
+        size_t l1 = This.Count1();
+        size_t r1 = That.Count1();
 
         bool bND = l1 > r1;
 
-        size_t stMB = bND ? m_Data.size() : rhs.m_Data.size();
-        Number prod(0); prod.SetSize(stMB);
-        Number mulc = rhs;
+        size_t stMB = bND ? This.m_Data.size() : That.m_Data.size();
+        prod.SetSize(stMB);
+        Number mulc = That;
 
         if (bND) // N1s >= D1s
         {
-            Number mulp = *this;
+            Number mulp = This;
             for (size_t data = 0, ndata = mulc.m_Data.size(); data < ndata; ++data)
             {
                 for (UNUM ui = 1; ui != 0; ui <<= 1)
@@ -399,16 +406,19 @@ public:
         }
         else // D1s > N1s
         {
-            for (size_t data = 0, ndata = m_Data.size(); data < ndata; ++data)
+            for (size_t data = 0, ndata = This.m_Data.size(); data < ndata; ++data)
             {
                 for (UNUM ui = 1; ui != 0; ui <<= 1)
                 {
-                    if (ui & m_Data[data].U)
+                    if (ui & This.m_Data[data].U)
                         prod += mulc;
                     mulc.Shl();
                 }
             }
         }
+
+        if (m_bNeg != rhs.m_bNeg)
+            prod = prod.TwosComplement();
 
         return prod;
     }
@@ -418,10 +428,9 @@ public:
         if (m_bNan || rhs.m_bNan)
             throw std::exception();
 
-        const static Number _0(0);
-        Number quot;
-        if (rhs == _0)
-            return quot;
+        Number quot(0);
+        if (rhs == quot)
+            return Number();
 
         size_t stMB = m_Data.size() > rhs.m_Data.size() ? m_Data.size() : rhs.m_Data.size();
 
@@ -460,7 +469,6 @@ public:
             pow.Shl(stn++);
         }
 
-        quot = _0;
         for (size_t ndbl = stn + 1; ndbl > 0; --ndbl)
         {
             if (!m_bNeg ? dbl > rem : dbl < rem)
@@ -1094,7 +1102,13 @@ public:
             }
             m_Data[data].U <<= nbits;
 
-            m_bNeg = (m_Data[m_Data.size() - 1].U & AND) >> SHFT;
+            bool bNeg = (m_Data[m_Data.size() - 1].U & AND) >> SHFT ? true : false;
+            if (m_bNeg != bNeg)
+            {
+                // shift caused sign change
+                if (!m_bNeg)
+                    SetSize(GetSize() + 1);
+            }
         }
 
         // Right Bit Shift by n bits -> halve value n times

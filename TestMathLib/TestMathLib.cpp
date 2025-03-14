@@ -235,6 +235,19 @@ namespace TestMathLib
 				Assert::AreEqual(N25p.ToDisplay(), B.ToDisplay());
 		}
 
+		TEST_METHOD(ByteTestInit)
+		{
+			std::string s,s1;
+			Number A;
+
+			A = 1326124800;
+			s = A.ToDisplay();
+			A = "1326124800";
+			s1 = A.ToDisplay();
+			if (s1 != s)
+				Assert::AreEqual(s, s1);
+		}
+
 		TEST_METHOD(ByteShift)
 		{
 			std::string s, e;
@@ -250,9 +263,6 @@ namespace TestMathLib
 
 			e = "2652249600";
 			A = 1326124800;
-			s = A.ToDisplay();
-			A = "1326124800";
-			s = A.ToDisplay();
 			A <<= 1;
 			s = A.ToDisplay();
 			if (e != A.ToDisplay())
