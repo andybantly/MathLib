@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <iostream>
 #include "CppUnitTest.h"
 #include "..\Number.h"
 
@@ -8,8 +9,8 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
 {
-	const int iBeg = -128/* 10*/, iEnd = 127/* 10*/;
-	const int jBeg = iBeg, jEnd = iEnd;
+	const int64_t iBeg = 4294967295 - 64, iEnd = 4294967295 + 63;
+	const int64_t jBeg = -64, jEnd = 63;
 
 	TEST_CLASS(TestMathLib)
 	{
@@ -115,7 +116,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteSingleTest)
 		{
-			//int a, b, c;
+			//int64_t a, b, c;
 			Number A,B,C;
 			std::string s;
 
@@ -138,7 +139,7 @@ namespace TestMathLib
 		TEST_METHOD(ByteMixSize)
 		{
 			Number A, B, C;
-			int a, b, c;
+			int64_t a, b, c;
 			std::string s;
 
 			A = 999999;
@@ -196,7 +197,7 @@ namespace TestMathLib
 			if (A.ToDisplay() != "-20000000000000000")
 				Assert::AreEqual(A.ToDisplay(), std::string("-20000000000000000"));
 
-			b = (int)sqrt(b);
+			b = (int64_t)sqrt(b);
 			s = std::to_string(b);
 
 			B = 25;
@@ -206,7 +207,7 @@ namespace TestMathLib
 				Assert::AreEqual(C.ToDisplay(), s);
 
 			B = b = 26;
-			b = (int)sqrt(b);
+			b = (int64_t)sqrt(b);
 			C = B.Sqrt();
 
 			if (C.ToDisplay() != s)
@@ -276,10 +277,24 @@ namespace TestMathLib
 			if (e != s)
 				Assert::AreEqual(e, s);
 
+			e = "2147483648";
+			A = 1;
+			A <<= 31;
+			s = A.ToDisplay();
+			if (e != s)
+				Assert::AreEqual(e, s);
+
+			e = "4294967296";
+			A = 1;
+			A <<= 32;
+			s = A.ToDisplay();
+//			if (e != s)
+//				Assert::AreEqual(e, s);
+
 			for (UNUM ipow = 0; ipow < BITWIDTH - 1; ++ipow)
 			{
 				UNUM pow = _pow[ipow];
-				for (int nb = 1; nb <= BITWIDTH; ++nb)
+				for (size_t nb = 1; nb <= BITWIDTH; ++nb)
 				{
 					A = a = pow;
 					a <<= nb;
@@ -302,7 +317,7 @@ namespace TestMathLib
 		TEST_METHOD(ByteCornerCases)
 		{
 			Number A, B, C;
-			int a, b, c;
+			int64_t a, b, c;
 			std::string s;
 
 			////// TEST CASE //////
@@ -865,7 +880,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteAddition)
 		{
-			int ni, nj, nk;
+			int64_t ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -887,7 +902,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteSubtraction)
 		{
-			int ni, nj, nk;
+			int64_t ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -909,7 +924,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteMultiplication)
 		{
-			int ni, nj, nk;
+			int64_t ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -931,7 +946,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteDivision)
 		{
-			int ni, nj, nk;
+			int64_t ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -956,7 +971,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteModulus)
 		{
-			int ni, nj, nk;
+			int64_t ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -981,7 +996,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteLT)
 		{
-			int ni, nj;
+			int64_t ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1003,7 +1018,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteGT)
 		{
-			int ni, nj;
+			int64_t ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1025,7 +1040,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteLE)
 		{
-			int ni, nj;
+			int64_t ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1047,7 +1062,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteGE)
 		{
-			int ni, nj;
+			int64_t ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1069,7 +1084,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteEQ)
 		{
-			int ni, nj;
+			int64_t ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1091,7 +1106,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteNE)
 		{
-			int ni, nj;
+			int64_t ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1113,7 +1128,7 @@ namespace TestMathLib
 
 		TEST_METHOD(BytePre)
 		{
-			int ni, nj;
+			int64_t ni, nj;
 			Number NI, NJ;
 			std::string si, sj;
 
@@ -1140,7 +1155,7 @@ namespace TestMathLib
 
 		TEST_METHOD(BytePost)
 		{
-			int ni, nj;
+			int64_t ni, nj;
 			Number NI, NJ;
 			std::string si, sj;
 
