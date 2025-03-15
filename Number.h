@@ -10,10 +10,11 @@
 /*
 * CONSTANT/TYPEDEF MEANINGS
 * SHFT - Number of bits to left shift. BITWIDTH - 1 in value.
-* SHFM - Number of bits for multiplication. (3=8 bits, 4=16 bits, etc)
+* SHFM - Number of bits for multiplication. (3=8 bits, 4=16 bits, 5=32, 6=64, etc)
 * AND  - Number of bits for masking in shifting
 * NTH  - Maximum value of the internal type
-* UNUM - The mapping to the actual type used (change one place, changes many)
+* UNUM - The mapping to the actual type used
+* BNUM - The mapping to the type used for bits in 1 UNUM
 */
 #define BITWIDTH        32
 
@@ -63,11 +64,28 @@ private:
     struct DATA
     {
         alignas(8) UNUM U;
-        UNUM F;
+        BNUM F;
 
-        DATA(UNUM u = 0) : U(u), F(0) {};
+        DATA(UNUM u = 0, BNUM f = 0) : U(u), F(f) {};
 
-        const DATA Add(const DATA& data, const UNUM f) const // Full-Adder
+        inline const DATA Add(const DATA& data, const BNUM c) const // Adder with carry
+        {
+            UNUM u = U + data.U + c;
+            return DATA(u, u < U);
+        }
+
+        inline const DATA Sub(const DATA& data, const BNUM b) const // Subtractor with borrow
+        {
+            return DATA(U - data.U - b, U < data.U);
+        }
+
+#ifdef DEBUG
+        /*
+        * For simulation purposes
+        * FullAdd, an implementation of a full-adder circuit, is functionally equivalent to Add and a text book implementation
+        * FullSub, an implementation of a full-subtractor circuit, is functionally equivalent to Sub and a text book implementation
+        */
+        inline const DATA FullAdd(const DATA& data, const BNUM f) const // Full-Adder
         {
             DATA Out;
             Out.F = f; // Kerry-In
@@ -80,7 +98,7 @@ private:
             return Out;
         }
 
-        const DATA Sub(const DATA& data, const UNUM f) const // Full-Subtractor
+        inline const DATA FullSub(const DATA& data, const BNUM f) const // Full-Subtractor
         {
             DATA Out;
             Out.F = f; // Borrow-In
@@ -92,6 +110,7 @@ private:
             }
             return Out;
         }
+#endif // DEBUG
 
         const bool ispow2() const { return (U > 0) && (U & (U - 1)) == 0; }
     };
