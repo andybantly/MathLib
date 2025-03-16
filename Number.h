@@ -7,30 +7,61 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
+#define IS_64BIT 1
+#else
+#define IS_32BIT 1
+#endif
+
 /*
-* CONSTANT/TYPEDEF MEANINGS
+* CONSTANT/TYPEDEF MEANINGS/DEFINE
 * SHFT - Number of bits to left shift. BITWIDTH - 1 in value.
 * SHFM - Number of bits for multiplication. (3=8 bits, 4=16 bits, 5=32, 6=64, etc)
 * AND  - Number of bits for masking in shifting
 * NTH  - Maximum value of the internal type
 * UNUM - The mapping to the actual type used
 * BNUM - The mapping to the type used for bits in 1 UNUM
+* IS_64BIT - 64 bit build
+* IS_32BIT - 32 bit build
 */
-#define BITWIDTH        32
 
+typedef uint8_t BNUM;
+#ifdef IS_64BIT
+
+#define BITWIDTH        64
+#define SHFT            63
+#define SHFM            6
+#define AND             0x8000000000000000
+#define NTH             0xFFFFFFFFFFFFFFFF
+
+// The internal type
+typedef uint64_t UNUM;
+
+const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,               0x4,               0x8,               0x10,               0x20,               0x40,               0x80,    //  8 bits
+                                                 0x100,             0x200,             0x400,             0x800,             0x1000,             0x2000,             0x4000,             0x8000,    // 16 bits
+                                               0x10000,           0x20000,           0x40000,           0x80000,           0x100000,           0x200000,           0x400000,           0x800000,    // 24 bits
+                                             0x1000000,         0x2000000,         0x4000000,         0x8000000,         0x10000000,         0x20000000,         0x40000000,         0x80000000,    // 32 bits
+                                           0x100000000,       0x200000000,       0x400000000,       0x800000000,       0x1000000000,       0x2000000000,       0x4000000000,       0x8000000000,    // 40 bits
+                                         0x10000000000,     0x20000000000,     0x40000000000,     0x80000000000,     0x100000000000,     0x200000000000,     0x400000000000,     0x800000000000,    // 48 bits
+                                       0x1000000000000,   0x2000000000000,   0x4000000000000,   0x8000000000000,   0x10000000000000,   0x20000000000000,   0x40000000000000,   0x80000000000000,    // 56 bits
+                                     0x100000000000000, 0x200000000000000, 0x400000000000000, 0x800000000000000, 0x1000000000000000, 0x2000000000000000, 0x4000000000000000, 0x8000000000000000 };  // 64 bits
+
+#else
+
+#define BITWIDTH        32
 #define SHFT            31
 #define SHFM            5
 #define AND             0x80000000
 #define NTH             0xFFFFFFFF
 
-// The internal types are unsigned numbers
+// The internal type
 typedef uint32_t UNUM;
-typedef uint8_t BNUM;
 
-const static UNUM _pow[BITWIDTH] = {     0x01,      0x02,      0x04,      0x08,       0x10,       0x20,       0x40,       0x80,
-                                        0x100,     0x200,     0x400,     0x800,     0x1000,     0x2000,     0x4000,     0x8000,
-                                      0x10000,   0x20000,   0x40000,   0x80000,   0x100000,   0x200000,   0x400000,   0x800000,
-                                    0x1000000, 0x2000000, 0x4000000, 0x8000000, 0x10000000, 0x20000000, 0x40000000, 0x80000000};
+const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,               0x4,               0x8,               0x10,               0x20,               0x40,               0x80,   //  8 bits
+                                                 0x100,             0x200,             0x400,             0x800,             0x1000,             0x2000,             0x4000,             0x8000,   // 16 bits
+                                               0x10000,           0x20000,           0x40000,           0x80000,           0x100000,           0x200000,           0x400000,           0x800000,   // 24 bits
+                                             0x1000000,         0x2000000,         0x4000000,         0x8000000,         0x10000000,         0x20000000,         0x40000000,         0x80000000 }; // 32 bits
+#endif
 
 // Global singleton for number transcribing
 class NumberTranscriber
@@ -71,12 +102,12 @@ private:
         inline const DATA Add(const DATA& data, const BNUM c) const // Adder with carry
         {
             UNUM u = U + data.U + c;
-            return DATA(u, u < U);
+            return DATA(u, (BNUM)(u < U));
         }
 
         inline const DATA Sub(const DATA& data, const BNUM b) const // Subtractor with borrow
         {
-            return DATA(U - data.U - b, U < data.U);
+            return DATA(U - data.U - b, (BNUM)(U < data.U));
         }
 
 #ifdef DEBUG
@@ -92,8 +123,8 @@ private:
             for (BNUM uj = 0; uj < BITWIDTH; ++uj)
             {
                 UNUM ui = _pow[uj];
-                Out.U |= (Out.F ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                // SUM:   Kerry-in XOR (A XOR B)
-                Out.F = (((U & ui) >> uj) & Out.F) | (((U & ui) >> uj) & ((data.U & ui) >> uj)) | (((data.U & ui) >> uj) & Out.F);  // CARRY: Kerry-out AB OR BC OR ACin
+                Out.U |= (Out.F ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                                         // SUM:   Kerry-in XOR (A XOR B)
+                Out.F  = (BNUM)(((U & ui) >> uj) & Out.F) | (BNUM)(((U & ui) >> uj) & (BNUM)((data.U & ui) >> uj)) | (BNUM)(((data.U & ui) >> uj) & Out.F);  // CARRY: Kerry-out AB OR BC OR ACin
             }
             return Out;
         }
@@ -105,8 +136,8 @@ private:
             for (BNUM uj = 0; uj < BITWIDTH; ++uj)
             {
                 UNUM ui = _pow[uj];
-                Out.U |= (Out.F ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                 // DIFFERENCE: (A XOR B) XOR Borrow-in
-                Out.F = (~((U & ui) >> uj) & Out.F) | (~((U & ui) >> uj) & ((data.U & ui) >> uj)) | (((data.U & ui) >> uj) & Out.F); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
+                Out.U |= (Out.F ^ (((U & ui) >> uj) ^ ((data.U & ui) >> uj))) << uj;                                                                          // DIFFERENCE: (A XOR B) XOR Borrow-in
+                Out.F  = (BNUM)(~((U & ui) >> uj) & Out.F) | (BNUM)(~((U & ui) >> uj) & (BNUM)((data.U & ui) >> uj)) | (BNUM)(((data.U & ui) >> uj) & Out.F); // BORROW: A'Borrow-in OR A'B OR AB (' = 2s complement)
             }
             return Out;
         }
@@ -249,9 +280,19 @@ protected:
     }
 
     // Helper to convert to the internal format
-#if BITWIDTH == 32
+#if BITWIDTH == 64
+    void Convert(const int64_t u)
+    {
+        m_bNan = false;
+        m_bOvf = false;
 
-    // 32 bit signed quantities
+        m_Data.resize(1);
+
+        m_Data[0] = (UNUM)(u);
+
+        m_bNeg = u < 0;
+    }
+#elif BITWIDTH == 32
     void Convert(const int32_t u)
     {
         m_bNan = false;
@@ -263,7 +304,6 @@ protected:
         m_bNeg = u < 0;
     }
 
-    // 64 bit signed quantities
     void Convert(const int64_t u)
     {
         m_bNan = false;
@@ -315,20 +355,20 @@ public:
         size_t stMax = l == r ? l : (l < r ? r : l);
         const static DATA Zero(0), Neg1(NTH);
         Number out(0); out.SetSize(stMax);
-        UNUM of = 0;
+        BNUM c = 0;
 
         for (; st < stMin; ++st)
         {
-            if (of == 0 && m_Data[st].U == 0 && rhs.m_Data[st].U == 0) continue;
-            of = (out.m_Data[st] = m_Data[st].Add(rhs.m_Data[st], of), out.m_Data[st].F);
+            if (c == 0 && m_Data[st].U == 0 && rhs.m_Data[st].U == 0) continue;
+            c = (out.m_Data[st] = m_Data[st].Add(rhs.m_Data[st], c), out.m_Data[st].F);
         }
 
         for (DATA lb, rb; st < stMax; ++st) // This loop occurs for mixed Number sizes
         {
             lb = st < l ? m_Data[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Data[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (out.m_Data[st] = lb.Add(rb, of), out.m_Data[st].F);
+            if (c == 0 && lb.U == 0 && rb.U == 0) continue;
+            c = (out.m_Data[st] = lb.Add(rb, c), out.m_Data[st].F);
         }
 
         out.m_bNeg = (out.m_Data[out.GetSize() - 1].U & AND) >> SHFT;
@@ -356,20 +396,20 @@ public:
         size_t stMax = l == r ? l : (l < r ? r : l);
         const static DATA Zero(0), Neg1(NTH);
         Number out(0); out.SetSize(stMax);
-        UNUM of = 0;
+        BNUM b = 0;
 
         for (; st < stMin; ++st)
         {
-            if (of == 0 && m_Data[st].U == 0 && rhs.m_Data[st].U == 0) continue;
-            of = (out.m_Data[st] = m_Data[st].Sub(rhs.m_Data[st], of), out.m_Data[st].F);
+            if (b == 0 && m_Data[st].U == 0 && rhs.m_Data[st].U == 0) continue;
+            b = (out.m_Data[st] = m_Data[st].Sub(rhs.m_Data[st], b), out.m_Data[st].F);
         }
 
         for (DATA lb, rb; st < stMax; ++st) // This loop occurs for mixed Number sizes
         {
             lb = st < l ? m_Data[st] : (m_bNeg ? Neg1 : Zero);
             rb = st < r ? rhs.m_Data[st] : (rhs.m_bNeg ? Neg1 : Zero);
-            if (of == 0 && lb.U == 0 && rb.U == 0) continue;
-            of = (out.m_Data[st] = lb.Sub(rb, of), out.m_Data[st].F);
+            if (b == 0 && lb.U == 0 && rb.U == 0) continue;
+            b = (out.m_Data[st] = lb.Sub(rb, b), out.m_Data[st].F);
         }
 
         out.m_bNeg = (out.m_Data[out.GetSize() - 1].U & AND) >> SHFT;
@@ -703,7 +743,6 @@ public:
         {
             UNUM iProd;
             UNUM iCarry;
-
             if (m_Data[data].U & pow) // Evaluates to False=0 or True=one of 1,2,4,8,16,32,64,128
             {
                 Disp.clear();
