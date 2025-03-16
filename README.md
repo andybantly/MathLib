@@ -1,48 +1,23 @@
-# MathLib
+Andrew Scott Bantly's Software License Agreement
+Version 1.0
 
-C++ class for very large integer arithmetic
+Copyright(C) 2012 Andrew Scott Bantly
 
-Source Code
+1. Permission and Restrictions:
+   -This software is proprietary and is provided "as is."
+   - No individual or organization may copy, modify, distribute, or use this software or its derivatives without prior written consent from Andrew Scott Bantly.
+   - Usage in commercial, educational, or personal projects is strictly prohibited without explicit permission from Andrew Scott Bantly
 
-The include file is Number.h 
+2. Limited Access :
+   -Access to the source code is granted for reference purposes only.
+   - Redistribution of the source code or its compiled binaries, whether modified or unmodified, is expressly forbidden.
 
-In C++ code, use the Number object.
+3. Liability Disclaimer :
+   -This software is provided without warranty of any kind, either express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, or noninfringement.
+   - Under no circumstances shall[Your Name or Organization] be liable for any damages, including incidental, special, or consequential damages arising out of or in connection with the use of this software.
 
-It can be constructed or assigned with a string representation of a signed integer, 
+4. Violation of Terms :
+   -Any unauthorized use, modification, or distribution of this software will result in immediate revocation of any implied permissions and may lead to legal action.
 
-a signed integer, or a byte value and capacity.
-
-It has the following logical operators and usage for Number objects N1 and N2
-
-==					: 	N1 == N2	boolean
-!=					:	N1 != N2	boolean
-<=					:	N1 <= N2	boolean
->=					:	N1 >= N2	boolean
-<					:	N1 < N2		boolean
->					:	N1 > N2		boolean
-
-It has the following assignment operators
-
-=					:	N1 = N2, N1 = 1, N1 = “1”
-
-It has the following arithmetic operators
-
-++ and ++ (int)		:	Pre and Post increment – returns reference to this
--- and – (int)		:	Pre and Post decrement – returns reference to this
-+ : addition		:	returns new number
-- : subtraction		:	returns new number
-* : multiplication	:	returns new number
-/ : division		:	returns new number
-% : modulus			:	returns new number					
-, : div and mod     :   returns a pair of number(s)
-
-It has the following properties
-
-ToDispay()			:	returns std::string representation of base 10 number
-ToBinary()			:	returns std::string representation of base 2 number
-TwosComplement()	:	returns Number representation of the 2s complement
-Shr()				:	Shift Right - returns right shifted by 1 bit Number
-Shl()				:	Shift-Left - returns left shifted by 1 bit Number
-Ror()				:	Roll-Right – returns right rolled by 1 bit Number
-Rol()				:	Roll-Left – Returns left rolled by 1 bit Number
-
+5. Jurisdiction :
+   -This license shall be governed by the laws of The United States of America.
