@@ -307,6 +307,9 @@ protected:
         m_bNan = false;
         m_bOvf = false;
 
+        if ((m_Data[m_Data.size() - 1].U & AND) >> SHFT ? true : false)
+            SetSize(m_Data.size() + 1);
+
         if (bNeg)
             *this = TwosComplement();
     }

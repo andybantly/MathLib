@@ -142,24 +142,25 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteSingleTest)
 		{
-			//int64_t a, b, c;
-			Number A,B,C;
-			std::string s;
+			Number A,B,C,D,E,F,EX;
+			std::string s,e;
 
-			//A = 2147483647; A.SetSize(1); B = A;
-			/*
-			a = -19;
-			b = -21;
+			EX = "8589934588";
+			e = EX.ToDisplay();
 
-			A = a; A.SetSize(1);
-			B = b; B.SetSize(1);
-
-			c = a + b;
-			C = A + B;
-
+			A = 4294967294;
+			B = 2;
+			C = A * B;
 			s = C.ToDisplay();
-			if (std::to_string(c) != s)
-				Assert::AreEqual(std::to_string(c), s);*/
+			if (e != s)
+				Assert::AreEqual(e, s);
+
+			D = "4294967294";
+			E = 2;
+			F = D * E;
+			s = F.ToDisplay();
+			if (e != s)
+				Assert::AreEqual(e, s);
 		}
 
 		TEST_METHOD(ByteMixSize)
