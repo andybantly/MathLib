@@ -310,15 +310,13 @@ namespace TestMathLib
 			if (e != s)
 				Assert::AreEqual(e, s);
 
-			/* // asserts because the size allocated is less than the starting element in the backing
+			// asserts because the size allocated is less than the starting element in the backing
 			e = "4294967296";
 			A = 1;
 			A <<= 32;
 			s = A.ToDisplay();
 			if (e != s)
 				Assert::AreEqual(e, s);
-			*/
-
 
 #if BITWIDTH == 64
 			BNUM bw = 32;

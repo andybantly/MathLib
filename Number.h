@@ -1205,34 +1205,40 @@ protected:
         {
             size_t tmp = data;
             size_t sb = nbits / BITWIDTH;
-            if (sb)
+            if (sb >= m_Data.size())
             {
-                for (; data != -1; --data)
-                {
-                    if (data >= sb)
-                    {
-                        m_Data[data].U = m_Data[data - sb].U;
-                        m_Data[data - sb].U = 0;
-                    }
-                }
-                nbits = nbits % BITWIDTH;
+                SetSize(m_Data.size() + sb);
+                return Shl(stbit, nbits);
             }
+
+            for (; data != -1; --data)
+            {
+                if (data >= sb)
+                {
+                    m_Data[data].U = m_Data[data - sb].U;
+                    m_Data[data - sb].U = 0;
+                }
+            }
+            nbits = nbits % BITWIDTH;
             data = tmp;
         }
 
-        for (; data != stn; --data)
+        if (nbits)
         {
+            for (; data != stn; --data)
+            {
+                m_Data[data].U <<= nbits;
+                m_Data[data].U |= (m_Data[data - 1].U >> (BITWIDTH - nbits));
+            }
             m_Data[data].U <<= nbits;
-            m_Data[data].U |= (m_Data[data - 1].U >> (BITWIDTH - nbits));
         }
-        m_Data[data].U <<= nbits;
 
         bool bNeg = (m_Data[m_Data.size() - 1].U & AND) >> SHFT ? true : false;
         if (m_bNeg != bNeg)
         {
             // shift caused sign change
             if (!m_bNeg)
-                SetSize(GetSize() + 1);
+                SetSize(m_Data.size() + 1);
         }
     }
 
