@@ -45,8 +45,8 @@ const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,      
                                          0x10000000000,     0x20000000000,     0x40000000000,     0x80000000000,     0x100000000000,     0x200000000000,     0x400000000000,     0x800000000000,    // 48 bits
                                        0x1000000000000,   0x2000000000000,   0x4000000000000,   0x8000000000000,   0x10000000000000,   0x20000000000000,   0x40000000000000,   0x80000000000000,    // 56 bits
                                      0x100000000000000, 0x200000000000000, 0x400000000000000, 0x800000000000000, 0x1000000000000000, 0x2000000000000000, 0x4000000000000000, 0x8000000000000000 };  // 64 bits
-
-#else
+#endif
+#ifdef IS_32BIT
 
 #define BITWIDTH        32
 #define SHFT            31
@@ -94,7 +94,13 @@ class Number
 private:
     struct DATA
     {
-        alignas(8) UNUM U;
+#ifdef IS_32BIT
+        alignas(8)
+#endif
+#ifdef IS_64BIT
+        alignas(64)
+#endif
+        UNUM U;
         BNUM F;
 
         DATA(UNUM u = 0, BNUM f = 0) : U(u), F(f) {};
