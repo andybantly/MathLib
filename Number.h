@@ -39,6 +39,32 @@ Copyright(C) 2012 Andrew Scott Bantly
 #define IS_32BIT 1
 #endif
 
+// Global singleton for number transcribing
+class NumberTranscriber
+{
+    struct cilt  // case insensitive less-than for mixed case map text
+    {
+        struct compare { bool operator() (const unsigned char& cl, const unsigned char& cr) const { return tolower(cl) < tolower(cr); } };
+        bool operator() (const std::string& sl, const std::string& sr) const { return std::lexicographical_compare(sl.begin(), sl.end(), sr.begin(), sr.end(), compare()); }
+    };
+
+    NumberTranscriber() { init(); }
+    NumberTranscriber(const NumberTranscriber&) = delete;
+    NumberTranscriber& operator=(const NumberTranscriber&) = delete;
+
+    static std::unique_ptr<NumberTranscriber> instance;
+    static std::mutex mutex;
+    static std::map<std::string, std::string, NumberTranscriber::cilt> mapWordTo99;
+    static std::map<std::string, std::string, NumberTranscriber::cilt> mapWordTo100;
+    static void init();
+
+public:
+    static NumberTranscriber& getInstance();
+    static std::string ToPhrase(const std::string& number);
+    static std::string ToNumber(const std::string& phrase);
+    static bool TextEqual(const std::string& s1, const std::string& s2);
+};
+
 /*
 * CONSTANT/TYPEDEF MEANINGS/DEFINE
 * SHFT - Number of bits to left shift. BITWIDTH - 1 in value.
@@ -52,9 +78,12 @@ Copyright(C) 2012 Andrew Scott Bantly
 */
 
 typedef uint8_t BNUM;
+
 #ifdef IS_64BIT
 
 #define BITWIDTH        64
+
+#if     BITWIDTH == 64
 #define SHFT            63
 #define SHFM            6
 #define AND             0x8000000000000000
@@ -62,6 +91,7 @@ typedef uint8_t BNUM;
 
 // The internal type
 typedef uint64_t UNUM;
+typedef int64_t SNUM;
 
 const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,               0x4,               0x8,               0x10,               0x20,               0x40,               0x80,    //  8 bits
                                                  0x100,             0x200,             0x400,             0x800,             0x1000,             0x2000,             0x4000,             0x8000,    // 16 bits
@@ -72,9 +102,7 @@ const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,      
                                        0x1000000000000,   0x2000000000000,   0x4000000000000,   0x8000000000000,   0x10000000000000,   0x20000000000000,   0x40000000000000,   0x80000000000000,    // 56 bits
                                      0x100000000000000, 0x200000000000000, 0x400000000000000, 0x800000000000000, 0x1000000000000000, 0x2000000000000000, 0x4000000000000000, 0x8000000000000000 };  // 64 bits
 #endif
-#ifdef IS_32BIT
-
-#define BITWIDTH        32
+#if     BITWIDTH == 32
 #define SHFT            31
 #define SHFM            5
 #define AND             0x80000000
@@ -82,38 +110,61 @@ const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,      
 
 // The internal type
 typedef uint32_t UNUM;
+typedef int64_t SNUM;
 
 const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,               0x4,               0x8,               0x10,               0x20,               0x40,               0x80,   //  8 bits
                                                  0x100,             0x200,             0x400,             0x800,             0x1000,             0x2000,             0x4000,             0x8000,   // 16 bits
                                                0x10000,           0x20000,           0x40000,           0x80000,           0x100000,           0x200000,           0x400000,           0x800000,   // 24 bits
                                              0x1000000,         0x2000000,         0x4000000,         0x8000000,         0x10000000,         0x20000000,         0x40000000,         0x80000000 }; // 32 bits
 #endif
+#if     BITWIDTH == 16
+#define SHFT            15
+#define SHFM            4
+#define AND             0x8000
+#define NTH             0xFFFF
 
-// Global singleton for number transcribing
-class NumberTranscriber
-{
-    struct cilt  // case insensitive less-than for mixed case map text
-    {
-        struct compare { bool operator() (const unsigned char& cl, const unsigned char& cr) const { return tolower(cl) < tolower(cr); } };
-        bool operator() (const std::string& sl, const std::string& sr) const { return std::lexicographical_compare(sl.begin(), sl.end(), sr.begin(), sr.end(), compare()); }
-    };
+// The internal type
+typedef uint16_t UNUM;
+typedef int32_t SNUM;
 
-    NumberTranscriber() { init(); }
-    NumberTranscriber(const NumberTranscriber&) = delete;
-    NumberTranscriber& operator=(const NumberTranscriber&) = delete;
-        
-    static std::unique_ptr<NumberTranscriber> instance;
-    static std::mutex mutex;
-    static std::map<std::string, std::string, NumberTranscriber::cilt> mapWordTo99;
-    static std::map<std::string, std::string, NumberTranscriber::cilt> mapWordTo100;
-    static void init();
+const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,               0x4,               0x8,               0x10,               0x20,               0x40,               0x80,   //  8 bits
+                                                 0x100,             0x200,             0x400,             0x800,             0x1000,             0x2000,             0x4000,             0x8000 }; // 16 bits
+#endif
+#endif
 
-public:
-    static NumberTranscriber& getInstance();
-    static std::string ToPhrase(const std::string& number);
-    static std::string ToNumber(const std::string& phrase);
-    static bool TextEqual(const std::string& s1, const std::string& s2);
-};
+#ifdef IS_32BIT
+
+#define BITWIDTH        32
+
+#if     BITWIDTH == 32
+#define SHFT            31
+#define SHFM            5
+#define AND             0x80000000
+#define NTH             0xFFFFFFFF
+
+// The internal type
+typedef uint32_t UNUM;
+typedef int64_t SNUM;
+
+const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,               0x4,               0x8,               0x10,               0x20,               0x40,               0x80,   //  8 bits
+                                                 0x100,             0x200,             0x400,             0x800,             0x1000,             0x2000,             0x4000,             0x8000,   // 16 bits
+                                               0x10000,           0x20000,           0x40000,           0x80000,           0x100000,           0x200000,           0x400000,           0x800000,   // 24 bits
+                                             0x1000000,         0x2000000,         0x4000000,         0x8000000,         0x10000000,         0x20000000,         0x40000000,         0x80000000 }; // 32 bits
+#endif
+#if     BITWIDTH == 16
+#define SHFT            15
+#define SHFM            4
+#define AND             0x8000
+#define NTH             0xFFFF
+
+// The internal type
+typedef uint16_t UNUM;
+typedef int32_t SNUM;
+
+const static UNUM _pow[BITWIDTH] = {               0x1,               0x2,               0x4,               0x8,               0x10,               0x20,               0x40,               0x80,   //  8 bits
+                                                 0x100,             0x200,             0x400,             0x800,             0x1000,             0x2000,             0x4000,             0x8000 }; // 16 bits
+#endif
+#endif
 
 class Number
 {
@@ -352,28 +403,28 @@ protected:
         m_bNeg = u < 0;
     }
 #elif BITWIDTH == 16
+    void Convert(const int64_t u)
+    {
+        m_bNan = false;
+        m_bOvf = false;
+        m_Data.resize(4);
+
+        m_Data[0] = (u      ) & 0xFFFF;
+        m_Data[1] = (u >> 16) & 0xFFFF;
+        m_Data[2] = (u >> 32) & 0xFFFF;
+        m_Data[3] = (u >> 48) & 0xFFFF;
+
+        m_bNeg = u < 0;
+    }
+
     void Convert(const int32_t u)
     {
-        m_bNAN = false;
+        m_bNan = false;
         m_bOvf = false;
 
         m_Data.resize(2);
         m_Data[0] = ((uint32_t)(u)) & 0x0000FFFF; // 16
         m_Data[1] = ((uint32_t)(u) >> 0x10); // 32
-
-        m_bNeg = u < 0;
-    }
-#elif BITWIDTH == 8
-    void Convert(const int32_t u)
-    {
-        m_bNAN = false;
-        m_bOvf = false;
-
-        m_Data.resize(4);
-        m_Data[0] = (uint32_t)(u) & 0xFF;
-        m_Data[1] = ((uint32_t)(u) >> 0x08) & 0xFF;
-        m_Data[2] = ((uint32_t)(u) >> 0x10) & 0xFF;
-        m_Data[3] = (uint32_t)(u) >> 0x18;
 
         m_bNeg = u < 0;
     }
@@ -889,6 +940,190 @@ public:
         return out;
     }
 
+protected:
+
+    // Find the MSB
+    size_t MSb() const
+    {
+        size_t lhp(size_t(-1));
+        size_t lhn(size_t(-1));
+
+        size_t bit = m_Data.size() * BITWIDTH - 1;
+        size_t data = m_Data.size() - 1;
+        UNUM pow = AND;
+        do
+        {
+            if (!m_bNeg && (m_Data[data].U & pow))
+            {
+                if (lhp == size_t(-1))
+                {
+                    lhp = bit;
+                    break;
+                }
+            }
+            else if (m_bNeg && (~m_Data[data].U & pow))
+            {
+                if (lhn == size_t(-1))
+                {
+                    lhn = bit + 1;
+                    break;
+                }
+            }
+
+            if (!(pow >>= 1))
+            {
+                --data;
+                pow = AND;
+            }
+        } while (--bit, data != -1);
+
+        return !m_bNeg ? lhp : lhn;
+    }
+
+    // Find the LSB
+    size_t LSb() const
+    {
+        size_t lhp(-1);
+        size_t lhn(-1);
+
+        size_t bit = 0;
+        size_t data = 0;
+        UNUM pow = 1;
+        do
+        {
+            if (!m_bNeg && (m_Data[data].U & pow))
+            {
+                if (lhp == size_t(-1))
+                {
+                    lhp = bit;
+                    break;
+                }
+            }
+            else if (m_bNeg && (~m_Data[data].U & pow))
+            {
+                if (lhn == size_t(-1))
+                {
+                    lhn = bit + 1;
+                    break;
+                }
+            }
+
+            if (!(pow <<= 1))
+            {
+                ++data;
+                pow = 1;
+            }
+        } while (++bit, data < m_Data.size());
+
+        return !m_bNeg ? lhp : lhn;
+    }
+
+    // Left Bit Shift by n bits <- double value n times
+    void Shl(size_t stbit = size_t(-1), size_t nbits = 1)
+    {
+        const static UNUM Zero(0), Neg1(NTH);
+
+        size_t stn = 0;
+        size_t data = m_Data.size() - 1;
+        if (stbit != size_t(-1))
+        {
+            data = (stbit >> SHFM) + 1;
+            if (data >= m_Data.size())
+                data = m_Data.size() - 1;
+            if (data)
+                stn = data - 1;
+        }
+
+        if (nbits >= BITWIDTH)
+        {
+            size_t tmp = data;
+            size_t sb = nbits / BITWIDTH;
+            if (sb >= m_Data.size())
+            {
+                SetSize(m_Data.size() + sb);
+                return Shl(stbit, nbits);
+            }
+
+            for (; data != -1; --data)
+            {
+                if (data >= sb)
+                {
+                    m_Data[data].U = m_Data[data - sb].U;
+                    m_Data[data - sb].U = 0;
+                }
+            }
+            nbits = nbits % BITWIDTH;
+            data = tmp;
+        }
+
+        if (nbits)
+        {
+            for (; data != stn; --data)
+            {
+                m_Data[data].U <<= nbits;
+                m_Data[data].U |= (m_Data[data - 1].U >> (BITWIDTH - nbits));
+            }
+            m_Data[data].U <<= nbits;
+        }
+
+        bool bNeg = (m_Data[m_Data.size() - 1].U & AND) >> SHFT ? true : false;
+        if (m_bNeg != bNeg)
+        {
+            // shift caused sign change
+            if (!m_bNeg)
+                SetSize(m_Data.size() + 1);
+        }
+    }
+
+    // Right Bit Shift by n bits -> halve value n times
+    void Shr(size_t stbit = size_t(-1), size_t nbits = 1)
+    {
+        const static UNUM Zero(0), Neg1(NTH);
+
+        size_t stn = m_Data.size() - 1;
+        size_t data = 0;
+        if (stbit != size_t(-1))
+        {
+            stn = stbit >> SHFM;
+            if (stn >= m_Data.size())
+                stn = m_Data.size() - 1;
+            data = stn;
+            if (data)
+                --data;
+        }
+
+        if (nbits >= BITWIDTH)
+        {
+            size_t tmp = data;
+            size_t sb = nbits / BITWIDTH;
+            if (sb)
+            {
+                for (; data != m_Data.size() - 1; ++data)
+                {
+                    if (data + sb < m_Data.size())
+                    {
+                        m_Data[data].U = m_Data[data + sb].U;
+                        m_Data[data + sb].U = 0;
+                    }
+                    else
+                        m_Data[data].U = (m_bNeg ? Neg1 : Zero);
+                }
+                nbits = nbits % BITWIDTH;
+            }
+            data = tmp;
+        }
+
+        for (; data != stn; ++data)
+        {
+            m_Data[data].U >>= nbits;
+            m_Data[data].U |= (m_Data[data + 1].U << (BITWIDTH - nbits));
+        }
+
+        m_Data[data].U >>= nbits;
+        if (m_bNeg)
+            m_Data[data].U |= AND;
+    }
+
 public:
     void operator = (const int64_t u)
     {
@@ -1110,184 +1345,6 @@ public:
     size_t GetSize() const
     {
         return m_Data.size();
-    }
-
-protected:
-
-    // Find the MSB
-    size_t MSb() const
-    {
-        size_t lhp(size_t(-1));
-        size_t lhn(size_t(-1));
-
-        size_t bit = m_Data.size() * BITWIDTH - 1;
-        size_t data = m_Data.size() - 1;
-        UNUM pow = AND;
-        do
-        {
-            if (!m_bNeg && (m_Data[data].U & pow))
-            {
-                if (lhp == size_t(-1))
-                {
-                    lhp = bit;
-                    break;
-                }
-            }
-            else if (m_bNeg && (~m_Data[data].U & pow))
-            {
-                if (lhn == size_t(-1))
-                {
-                    lhn = bit + 1;
-                    break;
-                }
-            }
-
-            if (!(pow >>= 1))
-            {
-                --data;
-                pow = AND;
-            }
-        } while (--bit, data != -1);
-
-        return !m_bNeg ? lhp : lhn;
-    }
-
-    // Find the LSB
-    size_t LSb() const
-    {
-        size_t lhp(-1);
-        size_t lhn(-1);
-
-        size_t bit = 0;
-        size_t data = 0;
-        UNUM pow = 1;
-        do
-        {
-            if (!m_bNeg && (m_Data[data].U & pow))
-            {
-                if (lhp == size_t(-1))
-                {
-                    lhp = bit;
-                    break;
-                }
-            }
-            else if (m_bNeg && (~m_Data[data].U & pow))
-            {
-                if (lhn == size_t(-1))
-                {
-                    lhn = bit + 1;
-                    break;
-                }
-            }
-
-            if (!(pow <<= 1))
-            {
-                ++data;
-                pow = 1;
-            }
-        } while (++bit, data < m_Data.size());
-
-        return !m_bNeg ? lhp : lhn;
-    }
-
-    // Left Bit Shift by n bits <- double value n times
-    void Shl(size_t stbit = size_t(-1), size_t nbits = 1)
-    {
-        size_t stn = 0;
-        size_t data = m_Data.size() - 1;
-        if (stbit != size_t(-1))
-        {
-            data = (stbit >> SHFM) + 1;
-            if (data >= m_Data.size())
-                data = m_Data.size() - 1;
-            if (data)
-                stn = data - 1;
-        }
-
-        if (nbits >= BITWIDTH)
-        {
-            size_t tmp = data;
-            size_t sb = nbits / BITWIDTH;
-            if (sb >= m_Data.size())
-            {
-                SetSize(m_Data.size() + sb);
-                return Shl(stbit, nbits);
-            }
-
-            for (; data != -1; --data)
-            {
-                if (data >= sb)
-                {
-                    m_Data[data].U = m_Data[data - sb].U;
-                    m_Data[data - sb].U = 0;
-                }
-            }
-            nbits = nbits % BITWIDTH;
-            data = tmp;
-        }
-
-        if (nbits)
-        {
-            for (; data != stn; --data)
-            {
-                m_Data[data].U <<= nbits;
-                m_Data[data].U |= (m_Data[data - 1].U >> (BITWIDTH - nbits));
-            }
-            m_Data[data].U <<= nbits;
-        }
-
-        bool bNeg = (m_Data[m_Data.size() - 1].U & AND) >> SHFT ? true : false;
-        if (m_bNeg != bNeg)
-        {
-            // shift caused sign change
-            if (!m_bNeg)
-                SetSize(m_Data.size() + 1);
-        }
-    }
-
-    // Right Bit Shift by n bits -> halve value n times
-    void Shr(size_t stbit = size_t(-1), size_t nbits = 1)
-    {
-        size_t stn = m_Data.size() - 1;
-        size_t data = 0;
-        if (stbit != size_t(-1))
-        {
-            stn = stbit >> SHFM;
-            if (stn >= m_Data.size())
-                stn = m_Data.size() - 1;
-            data = stn;
-            if (data)
-                --data;
-        }
-
-        if (nbits >= BITWIDTH)
-        {
-            size_t tmp = data;
-            size_t sb = nbits / BITWIDTH;
-            if (sb)
-            {
-                for (; data != m_Data.size() - 1; ++data)
-                {
-                    if (data + sb < m_Data.size())
-                    {
-                        m_Data[data].U = m_Data[data + sb].U;
-                        m_Data[data + sb].U = 0;
-                    }
-                }
-                nbits = nbits % BITWIDTH;
-            }
-            data = tmp;
-        }
-
-        for (; data != stn; ++data)
-        {
-            m_Data[data].U >>= nbits;
-            m_Data[data].U |= (m_Data[data + 1].U << (BITWIDTH - nbits));
-        }
-
-        m_Data[data].U >>= nbits;
-        if (m_bNeg)
-            m_Data[data].U |= AND;
     }
 
 public: // helpers

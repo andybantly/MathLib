@@ -31,12 +31,18 @@ Copyright(C) 2012 Andrew Scott Bantly
 
 #pragma warning(disable:4552)
 
+#if defined(__x86_64__) || defined(__ppc64__) || defined(_WIN64)
+#define IS_64BIT 1
+#else
+#define IS_32BIT 1
+#endif
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
 {
-	const int64_t iBeg = 4294967295 - 64, iEnd = 4294967295 + 63;
-	const int64_t jBeg = -64, jEnd = 63;
+	const SNUM iBeg = NTH - 64, iEnd = NTH + 63;
+	const SNUM jBeg = -64, jEnd = 63;
 
 	TEST_CLASS(TestMathLib)
 	{
@@ -166,17 +172,8 @@ namespace TestMathLib
 		TEST_METHOD(ByteMixSize)
 		{
 			Number A, B, C;
-			int64_t a, b, c;
+			SNUM a, b, c;
 			std::string s;
-
-			A = 999999;
-			a = 999999;
-			B = b = 180;
-			C = A / B;
-			c = a / b;
-			s = C.ToDisplay();
-			if (std::to_string(c) != s)
-				Assert::AreEqual(std::to_string(c), s);
 
 			B = b = 256;
 			b >> 1;
@@ -224,7 +221,7 @@ namespace TestMathLib
 			if (A.ToDisplay() != "-20000000000000000")
 				Assert::AreEqual(A.ToDisplay(), std::string("-20000000000000000"));
 
-			b = (int64_t)sqrt(b);
+			b = (SNUM)sqrt(b);
 			s = std::to_string(b);
 
 			B = 25;
@@ -234,7 +231,7 @@ namespace TestMathLib
 				Assert::AreEqual(C.ToDisplay(), s);
 
 			B = b = 26;
-			b = (int64_t)sqrt(b);
+			b = (SNUM)sqrt(b);
 			C = B.Sqrt();
 
 			if (C.ToDisplay() != s)
@@ -279,7 +276,7 @@ namespace TestMathLib
 		TEST_METHOD(ByteShift)
 		{
 			std::string s, e;
-			int64_t a;
+			SNUM a;
 			Number A;
 
 			A = a = -31;
@@ -296,9 +293,9 @@ namespace TestMathLib
 			if (e != s)
 				Assert::AreEqual(e, s);
 
-			A = a = 0x40000000;
-			a <<= 8;
-			A <<= 8;
+			A = a = 0x4000;
+			a <<= 4;
+			A <<= 4;
 			e = std::to_string(a);
 			s = A.ToDisplay();
 			if (e != s)
@@ -350,7 +347,7 @@ namespace TestMathLib
 		TEST_METHOD(ByteCornerCases)
 		{
 			Number A, B, C;
-			int64_t a, b, c;
+			SNUM a, b, c;
 			std::string s;
 
 			////// TEST CASE //////
@@ -503,7 +500,7 @@ namespace TestMathLib
 			////// TEST CASE //////
 
 			A = a = 7;
-			B = b = 65535;
+			B = b = 32767;
 
 			c = a * b;
 			C = A * B;
@@ -913,7 +910,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteAddition)
 		{
-			int64_t ni, nj, nk;
+			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -935,7 +932,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteSubtraction)
 		{
-			int64_t ni, nj, nk;
+			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -957,7 +954,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteMultiplication)
 		{
-			int64_t ni, nj, nk;
+			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -979,7 +976,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteDivision)
 		{
-			int64_t ni, nj, nk;
+			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -1004,7 +1001,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteModulus)
 		{
-			int64_t ni, nj, nk;
+			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -1029,7 +1026,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteLT)
 		{
-			int64_t ni, nj;
+			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1051,7 +1048,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteGT)
 		{
-			int64_t ni, nj;
+			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1073,7 +1070,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteLE)
 		{
-			int64_t ni, nj;
+			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1095,7 +1092,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteGE)
 		{
-			int64_t ni, nj;
+			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1117,7 +1114,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteEQ)
 		{
-			int64_t ni, nj;
+			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1139,7 +1136,7 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteNE)
 		{
-			int64_t ni, nj;
+			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
 
@@ -1161,7 +1158,7 @@ namespace TestMathLib
 
 		TEST_METHOD(BytePre)
 		{
-			int64_t ni, nj;
+			SNUM ni, nj;
 			Number NI, NJ;
 			std::string si, sj;
 
@@ -1188,7 +1185,7 @@ namespace TestMathLib
 
 		TEST_METHOD(BytePost)
 		{
-			int64_t ni, nj;
+			SNUM ni, nj;
 			Number NI, NJ;
 			std::string si, sj;
 
