@@ -715,29 +715,29 @@ public:
         return sqrt;
     }
 
-    Number Prime() const
+    Number Factorial () const
     {
         if (m_bNan)
             throw std::exception();
 
-        Number prme;
+        Number fact;
         if (m_bNeg)
         {
-            prme = TwosComplement().Prime();
-            return prme.TwosComplement();
+            fact = TwosComplement().Factorial();
+            return fact.TwosComplement();
         }
 
         const static Number _1(1);
         const static Number _0(0);
 
-        prme = *this;
-        if (prme == _1 || prme == _0)
-            return prme;
+        fact = *this;
+        if (fact == _1 || fact == _0)
+            return fact;
 
-        for (Number mul = prme - _1; mul != _1; --mul)
-            prme *= mul;
+        for (Number mul = fact - _1; mul != _1; --mul)
+            fact *= mul;
 
-        return prme;
+        return fact;
     }
 
     bool Equals(const Number& rhs) const

@@ -244,18 +244,10 @@ namespace TestMathLib
 				Assert::AreEqual(D.ToDisplay(), E.ToDisplay());
 		}
 
-		TEST_METHOD(BytePI)
-		{
-			std::string s = "3141592653589793";
-			Number PI = s;
-//			s = PI.ToBinary();
-//			s = PI.ToDisplay();
-		}
-
-		TEST_METHOD(BytePrime)
+		TEST_METHOD(ByteFactorial)
 		{
 			Number B = 25, N25p = "15511210043330985984000000";
-			B = B.Prime();
+			B = B.Factorial();
 			if (B.ToDisplay() != N25p.ToDisplay())
 				Assert::AreEqual(N25p.ToDisplay(), B.ToDisplay());
 		}
