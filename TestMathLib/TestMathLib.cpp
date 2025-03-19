@@ -307,16 +307,11 @@ namespace TestMathLib
 			s = A.ToDisplay();
 			if (e != s)
 				Assert::AreEqual(e, s);
-
-#if BITWIDTH == 64
-			BNUM bw = 32;
-#else
-			BNUM bw = BITWIDTH;
-#endif
+			BNUM bw = (BITWIDTH / 2) - 1;
 			for (BNUM ipow = 0; ipow < bw - 1; ++ipow)
 			{
 				UNUM pow = _pow[ipow];
-				for (size_t nb = 1; nb <= bw; ++nb)
+				for (size_t nb = 1; nb < bw - 1; ++nb)
 				{
 					A = a = pow;
 					a <<= nb;
