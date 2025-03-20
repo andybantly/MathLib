@@ -1199,11 +1199,11 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteBigDiv)
 		{
-			Number N = "9999999999999999";
+			Number N = "99999999999999999999999999999999";
 			Number D = 180;
 			Number Q;
 
-			std::string s = "55555555555555";
+			std::string s = "555555555555555555555555555555";
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = N / D;
 			Assert::AreEqual(s, Q.ToDisplay());
@@ -1211,11 +1211,11 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteBigMul)
 		{
-			Number N = "9999999999999999";
+			Number N = "99999999999999999999999999999999";
 			Number D = 180;
 			Number Q;
 
-			std::string s = "1799999999999999820";
+			std::string s = "17999999999999999999999999999999820";
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = N * D;
 			Assert::AreEqual(s, Q.ToDisplay());
@@ -1223,11 +1223,11 @@ namespace TestMathLib
 
 		TEST_METHOD(ByteBigMul2)
 		{
-			Number N = "9999999999999999";
+			Number N = "99999999999999999999999999999999";
 			Number D = 180;
 			Number Q;
 
-			std::string s = "1799999999999999820";
+			std::string s = "17999999999999999999999999999999820";
 			for (unsigned int i = 0; i < 65536; ++i)
 				Q = D * N;
 			Assert::AreEqual(s, Q.ToDisplay());
