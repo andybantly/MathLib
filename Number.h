@@ -572,22 +572,18 @@ public:
             return prod;
         }
 
-        bool bND = l1 > r1;
-
-        size_t stMB = bND ? This.m_Data.size() : That.m_Data.size();
+        size_t stMB = (l1 > r1) ? This.m_Data.size() : That.m_Data.size();
         prod.SetSize(stMB);
-        Number mulc = That;
 
-        if (bND) // N1s > D1s
+        if (l1 > r1) // N1s > D1s
         {
-            Number mulp = This;
-            for (size_t data = 0, ndata = mulc.m_Data.size(); data < ndata; ++data)
+            for (size_t data = 0, ndata = That.m_Data.size(); data < ndata; ++data)
             {
                 for (UNUM ui = 1; ui != 0; ui <<= 1)
                 {
-                    if (ui & mulc.m_Data[data].U)
-                        prod += mulp;
-                    mulp.Shl();
+                    if (ui & That.m_Data[data].U)
+                        prod += This;
+                    This.Shl();
                 }
             }
         }
@@ -598,8 +594,8 @@ public:
                 for (UNUM ui = 1; ui != 0; ui <<= 1)
                 {
                     if (ui & This.m_Data[data].U)
-                        prod += mulc;
-                    mulc.Shl();
+                        prod += That;
+                    That.Shl();
                 }
             }
         }
