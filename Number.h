@@ -626,11 +626,21 @@ public:
         Number rem = *this;
         rem.SetSize(stMB);
 
-        Number rhsin = rhs;
+        Number dbl = rhs;
         if (m_bNeg != rhs.m_bNeg)
-            rhsin = rhsin.TwosComplement();
+            dbl = dbl.TwosComplement();
 
-        Number dbl = rhsin;
+        size_t stbpos = dbl.IsPow2();
+        if (stbpos != -1)
+        {
+            if (stbpos)
+                rem >>= stbpos;
+            if (rem == quot)
+                return rem;
+            if (m_bNeg != rhs.m_bNeg)
+                rem = rem.TwosComplement();
+            return rem;
+        }
         dbl.SetSize(stMB);
 
         Number pow(m_bNeg == rhs.m_bNeg ? 1 : -1); pow.SetSize(stMB);

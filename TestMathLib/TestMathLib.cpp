@@ -308,10 +308,10 @@ namespace TestMathLib
 			if (e != s)
 				Assert::AreEqual(e, s);
 			BNUM bw = (BITWIDTH / 2) - 1;
-			for (BNUM ipow = 0; ipow < bw - 1; ++ipow)
+			for (BNUM ipow = 0; ipow < size_t(bw - 1); ++ipow)
 			{
 				UNUM pow = _pow[ipow];
-				for (size_t nb = 1; nb < bw - 1; ++nb)
+				for (size_t nb = 1; nb < size_t(bw - 1); ++nb)
 				{
 					A = a = pow;
 					a <<= nb;
