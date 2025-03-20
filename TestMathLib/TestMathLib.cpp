@@ -167,6 +167,10 @@ namespace TestMathLib
 			s = F.ToDisplay();
 			if (e != s)
 				Assert::AreEqual(e, s);
+
+			A = 9;
+			A = A.Pow(A);
+			Assert::AreEqual(std::string("387420489"), A.ToDisplay());
 		}
 
 		TEST_METHOD(ByteMixSize)

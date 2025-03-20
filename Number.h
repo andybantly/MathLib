@@ -237,9 +237,6 @@ public:
 
     Number(const std::string& number) { ToBinary(number); }
 
-    // Special helper constructor for twos complement addition
-    Number(const int8_t u, size_t st) { Convert(u); SetSize(st); m_bOvf = true; }
-
     Number(const int32_t u) { Convert(u); }
 
     Number(const int64_t u) { Convert(u); }
@@ -261,6 +258,9 @@ public:
     }
 
 protected:
+
+    // Special helper constructor for twos complement addition
+    Number(const int8_t u, size_t st) { Convert(u); SetSize(st); m_bOvf = true; }
 
     // Helper to convert to the internal format
 #if BITWIDTH == 64
@@ -780,8 +780,8 @@ public:
             return fact.TwosComplement();
         }
 
-        const static Number _1(1);
         const static Number _0(0);
+        const static Number _1(1);
 
         fact = *this;
         if (fact == _1 || fact == _0)
@@ -791,6 +791,23 @@ public:
             fact *= mul;
 
         return fact;
+    }
+
+    Number Pow(const Number& Exp) const
+    {
+        if (m_bNan)
+            throw std::exception();
+
+        const static Number _0(0);
+        const static Number _1(1);
+
+        Number pow = _1;
+        Number exp = Exp.m_bNeg ? Exp.TwosComplement() : Exp;
+
+        for (Number N = _0; N < exp; ++N)
+            pow *= *this;
+
+        return pow;
     }
 
     bool Equals(const Number& rhs) const
