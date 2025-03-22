@@ -41,7 +41,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace TestMathLib
 {
-	const SNUM iBeg = NTH - 64, iEnd = NTH + 63;
+	const SNUM iBeg = (NTH - 64), iEnd = (NTH + 63);
 	const SNUM jBeg = -64, jEnd = 63;
 
 	TEST_CLASS(TestMathLib)
@@ -248,12 +248,45 @@ namespace TestMathLib
 				Assert::AreEqual(D.ToDisplay(), E.ToDisplay());
 		}
 
+		uint64_t factorial(uint64_t n) {
+			uint64_t result = 1;
+			for (uint64_t i = 1; i <= n; ++i) {
+				result *= i;
+			}
+			return result;
+		}
+
 		TEST_METHOD(ByteFactorial)
 		{
 			Number B = 25, N25p = "15511210043330985984000000";
+
 			B = B.Factorial();
 			if (B.ToDisplay() != N25p.ToDisplay())
 				Assert::AreEqual(N25p.ToDisplay(), B.ToDisplay());
+
+			int64_t b;
+			B = b = 20;
+			Number _0 = 0;
+			while (B >= _0)
+			{
+				
+				Number F = B.Factorial();
+				int64_t f = factorial(b);
+
+				std::string s = std::to_string(f);
+				if (F.ToDisplay() != s)
+					Assert::AreEqual(s, F.ToDisplay());
+
+				--B;
+				--b;
+			}
+
+			std::string sbig = "93,326,215,443,944,152,681,699,238,856,266,700,490,715,968,264,381,621,468,592,963,895,217,599,993,229,915,608,941,463,976,156,518,286,253,697,920,827,223,758,251,185,210,916,864,000,000,000,000,000,000,000,000";
+			Number BIG = sbig;
+			sbig.erase(std::remove(sbig.begin(), sbig.end(), ','), sbig.end());
+			std::string sb2 = BIG.ToDisplay();
+			if (sbig != BIG.ToDisplay())
+				Assert::AreEqual(sbig, BIG.ToDisplay());
 		}
 
 		TEST_METHOD(ByteTestInit)
@@ -903,6 +936,7 @@ namespace TestMathLib
 		{
 			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -917,14 +951,18 @@ namespace TestMathLib
 					std::string strNK = NK.ToDisplay();
 					if (std::to_string(nk) != strNK)
 						Assert::AreEqual(std::to_string(nk), strNK);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteSubtraction)
 		{
 			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -939,14 +977,18 @@ namespace TestMathLib
 					std::string strNK = NK.ToDisplay();
 					if (std::to_string(nk) != strNK)
 						Assert::AreEqual(std::to_string(nk), strNK);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteMultiplication)
 		{
 			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -961,14 +1003,18 @@ namespace TestMathLib
 					std::string strNK = NK.ToDisplay();
 					if (std::to_string(nk) != strNK)
 						Assert::AreEqual(std::to_string(nk), strNK);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteDivision)
 		{
 			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -986,14 +1032,18 @@ namespace TestMathLib
 					std::string strNK = NK.ToDisplay();
 					if (std::to_string(nk) != strNK)
 						Assert::AreEqual(std::to_string(nk), strNK);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteModulus)
 		{
 			SNUM ni, nj, nk;
 			Number NI, NJ, NK;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -1011,14 +1061,18 @@ namespace TestMathLib
 					std::string strNK = NK.ToDisplay();
 					if (std::to_string(nk) != strNK)
 						Assert::AreEqual(std::to_string(nk), strNK);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteLT)
 		{
 			SNUM ni, nj;
 			Number NI, NJ;
+			bool bt = false;
 			bool b, B;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
@@ -1033,8 +1087,11 @@ namespace TestMathLib
 
 					if (b != B)
 						Assert::AreEqual(b, B);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteGT)
@@ -1042,6 +1099,7 @@ namespace TestMathLib
 			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -1055,8 +1113,11 @@ namespace TestMathLib
 
 					if (b != B)
 						Assert::AreEqual(b, B);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteLE)
@@ -1064,6 +1125,7 @@ namespace TestMathLib
 			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -1077,8 +1139,11 @@ namespace TestMathLib
 
 					if (b != B)
 						Assert::AreEqual(b, B);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteGE)
@@ -1086,6 +1151,7 @@ namespace TestMathLib
 			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -1099,8 +1165,11 @@ namespace TestMathLib
 
 					if (b != B)
 						Assert::AreEqual(b, B);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteEQ)
@@ -1108,6 +1177,7 @@ namespace TestMathLib
 			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -1121,8 +1191,11 @@ namespace TestMathLib
 
 					if (b != B)
 						Assert::AreEqual(b, B);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteNE)
@@ -1130,6 +1203,7 @@ namespace TestMathLib
 			SNUM ni, nj;
 			Number NI, NJ;
 			bool b, B;
+			bool bt = false;
 
 			for (ni = iBeg; ni < iEnd; ++ni)
 			{
@@ -1143,8 +1217,11 @@ namespace TestMathLib
 
 					if (b != B)
 						Assert::AreEqual(b, B);
+					bt = true;
 				}
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(BytePre)
@@ -1152,6 +1229,7 @@ namespace TestMathLib
 			SNUM ni, nj;
 			Number NI, NJ;
 			std::string si, sj;
+			bool bt = false;
 
 			ni = iBeg;
 			for (NI = iBeg; NI < iEnd; ++NI)
@@ -1164,6 +1242,7 @@ namespace TestMathLib
 						Assert::AreEqual(std::to_string(nj), sj);
 
 					++nj;
+					bt = true;
 				}
 
 				si = NI.ToDisplay();
@@ -1172,6 +1251,8 @@ namespace TestMathLib
 
 				++ni;
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(BytePost)
@@ -1179,6 +1260,7 @@ namespace TestMathLib
 			SNUM ni, nj;
 			Number NI, NJ;
 			std::string si, sj;
+			bool bt = false;
 
 			ni = iBeg;
 			for (NI = iBeg; NI < iEnd; NI++)
@@ -1191,6 +1273,7 @@ namespace TestMathLib
 						Assert::AreEqual(std::to_string(nj), sj);
 
 					++nj;
+					bt = true;
 				}
 
 				si = NI.ToDisplay();
@@ -1199,6 +1282,8 @@ namespace TestMathLib
 
 				++ni;
 			}
+
+			Assert::AreEqual(true, bt);
 		}
 
 		TEST_METHOD(ByteBigDiv)

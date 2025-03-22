@@ -338,6 +338,8 @@ protected:
         if (strNumber.empty())
             strNumber = strNumberIn;
 
+        strNumber.erase(std::remove(strNumber.begin(), strNumber.end(), ','), strNumber.end());
+
         bool bNeg = false;
         std::string::iterator it = strNumber.begin();
         if (*it == '-')
@@ -783,10 +785,12 @@ public:
         const static Number _0(0);
         const static Number _1(1);
 
-        fact = *this;
-        if (fact == _1 || fact == _0)
-            return fact;
+        if (*this == _0)
+            return _1;
+        if (*this == _1)
+            return *this;
 
+        fact = *this;
         for (Number mul = fact - _1; mul != _1; --mul)
             fact *= mul;
 
