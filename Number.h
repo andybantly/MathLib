@@ -180,15 +180,15 @@ private:
         UNUM U;
         BNUM F;
 
-        DATA(UNUM u = 0, BNUM f = 0) : U(u), F(f) {};
+        DATA(UNUM u = 0, BNUM f = 0) noexcept : U(u), F(f) {};
 
-        inline const DATA Add(const DATA& data, const BNUM c) const // Adder with carry
+        inline const DATA Add(const DATA& data, const BNUM c) const noexcept // Adder with carry
         {
             UNUM u = U + data.U + c;
             return DATA(u, (BNUM)(u < U));
         }
 
-        inline const DATA Sub(const DATA& data, const BNUM b) const // Subtractor with borrow
+        inline const DATA Sub(const DATA& data, const BNUM b) const noexcept // Subtractor with borrow
         {
             return DATA(U - data.U - b, (BNUM)(U < data.U));
         }
@@ -199,7 +199,7 @@ private:
         * FullAdd, an implementation of a full-adder circuit, is functionally equivalent to Add and a text book implementation
         * FullSub, an implementation of a full-subtractor circuit, is functionally equivalent to Sub and a text book implementation
         */
-        inline const DATA FullAdd(const DATA& data, const BNUM f) const // Full-Adder
+        inline const DATA FullAdd(const DATA& data, const BNUM f) const noexcept // Full-Adder
         {
             DATA Out;
             Out.F = f; // Kerry-In
@@ -212,7 +212,7 @@ private:
             return Out;
         }
 
-        inline const DATA FullSub(const DATA& data, const BNUM f) const // Full-Subtractor
+        inline const DATA FullSub(const DATA& data, const BNUM f) const noexcept // Full-Subtractor
         {
             DATA Out;
             Out.F = f; // Borrow-In
@@ -226,26 +226,34 @@ private:
         }
 #endif // DEBUG
 
-        const bool IsPow2() const { return (U > 0) && (U & (U - 1)) == 0; }
+        const bool IsPow2() const noexcept { return (U > 0) && (U & (U - 1)) == 0; }
     };
 
 public:
 
-    Number() : m_bNeg(false), m_bNan(true), m_bOvf(false) {};
+    Number() noexcept : m_bNeg(false), m_bNan(true), m_bOvf(false) {};
 
     Number(const char* pnum) { ToBinary(pnum); }
 
     Number(const std::string& number) { ToBinary(number); }
 
-    Number(const int32_t u) { Convert(u); }
+    Number(const int32_t u) noexcept { Convert(u); }
 
-    Number(const int64_t u) { Convert(u); }
+    Number(const int64_t u) noexcept { Convert(u); }
 
-    Number(const Number& rhs) { *this = rhs; }
+    Number(const Number& rhs) noexcept { *this = rhs; }
+
+    Number(Number&& rhs) noexcept(false) : m_Data(std::move(rhs.m_Data)), m_bNeg(rhs.m_bNeg), m_bNan(rhs.m_bNan), m_bOvf(rhs.m_bOvf)
+    {
+        rhs.m_Data.clear();
+        rhs.m_bNeg = false;
+        rhs.m_bNan = true;
+        rhs.m_bOvf = false;
+    }
 
     ~Number() {}
 
-    Number& operator = (const Number& rhs)
+    Number& operator = (const Number& rhs) noexcept
     {
         if (this != &rhs)
         {
@@ -257,6 +265,24 @@ public:
         return *this;
     }
 
+    Number& operator=(Number&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            // Move the vector using std::move
+            m_Data = std::move(rhs.m_Data);
+
+            m_bNeg = rhs.m_bNeg;
+            m_bNan = rhs.m_bNan;
+            m_bOvf = rhs.m_bOvf;
+
+            rhs.m_bNeg = false;
+            rhs.m_bNan = true;
+            rhs.m_bOvf = false;
+        }
+        return *this;
+    }
+
 protected:
 
     // Special helper constructor for twos complement addition
@@ -264,7 +290,7 @@ protected:
 
     // Helper to convert to the internal format
 #if BITWIDTH == 64
-    void Convert(const int64_t u)
+    void Convert(const int64_t u) noexcept
     {
         m_bNan = false;
         m_bOvf = false;
@@ -276,7 +302,7 @@ protected:
         m_bNeg = u < 0;
     }
 #elif BITWIDTH == 32
-    void Convert(const int32_t u)
+    void Convert(const int32_t u) noexcept
     {
         m_bNan = false;
         m_bOvf = false;
@@ -287,7 +313,7 @@ protected:
         m_bNeg = u < 0;
     }
 
-    void Convert(const int64_t u)
+    void Convert(const int64_t u) noexcept
     {
         m_bNan = false;
         m_bOvf = false;
@@ -300,7 +326,7 @@ protected:
         m_bNeg = u < 0;
     }
 #elif BITWIDTH == 16
-    void Convert(const int64_t u)
+    void Convert(const int64_t u) noexcept
     {
         m_bNan = false;
         m_bOvf = false;
@@ -314,7 +340,7 @@ protected:
         m_bNeg = u < 0;
     }
 
-    void Convert(const int32_t u)
+    void Convert(const int32_t u) noexcept
     {
         m_bNan = false;
         m_bOvf = false;
@@ -434,6 +460,9 @@ protected:
 
     const size_t IsPow2() const
     {
+        if (m_bNan)
+            throw std::exception();
+
         size_t stcnt = 0;
         size_t stpos = 0;
 
@@ -839,7 +868,7 @@ public:
         return true;
     }
 
-    bool LessThan(const Number& rhs) const
+    bool LessThan(const Number& rhs) const noexcept
     {
         if (this == &rhs)
             return false; // I CANT BE LESS THAN MYSELF!
@@ -961,6 +990,9 @@ public:
 
     size_t Count1() const
     {
+        if (m_bNan)
+            throw std::exception();
+
         size_t stcnt = 0;
         for (size_t st = 0; st < m_Data.size(); ++st)
         {
@@ -976,6 +1008,9 @@ public:
 
     Number BitNot() const
     {
+        if (m_bNan)
+            throw std::exception();
+
         size_t size = m_Data.size();
         Number Out(0); Out.SetSize(size);
 
@@ -986,6 +1021,9 @@ public:
 
     std::string ToBinary() const
     {
+        if (m_bNan)
+            throw std::exception();
+
         size_t nbit = m_Data.size() * size_t(BITWIDTH) - 1;
         std::string sbin(nbit + 1, '0');
         UNUM data = 0;
@@ -1005,6 +1043,9 @@ public:
 
     std::string ToPhrase() const
     {
+        if (m_bNan)
+            throw std::exception();
+
         return NumberTranscriber::getInstance().ToPhrase(ToDisplay());
     }
 
@@ -1019,6 +1060,9 @@ protected:
     // Find the MSB
     size_t MSb() const
     {
+        if (m_bNan)
+            throw std::exception();
+
         size_t lhp(size_t(-1));
         size_t lhn(size_t(-1));
 
@@ -1057,6 +1101,9 @@ protected:
     // Find the LSB
     size_t LSb() const
     {
+        if (m_bNan)
+            throw std::exception();
+
         size_t lhp(-1);
         size_t lhn(-1);
 
@@ -1095,6 +1142,9 @@ protected:
     // Left Bit Shift by n bits <- double value n times
     void Shl(size_t stbit = size_t(-1), size_t nbits = 1)
     {
+        if (m_bNan)
+            throw std::exception();
+
         const static UNUM Zero(0), Neg1(NTH);
 
         size_t stn = 0;
@@ -1152,6 +1202,9 @@ protected:
     // Right Bit Shift by n bits -> halve value n times
     void Shr(size_t stbit = size_t(-1), size_t nbits = 1)
     {
+        if (m_bNan)
+            throw std::exception();
+
         const static UNUM Zero(0), Neg1(NTH);
 
         size_t stn = m_Data.size() - 1;
@@ -1199,12 +1252,12 @@ protected:
     }
 
 public:
-    void operator = (const int64_t u)
+    void operator = (const int64_t u) noexcept
     {
         Convert(u);
     }
 
-    void operator = (const int32_t u)
+    void operator = (const int32_t u) noexcept
     {
         Convert(u);
     }
