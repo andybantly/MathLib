@@ -269,7 +269,6 @@ public:
     {
         if (this != &rhs)
         {
-            // Move the vector using std::move
             m_Data = std::move(rhs.m_Data);
 
             m_bNeg = rhs.m_bNeg;
@@ -286,7 +285,7 @@ public:
 protected:
 
     // Special helper constructor for twos complement addition
-    Number(const int8_t u, size_t st) { Convert(u); SetSize(st); m_bOvf = true; }
+    Number(const int8_t u, size_t st) noexcept { Convert(u); SetSize(st); m_bOvf = true; }
 
     // Helper to convert to the internal format
 #if BITWIDTH == 64
@@ -843,7 +842,7 @@ public:
         return pow;
     }
 
-    bool Equals(const Number& rhs) const
+    bool Equals(const Number& rhs) const noexcept
     {
         if (this == &rhs) // I AM ALWAYS EQUAL TOO MYSELF!
             return true;
@@ -1034,7 +1033,7 @@ public:
                 sbin[nbit] = '1';
             if (!(pow <<= 1))
             {
-                data++;
+                ++data;
                 pow = 1;
             }
         } while (--nbit, data != m_Data.size());
